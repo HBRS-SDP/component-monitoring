@@ -1,0 +1,9 @@
+# name: string | required
+# submonitors: list<string> | optional
+# dependencies: list<string> | optional
+#
+
+name: laser_monitor
+modes: [laser_monitors/device.yaml]
+#modes: [laser_monitors/device.yaml, laser_monitors/heartbeat.yaml, laser_monitors/functional.yaml]
+dependencies: []

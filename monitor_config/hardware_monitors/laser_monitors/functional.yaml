@@ -1,0 +1,23 @@
+# name: string | required
+# input_variables: list[string] | required
+# outputs: | required
+#     - output:
+#         name: string | required
+#         - obtained: | required
+#             type: bool
+#         - expected: | optional
+#             value: bool | string | int | double | required
+# arguments: | optional
+#     - arg:
+#         name: bool | string | int | double | required
+#         value: bool | string | int | double | required
+
+name: laser_functional_monitor
+mappings:
+    - mapping:
+        inputs: [/scan_front, /camera_scan]
+        outputs:
+            - output:
+                name: hokuyo_front_working
+                type: bool
+                expected: 0.9
