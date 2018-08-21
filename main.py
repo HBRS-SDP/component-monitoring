@@ -3,8 +3,8 @@ from __future__ import print_function
 from os import listdir
 from os.path import join, isfile
 
-from config.config_file_reader import ComponentMonitorConfigFileReader
-from monitor_manager import MonitorManager
+from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
+from component_monitoring.monitor_manager import MonitorManager
 
 def get_files(dir_name):
     file_names = list()
@@ -15,8 +15,8 @@ def get_files(dir_name):
     return file_names
 
 if __name__ == '__main__':
-    hw_monitor_config_dir_name = 'monitor_config/hardware'
-    sw_monitor_config_dir_name = 'monitor_config/software'
+    hw_monitor_config_dir_name = 'component_monitoring/monitor_config/hardware'
+    sw_monitor_config_dir_name = 'component_monitoring/monitor_config/software'
 
     hw_config_files = get_files(hw_monitor_config_dir_name)
     hw_monitor_config_params = list()
