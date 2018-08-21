@@ -4,6 +4,6 @@
 #
 
 name: laser_monitor
-modes: [laser_monitors/device.yaml]
-#modes: [laser_monitors/device.yaml, laser_monitors/heartbeat.yaml, laser_monitors/functional.yaml]
+modes: [laser/device.yaml]
+#modes: [laser/device.yaml, laser/heartbeat.yaml, laser/functional.yaml]
 dependencies: []
