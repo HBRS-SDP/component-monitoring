@@ -13,6 +13,7 @@ class MonitorModeConfig:
     def __init__(self):
         self.name = ''
         self.mappings = list()
+        self.arguments = dict()
 
 class ComponentMonitorConfig:
     def __init__(self):
@@ -24,3 +25,4 @@ class HardwareMonitorNames:
     LASER_DEVICE_MONITOR = 'laser_device_monitor'
     LASER_FUNCTIONAL_MONITOR = 'laser_functional_monitor'
     LASER_HEARTBEAT_MONITOR = 'laser_heartbeat_monitor'
+    ENCODER_FUNCTIONAL_MONITOR = 'encoder_functional_monitor'
