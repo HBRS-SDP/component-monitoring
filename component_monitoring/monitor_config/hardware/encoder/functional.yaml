@@ -1,0 +1,30 @@
+name: encoder_functional_monitor
+mappings:
+    - mapping:
+        inputs: [ros_sw_ethercat_parser/data]
+        outputs:
+            - output:
+                name: encoder_1_working
+                type: bool
+            - output:
+                name: encoder_2_working
+                type: bool
+            - output:
+                name: encoder_pivot_working
+                type: bool
+            - output:
+                name: consistent_differential_kinematics
+                type: bool
+arguments:
+    - arg:
+        name: velocity_threshold
+        value: 1.0
+    - arg:
+        name: pivot_velocity_threshold
+        value: 1.0
+    - arg:
+        name: wheel_diameter
+        value: 0.073
+    - arg:
+        name: inter_wheel_distance
+        value: 0.0893
