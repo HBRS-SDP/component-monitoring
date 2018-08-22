@@ -86,9 +86,6 @@ class ComponentMonitorConfigFileReader(object):
                 arg_name = argument_node['name']
                 arg_value = argument_node['value']
                 params.arguments[arg_name] = arg_value
-        else:
-            print('mode_config: mappings not specified')
-            return MonitorModeConfig()
 
         return params
 
