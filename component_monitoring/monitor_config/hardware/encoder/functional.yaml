@@ -17,6 +17,9 @@ mappings:
                 type: bool
 arguments:
     - arg:
+        name: number_of_wheels
+        value: 4
+    - arg:
         name: velocity_threshold
         value: 1.0
     - arg:
