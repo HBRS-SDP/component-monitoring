@@ -23,13 +23,13 @@ class ComponentMonitorConfigFileReader(object):
 
         file_path = join(root_dir, config_file_name)
         root = ComponentMonitorConfigFileReader.__read_yaml_file(file_path)
-        if root.has_key('name'):
+        if 'name' in root.keys():
             params.name = root['name']
         else:
             print('name not specified')
             return ComponentMonitorConfig()
 
-        if root.has_key('modes'):
+        if 'modes' in root.keys():
             for mode_config_file in root['modes']:
                 mode_config = ComponentMonitorConfigFileReader.__load_mode_config(root_dir,
                                                                                   mode_config_file)
@@ -54,13 +54,13 @@ class ComponentMonitorConfigFileReader(object):
         file_path = join(root_dir, config_file_name)
         root = ComponentMonitorConfigFileReader.__read_yaml_file(file_path)
 
-        if root.has_key('name'):
+        if 'name' in root.keys():
             params.name = root['name']
         else:
             print('mode_config: name not specified')
             return MonitorModeConfig()
 
-        if root.has_key('mappings'):
+        if 'mappings' in root.keys():
             for mapping in root['mappings']:
                 mapping_node = mapping['mapping']
 
@@ -72,7 +72,7 @@ class ComponentMonitorConfigFileReader(object):
                     output_params = OutputConfig()
                     output_params.name = output_node['name']
                     output_params.obtained_value_type = output_node['type']
-                    if output.has_key('expected'):
+                    if 'expected' in output.keys():
                         output_params.expected_value = output_node['expected']
                     fn_mapping_params.outputs.append(output_params)
                 params.mappings.append(fn_mapping_params)
@@ -80,7 +80,7 @@ class ComponentMonitorConfigFileReader(object):
             print('mode_config: mappings not specified')
             return MonitorModeConfig()
 
-        if root.has_key('arguments'):
+        if 'arguments' in root.keys():
             for argument in root['arguments']:
                 argument_node = argument['arg']
                 arg_name = argument_node['name']
