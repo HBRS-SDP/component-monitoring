@@ -1,0 +1,21 @@
+name: encoder_diff_drive_kinematics_monitor
+mappings:
+    - mapping:
+        inputs: [ros_sw_ethercat_parser/data]
+        outputs:
+            - output:
+                name: consistent_diff_kinematics
+                type: bool
+arguments:
+    - arg:
+        name: number_of_wheels
+        value: 4
+    - arg:
+        name: pivot_velocity_threshold
+        value: 1.0
+    - arg:
+        name: wheel_diameter
+        value: 0.073
+    - arg:
+        name: inter_wheel_distance
+        value: 0.0893

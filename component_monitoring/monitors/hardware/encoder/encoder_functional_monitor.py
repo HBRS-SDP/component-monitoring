@@ -14,9 +14,6 @@ class EncoderFunctionalMonitor(MonitorBase):
                 self.status_names.append(output_mapping.name)
         self.num_wheels = config_params.arguments['number_of_wheels']
         self.velocity_threshold = config_params.arguments['velocity_threshold']
-        self.pivot_velocity_threshold = config_params.arguments['pivot_velocity_threshold']
-        self.wheel_diameter = config_params.arguments['wheel_diameter']
-        self.inter_wheel_distance = config_params.arguments['inter_wheel_distance']
 
     def get_status(self):
         status_msg = self.get_status_message_template()
@@ -62,15 +59,10 @@ class EncoderFunctionalMonitor(MonitorBase):
             pivot_enc_vel_within_thresh = self.__is_vel_within_thresh(pivot_encoder_pos[i],
                                                                       pivot_encoder_vel[i],
                                                                       times)
-            diff_kinematics_consistent = self.__is_diff_kinematics_consistent(encoder1_vel[i],
-                                                                              encoder2_vel[i],
-                                                                              pivot_encoder_vel[i])
-
             result[wheel] = {}
-            result[wheel]['encoder_1_working'] = enc1_vel_within_thresh
-            result[wheel]['encoder_2_working'] = enc2_vel_within_thresh
-            result[wheel]['encoder_pivot_working'] = pivot_enc_vel_within_thresh
-            result[wheel]['consistent_differential_kinematics'] = diff_kinematics_consistent
+            result[wheel][self.status_names[0]] = enc1_vel_within_thresh
+            result[wheel][self.status_names[1]] = enc2_vel_within_thresh
+            result[wheel][self.status_names[2]] = pivot_enc_vel_within_thresh
         return result
 
     def __is_vel_within_thresh(self, position, velocity, timestamp):
@@ -82,19 +74,6 @@ class EncoderFunctionalMonitor(MonitorBase):
             diffs.append(np.abs(differential - velocity[i]))
 
         if np.median(diffs) < self.velocity_threshold:
-            return True
-        return False
-
-    def __is_diff_kinematics_consistent(self, enc1_v, enc2_v, pivot_enc_v):
-        r = self.wheel_diameter / 2.0
-        l = self.inter_wheel_distance
-        diffs = []
-        for i in range(len(enc1_v)):
-            # calculate expected pivot angular velocity
-            x = -r * (enc1_v[i] + enc2_v[i]) / l
-            diffs.append(np.abs(x - pivot_enc_v[i]))
-
-        if np.median(diffs) < self.pivot_velocity_threshold:
             return True
         return False
 
