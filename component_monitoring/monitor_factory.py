@@ -4,6 +4,7 @@ from component_monitoring.monitor_base import MonitorBase
 from component_monitoring.monitors.hardware.encoder.encoder_functional_monitor import EncoderFunctionalMonitor
 from component_monitoring.monitors.hardware.encoder.encoder_diff_drive_kinematics_monitor import EncoderDiffDriveKinematicsMonitor
 from component_monitoring.monitors.hardware.laser.laser_device_monitor import LaserDeviceMonitor
+from component_monitoring.monitors.hardware.wifi.wifi_functional_monitor import WifiFunctionalMonitor
 
 '''A factory for creating component monitors
 
@@ -34,6 +35,9 @@ class MonitorFactory(object):
         # elif (monitor_config_params.name == HardwareMonitorNames.LASER_HEARTBEAT_MONITOR):
         #     monitor = LaserHeartbeatMonitor(monitor_config_params)
         #     return monitor
+        elif monitor_config_params.name == HardwareMonitorNames.WIFI_FUNCTIONAL_MONITOR :
+            monitor = WifiFunctionalMonitor(monitor_config_params)
+            return monitor
         return MonitorBase(monitor_config_params)
 
     '''Returns a software monitor as specified by the given name

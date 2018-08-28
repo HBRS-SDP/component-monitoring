@@ -1,0 +1,12 @@
+name: wifi_functional_monitor
+mappings:
+    - mapping:
+        inputs: [/proc/net/wireles]
+        outputs:
+            - output:
+                name: wifi_quality
+                type: double
+            - output:
+                name: wifi_signal_level
+                type: int
+
