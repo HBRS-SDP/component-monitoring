@@ -1,12 +1,12 @@
 name: wifi_functional_monitor
 mappings:
     - mapping:
-        inputs: [/proc/net/wireles]
+        inputs: [/proc/net/wireless]
         outputs:
             - output:
                 name: wifi_quality
                 type: double
             - output:
-                name: wifi_signal_level
+                name: wifi_strength
                 type: int
 

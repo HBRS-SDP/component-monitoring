@@ -15,36 +15,51 @@ class WifiFunctionalMonitor(MonitorBase):
         status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
         self.wifi_values = self.get_wifi_strength()
-        for i, output_name in enumerate(self.output_names):
-            status_msg['healthStatus'][output_name] = self.wifi_values[i]
+        first_interface = self.wifi_values[0]
+        status_msg['healthStatus']["wifi_quality"] =  first_interface["quality"]
+        status_msg['healthStatus']["wifi_strength"] = first_interface["strength"]
         return status_msg
 
     '''
-    Returns : a tuple (float, int) where
-                float is between 0.0 and 100.0
-                int is generally negative
+    Returns : a tuple of dictionaries where each dictionary object has 3 items
+                name : string of length less than 9 char
+                quality : float between 0.0 and 100.0
+                strength : int between -30 and -90
 
-    Calculates the quality of the wifi signal percentage and signal strength 
+    Calculates the quality of the wifi signal percentage and signal strength (in dbm)
     from "iwconfig" shell command
-    Assumes linux OS
     '''
     def get_wifi_strength(self) :
-        output = subprocess.Popen("iwconfig",  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.readlines()
-        quality_line = 0
+        output = subprocess.Popen("iwconfig",  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
+        quality_lines = []
+        output = output.split("\n")
+        name = ""
+        names = []
         for line in output :
+            if line[:9] != "         " :
+                name = line[:9]
             if "Link Quality" in line :
-                quality_line = line
-                break
-        if quality_line == 0 :
-            return 0.0
+                quality_lines.append(line)
+                names.append(name)
+        if len(quality_lines) == 0 :
+            return ({"name":"", "quality":0.0, "strength":-90})
         '''
-        example of quality_line
+        example of a single quality_line
         quality_line = "Link Quality=68/70  Signal level=-42 dBm"
         '''
-        quality = quality_line.split()[1].split("=")[1]
-        actual, total = map(float, quality.split("/"))
-        quality_percent = (actual*100)/total
-        signal_strength = quality_line.split()[3].split("=")[1]
-        signal_strength_int = int(signal_strength)
-        return (quality_percent, signal_strength_int)
+        answer = []
+        for i in range(len(names)) :
+            name = names[i]
+            quality_line = quality_lines[i]
+            quality = quality_line.split()[1].split("=")[1]
+            actual, total = map(float, quality.split("/"))
+            quality_percent = (actual*100)/total
+            signal_strength = quality_line.split()[3].split("=")[1]
+            signal_strength_int = int(signal_strength)
+            interface = {}
+            interface["name"] = name.strip()
+            interface["quality"] = quality_percent
+            interface["strength"] = signal_strength_int
+            answer.append(interface)
+        return tuple(answer)
 
