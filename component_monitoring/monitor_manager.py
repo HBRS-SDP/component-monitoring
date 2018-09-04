@@ -24,4 +24,10 @@ class MonitorManager(object):
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 component_status_msg[monitor_name].append(monitor_status)
+
+        for monitor_name, monitors in self.software_monitors.items():
+            component_status_msg[monitor_name] = list()
+            for monitor in monitors:
+                monitor_status = monitor.get_status()
+                component_status_msg[monitor_name].append(monitor_status)
         print(component_status_msg)

@@ -1,9 +1,11 @@
-from component_monitoring.config.config_params import HardwareMonitorNames
+from component_monitoring.config.config_params import HardwareMonitorNames, SoftwareMonitorNames
 from component_monitoring.monitor_base import MonitorBase
 
 from component_monitoring.monitors.hardware.encoder.encoder_functional_monitor import EncoderFunctionalMonitor
 from component_monitoring.monitors.hardware.encoder.encoder_diff_drive_kinematics_monitor import EncoderDiffDriveKinematicsMonitor
 from component_monitoring.monitors.hardware.laser.laser_device_monitor import LaserDeviceMonitor
+
+from component_monitoring.monitors.software.ros.ros_master_monitor import RosMasterMonitor
 
 '''A factory for creating component monitors
 
@@ -44,4 +46,7 @@ class MonitorFactory(object):
     '''
     @staticmethod
     def get_software_monitor(monitor_config_params):
+        if monitor_config_params.name == SoftwareMonitorNames.ROS_MASTER_MONITOR:
+            monitor = RosMasterMonitor(monitor_config_params)
+            return monitor
         return MonitorBase(monitor_config_params)

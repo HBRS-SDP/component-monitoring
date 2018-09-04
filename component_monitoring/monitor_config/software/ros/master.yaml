@@ -1,0 +1,8 @@
+name: ros_master_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: master_running
+                type: bool
