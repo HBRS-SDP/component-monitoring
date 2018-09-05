@@ -31,3 +31,4 @@ class HardwareMonitorNames(object):
 
 class SoftwareMonitorNames(object):
     ROS_MASTER_MONITOR = 'ros_master_monitor'
+    ROS_TOPIC_MONITOR = 'ros_topic_monitor'

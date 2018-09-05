@@ -6,6 +6,7 @@ from component_monitoring.monitors.hardware.encoder.encoder_diff_drive_kinematic
 from component_monitoring.monitors.hardware.laser.laser_device_monitor import LaserDeviceMonitor
 
 from component_monitoring.monitors.software.ros.ros_master_monitor import RosMasterMonitor
+from component_monitoring.monitors.software.ros.ros_topic_monitor import RosTopicMonitor
 
 '''A factory for creating component monitors
 
@@ -48,5 +49,8 @@ class MonitorFactory(object):
     def get_software_monitor(monitor_config_params):
         if monitor_config_params.name == SoftwareMonitorNames.ROS_MASTER_MONITOR:
             monitor = RosMasterMonitor(monitor_config_params)
+            return monitor
+        elif monitor_config_params.name == SoftwareMonitorNames.ROS_TOPIC_MONITOR:
+            monitor = RosTopicMonitor(monitor_config_params)
             return monitor
         return MonitorBase(monitor_config_params)
