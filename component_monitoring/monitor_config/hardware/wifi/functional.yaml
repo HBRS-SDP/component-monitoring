@@ -1,0 +1,12 @@
+name: wifi_functional_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: wifi_quality
+                type: double
+            - output:
+                name: wifi_strength
+                type: int
+        map_outputs: True

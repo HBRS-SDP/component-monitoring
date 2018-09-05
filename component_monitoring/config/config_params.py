@@ -28,6 +28,7 @@ class HardwareMonitorNames(object):
     LASER_HEARTBEAT_MONITOR = 'laser_heartbeat_monitor'
     ENCODER_FUNCTIONAL_MONITOR = 'encoder_functional_monitor'
     ENCODER_DIFF_DRIVE_KINEMATICS_MONITOR = 'encoder_diff_drive_kinematics_monitor'
+    WIFI_FUNCTIONAL_MONITOR = 'wifi_functional_monitor'
 
 class SoftwareMonitorNames(object):
     ROS_MASTER_MONITOR = 'ros_master_monitor'

@@ -1,0 +1,3 @@
+name: wifi_monitor
+modes: [wifi/functional.yaml]
+dependencies: []
