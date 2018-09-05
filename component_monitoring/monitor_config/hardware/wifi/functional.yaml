@@ -1,7 +1,7 @@
 name: wifi_functional_monitor
 mappings:
     - mapping:
-        inputs: [/proc/net/wireless]
+        inputs: []
         outputs:
             - output:
                 name: wifi_quality
