@@ -8,6 +8,7 @@ class FunctionalMappingConfig(object):
     def __init__(self):
         self.inputs = list()
         self.outputs = list()
+        self.map_outputs = False
 
 class MonitorModeConfig(object):
     def __init__(self):

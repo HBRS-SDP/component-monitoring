@@ -66,6 +66,10 @@ class ComponentMonitorConfigFileReader(object):
 
                 fn_mapping_params = FunctionalMappingConfig()
                 fn_mapping_params.inputs = mapping_node['inputs']
+
+                if 'map_outputs' in mapping_node.keys():
+                    fn_mapping_params.map_outputs = mapping_node['map_outputs']
+
                 for output in mapping_node['outputs']:
                     output_node = output['output']
 
