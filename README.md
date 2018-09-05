@@ -24,11 +24,16 @@ mappings:
                 name: string | required
                 type: string | required
                 expected: bool | string | int | double | optional
+        map_outputs: bool | optional
 arguments: | optional
     - arg:
         name: bool | string | int | double | required
         value: bool | string | int | double | required
 ```
+
+In this specification, the optional output parameter `map_outputs` allows controlling the overall type of the monitor output, such that if `map_outputs` is set to `true`, the outputs will be returned in a dictionary. This is useful if the number of output value copies is unknown at design time.
+
+## Monitor Output
 
 The output produced by each component monitor is a string in JSON format which has the general format shown below:
 
@@ -44,7 +49,9 @@ The output produced by each component monitor is a string in JSON format which h
 }
 ```
 
-In this message, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those.
+In this message:
+* if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those
+* on the other hand, if `map_outputs` is set to `true`, `healthStatus` is a dictionary in which each value is a list of key-value pairs of the output names
 
 ## Specification example
 

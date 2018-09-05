@@ -1,0 +1,3 @@
+name: ros_monitor
+modes: [ros/master.yaml, ros/topics.yaml]
+dependencies: []

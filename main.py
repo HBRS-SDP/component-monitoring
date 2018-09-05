@@ -2,6 +2,7 @@
 from __future__ import print_function
 from os import listdir
 from os.path import join, isfile
+from time import sleep
 
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
@@ -35,7 +36,12 @@ if __name__ == '__main__':
         sw_monitor_config_params.append(component_config_params)
 
     monitor_manager = MonitorManager(hw_monitor_config_params, sw_monitor_config_params)
-    monitor_manager.monitor_components()
+    try:
+        while True:
+            monitor_manager.monitor_components()
+            sleep(0.5)
+    except (KeyboardInterrupt, SystemExit):
+        print('Component monitors exiting')
 
     ### debugging printout
     # hardware_monitor_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir_name,

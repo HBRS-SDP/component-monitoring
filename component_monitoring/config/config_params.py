@@ -8,6 +8,7 @@ class FunctionalMappingConfig(object):
     def __init__(self):
         self.inputs = list()
         self.outputs = list()
+        self.map_outputs = False
 
 class MonitorModeConfig(object):
     def __init__(self):
@@ -30,4 +31,5 @@ class HardwareMonitorNames(object):
     WIFI_FUNCTIONAL_MONITOR = 'wifi_functional_monitor'
 
 class SoftwareMonitorNames(object):
-    pass
+    ROS_MASTER_MONITOR = 'ros_master_monitor'
+    ROS_TOPIC_MONITOR = 'ros_topic_monitor'
