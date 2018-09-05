@@ -51,7 +51,7 @@ class WifiFunctionalMonitor(MonitorBase):
                 quality_lines.append(line)
                 names.append(name)
         if len(quality_lines) == 0 :
-            return ({"name":"", "quality":0.0, "strength":-90})
+            return ({"name":"", "quality":0.0, "strength":-90},)
         '''
         example of a single quality_line
         quality_line = "Link Quality=68/70  Signal level=-42 dBm"
