@@ -16,8 +16,8 @@ def get_files(dir_name):
     return file_names
 
 if __name__ == '__main__':
-    hw_monitor_config_dir_name = 'component_monitoring/monitor_config/hardware'
-    sw_monitor_config_dir_name = 'component_monitoring/monitor_config/software'
+    hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
+    sw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/software'
 
     hw_config_files = get_files(hw_monitor_config_dir_name)
     hw_monitor_config_params = list()
