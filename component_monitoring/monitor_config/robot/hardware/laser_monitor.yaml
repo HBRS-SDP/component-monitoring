@@ -4,6 +4,7 @@
 #
 
 name: laser_monitor
+component_name: laser
 modes: [laser/device.yaml]
 #modes: [laser/device.yaml, laser/heartbeat.yaml, laser/functional.yaml]
 dependencies: []

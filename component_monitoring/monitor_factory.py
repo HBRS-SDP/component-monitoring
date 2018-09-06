@@ -1,13 +1,5 @@
-from component_monitoring.config.config_params import HardwareMonitorNames, SoftwareMonitorNames
+import importlib
 from component_monitoring.monitor_base import MonitorBase
-
-from component_monitoring.monitors.hardware.encoder.encoder_functional_monitor import EncoderFunctionalMonitor
-from component_monitoring.monitors.hardware.encoder.encoder_diff_drive_kinematics_monitor import EncoderDiffDriveKinematicsMonitor
-from component_monitoring.monitors.hardware.laser.laser_device_monitor import LaserDeviceMonitor
-from component_monitoring.monitors.hardware.wifi.wifi_functional_monitor import WifiFunctionalMonitor
-
-from component_monitoring.monitors.software.ros.ros_master_monitor import RosMasterMonitor
-from component_monitoring.monitors.software.ros.ros_topic_monitor import RosTopicMonitor
 
 '''A factory for creating component monitors
 
@@ -22,26 +14,17 @@ class MonitorFactory(object):
 
     '''
     @staticmethod
-    def get_hardware_monitor(monitor_config_params):
-        if monitor_config_params.name == HardwareMonitorNames.LASER_DEVICE_MONITOR:
-            monitor = LaserDeviceMonitor(monitor_config_params)
-            return monitor
-        elif monitor_config_params.name == HardwareMonitorNames.ENCODER_FUNCTIONAL_MONITOR:
-            monitor = EncoderFunctionalMonitor(monitor_config_params)
-            return monitor
-        elif monitor_config_params.name == HardwareMonitorNames.ENCODER_DIFF_DRIVE_KINEMATICS_MONITOR:
-            monitor = EncoderDiffDriveKinematicsMonitor(monitor_config_params)
-            return monitor
-        # elif (monitor_config_params.name == HardwareMonitorNames.LASER_FUNCTIONAL_MONITOR):
-        #     monitor = LaserFunctionalMonitor(monitor_config_params)
-        #     return monitor
-        # elif (monitor_config_params.name == HardwareMonitorNames.LASER_HEARTBEAT_MONITOR):
-        #     monitor = LaserHeartbeatMonitor(monitor_config_params)
-        #     return monitor
-        elif monitor_config_params.name == HardwareMonitorNames.WIFI_FUNCTIONAL_MONITOR :
-            monitor = WifiFunctionalMonitor(monitor_config_params)
-            return monitor
-        return MonitorBase(monitor_config_params)
+    def get_hardware_monitor(component_name, monitor_config_params):
+        try:
+            monitor_name = monitor_config_params.name
+            module_name = 'component_monitoring.monitors.hardware.' \
+                          + component_name + '.' + monitor_name
+            class_name = ''.join(x.title() for x in monitor_name.split('_'))
+            MonitorClass = getattr(importlib.import_module(module_name),
+                                   class_name)
+            return MonitorClass(monitor_config_params)
+        except:
+            return MonitorBase(monitor_config_params)
 
     '''Returns a software monitor as specified by the given name
 
@@ -50,11 +33,14 @@ class MonitorFactory(object):
 
     '''
     @staticmethod
-    def get_software_monitor(monitor_config_params):
-        if monitor_config_params.name == SoftwareMonitorNames.ROS_MASTER_MONITOR:
-            monitor = RosMasterMonitor(monitor_config_params)
-            return monitor
-        elif monitor_config_params.name == SoftwareMonitorNames.ROS_TOPIC_MONITOR:
-            monitor = RosTopicMonitor(monitor_config_params)
-            return monitor
-        return MonitorBase(monitor_config_params)
+    def get_software_monitor(component_name, monitor_config_params):
+        try:
+            monitor_name = monitor_config_params.name
+            module_name = 'component_monitoring.monitors.software.' \
+                          + component_name + '.' + monitor_name
+            class_name = ''.join(x.title() for x in monitor_name.split('_'))
+            MonitorClass = getattr(importlib.import_module(module_name),
+                                   class_name)
+            return MonitorClass(monitor_config_params)
+        except:
+            return MonitorBase(monitor_config_params)

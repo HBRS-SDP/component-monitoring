@@ -8,6 +8,7 @@ Based on our abstraction, each component is associated with one or more monitors
 
 ```
 name: string | required
+component_name: string | required
 modes: list<string> | required
 dependencies: list<string> | optional
 ```
@@ -127,8 +128,6 @@ Battery example:
 
 ## Procedure for adding new monitors
 
-1. Create a monitor configuration file `component_monitoring/monitor_config/<type>/<component-name>.yaml`, where `<type>` is either `hardware` or `software` depending on the type of component, and describe the monitoring modes as described above
-2. Create a directory `component_monitoring/monitor_config/<type>/<component-name>` and add the mode configuration files there
-3. Create a directory `component_monitoring/monitors/<type>/<component-name>` and implement the mode monitors in separate scripts; the monitors should inherit from the `MonitorBase` class defined in `monitor_base.py`
-4. Add constants with the monitor mode names in `HardwareMonitorNames` or `SoftwareMonitorNames` depending on the type of component; the values of the constants should match the names of the monitor mode names assigned in the mode configuration files
-5. Update `get_hardware_monitor` or `get_software_monitor` in `monitor_factory.py` so that they generate objects of the newly implemented monitors
+1. Create a monitor configuration file `component_monitoring/monitor_config/<host>/<type>/<component-name>.yaml`, where `<host>` is either `robot` or `black-box` and `<type>` is either `hardware` or `software` depending on the type of component, and describe the monitoring modes as explained above. Make sure that the `component_name` parameter in the monitor configuration file is set to `<component-name>`
+2. Create a directory `component_monitoring/monitor_config/<host>/<type>/<component-name>` and add the mode configuration files there
+3. Create a directory `component_monitoring/monitors/<type>/<component-name>` and implement the mode monitors in separate scripts; the monitors should inherit from the `MonitorBase` class defined in `monitor_base.py`. Make sure that the names of the scripts in which the modes are implemented match the names specified in the mode configuration files

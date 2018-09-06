@@ -29,6 +29,12 @@ class ComponentMonitorConfigFileReader(object):
             print('name not specified')
             return ComponentMonitorConfig()
 
+        if 'component_name' in root.keys():
+            params.component_name = root['component_name']
+        else:
+            print('component_name not specified')
+            return ComponentMonitorConfig()
+
         if 'modes' in root.keys():
             for mode_config_file in root['modes']:
                 mode_config = ComponentMonitorConfigFileReader.__load_mode_config(root_dir,
