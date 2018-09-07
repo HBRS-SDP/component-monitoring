@@ -1,4 +1,3 @@
-from __future__ import print_function
 import subprocess
 
 from component_monitoring.monitor_base import MonitorBase
@@ -41,6 +40,7 @@ class WifiFunctionalMonitor(MonitorBase):
     def get_wifi_strength(self) :
         output = subprocess.Popen("iwconfig",  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
         quality_lines = []
+        output = output.decode()
         output = output.split("\n")
         name = ""
         names = []
