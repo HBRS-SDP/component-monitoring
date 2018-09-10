@@ -1,5 +1,4 @@
 from __future__ import print_function
-import json
 from component_monitoring.monitor_factory import MonitorFactory
 
 class MonitorManager(object):
@@ -21,16 +20,22 @@ class MonitorManager(object):
                 self.software_monitors[monitor_config.name].append(monitor)
 
     def monitor_components(self):
-        component_status_msg = dict()
+        component_status_msg = list()
         for monitor_name, monitors in self.hardware_monitors.items():
-            component_status_msg[monitor_name] = list()
+            hw_monitor_msg = dict()
+            hw_monitor_msg['component'] = monitor_name
+            hw_monitor_msg['modes'] = list()
             for monitor in monitors:
                 monitor_status = monitor.get_status()
-                component_status_msg[monitor_name].append(monitor_status)
+                hw_monitor_msg['modes'].append(monitor_status)
+            component_status_msg.append(hw_monitor_msg)
 
         for monitor_name, monitors in self.software_monitors.items():
-            component_status_msg[monitor_name] = list()
+            sw_monitor_msg = dict()
+            sw_monitor_msg['component'] = monitor_name
+            sw_monitor_msg['modes'] = list()
             for monitor in monitors:
                 monitor_status = monitor.get_status()
-                component_status_msg[monitor_name].append(monitor_status)
-        print(json.dumps(component_status_msg))
+                sw_monitor_msg['modes'].append(monitor_status)
+            component_status_msg.append(sw_monitor_msg)
+        return component_status_msg

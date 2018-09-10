@@ -10,6 +10,4 @@ class MonitorBase(object):
 
     def get_status_message_template(self):
         msg = dict()
-        msg['metamodel'] = 'ropod-component-monitor-schema.json'
-        msg['robotId'] = ''
         return msg

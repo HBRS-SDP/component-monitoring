@@ -1,5 +1,10 @@
 # ROPOD component monitoring
 
+
+## Dependencies
+* [Pyre](https://github.com/ropod-project/pyre)
+* [Pyre base communicator](https://git.ropod.org/ropod/ropod_common)
+
 ## Component monitor specification
 
 We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.
@@ -40,15 +45,20 @@ The output produced by each component monitor is a string in JSON format which h
 
 ```
 {
-    "metamodel" : "ropod-component-monitor-schema.json",
-    "robotId" : "",
-    "monitorName": "",
-    "healthStatus":
-    {
+    "component": "",
+    "modes":
+    [
+        "monitorName": "",
+        "healthStatus":
+        {
+            ...
+        },
         ...
-    }
+    ]
 }
 ```
+
+For the full message description, see [ropod-models](https://git.ropod.org/ropod/communication/ropod-models/tree/master/schemas)
 
 In this message:
 * if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those
