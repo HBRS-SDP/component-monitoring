@@ -3,9 +3,13 @@ from __future__ import print_function
 from os import listdir
 from os.path import join, isfile
 from time import sleep
+import json
+import datetime
+import uuid
 
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
+from pyre_communicator.base_class import PyreBaseCommunicator
 
 def get_files(dir_name):
     file_names = list()
@@ -14,6 +18,22 @@ def get_files(dir_name):
         if isfile(f_path):
             file_names.append(f_name)
     return file_names
+
+def generate_ropod_msg(status_msg):
+    d = datetime.datetime.now()
+    msg = {}
+    msg["header"] = {}
+    msg["header"]["type"] = "HEALTH-STATUS"
+    msg["header"]["metamodel"] = "ropod-msg-schema.json"
+    msg["header"]["msgId"] = str(uuid.uuid4())
+    msg["header"]["timestamp"] = d.isoformat('T')
+    payload = {}
+    payload["metamodel"] = "ropod-component-monitor-schema.json"
+    payload["ropodId"] = "ropod_0"
+    payload["monitors"] = status_msg
+    msg["payload"] = payload
+    return json.dumps(msg)
+
 
 if __name__ == '__main__':
     hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
@@ -36,9 +56,13 @@ if __name__ == '__main__':
         sw_monitor_config_params.append(component_config_params)
 
     monitor_manager = MonitorManager(hw_monitor_config_params, sw_monitor_config_params)
+    pyre_comm = PyreBaseCommunicator('component_monitor', ["MONITOR"], None)
     try:
         while True:
-            monitor_manager.monitor_components()
+            msg = monitor_manager.monitor_components()
+            print(msg)
+            ropod_msg = generate_ropod_msg(msg)
+            pyre_comm.shout(ropod_msg)
             sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')

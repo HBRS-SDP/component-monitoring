@@ -20,7 +20,8 @@ class EncoderFunctionalMonitor(MonitorBase):
         status_msg['monitorName'] = self.config_params.name
         # TODO: use the black box query interface to get the desired data
         data = list()
-        status_msg['healthStatus'] = self.__process_data(data)
+        status_msg['healthStatus'] = dict()
+        status_msg['healthStatus']['within_threshold'] = str(self.__process_data(data))
         return status_msg
 
     def __process_data(self, data):
