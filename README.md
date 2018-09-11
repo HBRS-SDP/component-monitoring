@@ -3,7 +3,7 @@
 
 ## Dependencies
 * [Pyre](https://github.com/ropod-project/pyre)
-* [Pyre base communicator](https://git.ropod.org/ropod/ropod_common)
+* [Pyre base communicator](https://github.com/ropod-project/ropod_common)
 
 ## Component monitor specification
 
