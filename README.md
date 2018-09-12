@@ -138,6 +138,33 @@ Battery example:
 
 ## Procedure for adding new monitors
 
+### Automatic procedure
+
+This is the recommended way of adding new monitors since it creates all necessary file skeletons at once.
+
+To add new monitors using this procedure, go to the repository's directory and run
+
+```
+component_monitoring/utils/add_monitors.py [monitor_config_dir] \
+[host_name] [monitor_name] [component_name] [mode_names]
+```
+
+where:
+* `[monitor_config_dir]` is the path to the component monitor config directory
+* `[host_name]` is the name of the host on which the monitors are running (either `robot` or `black-box`)
+* `[monitor_type]` is the type of monitor (either `hardware` or `software`)
+* `[component_name]` is the name of the component to be monitored
+* `[mode_names]` is a list of component monitor modes separated by space
+
+The script will create:
+1. A component monitor configuration file `[monitor_config_dir]/[host_name]/[monitor_type]/[component_name]_monitor.yaml`
+2. A directory `[monitor_config_dir]/[host_name]/[monitor_type]/[component_name]` and monitor mode configuration files inside it
+3. A directory `[monitor_type]/[component_name]` at the location of the package `component_monitoring.monitors` and individual Python scripts for the monitor modes inside it
+
+Once the necessary files are created, one simply has to complete the mode configuration files, the Python scripts of the monitor modes, and, if necessary, list dependencies in the component monitor configuration file.
+
+### Manual procedure
+
 1. Create a monitor configuration file `component_monitoring/monitor_config/<host>/<type>/<component-name>.yaml`, where `<host>` is either `robot` or `black-box` and `<type>` is either `hardware` or `software` depending on the type of component, and describe the monitoring modes as explained above. Make sure that the `component_name` parameter in the monitor configuration file is set to `<component-name>`
 2. Create a directory `component_monitoring/monitor_config/<host>/<type>/<component-name>` and add the mode configuration files there
 3. Create a directory `component_monitoring/monitors/<type>/<component-name>` and implement the mode monitors in separate scripts; the monitors should inherit from the `MonitorBase` class defined in `monitor_base.py`. Make sure that the names of the scripts in which the modes are implemented match the names specified in the mode configuration files
