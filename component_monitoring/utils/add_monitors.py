@@ -6,7 +6,7 @@ from os import mkdir
 from os.path import join, dirname
 
 def print_usage():
-    print('Usage: add_monitors.py component_monitoring_dir host_name ' + \
+    print('Usage: add_monitors.py monitor_config_dir host_name ' + \
                                  'monitor_name component_name mode_names')
     print()
     print('monitor_config_dir     Path to the component monitor config directory')
