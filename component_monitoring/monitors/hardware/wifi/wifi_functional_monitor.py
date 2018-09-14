@@ -6,9 +6,11 @@ class WifiFunctionalMonitor(MonitorBase):
     def __init__(self, config_params):
         super(WifiFunctionalMonitor, self).__init__(config_params)
         self.output_names = list()
+        self.output_thresholds = dict()
         self.map_outputs = config_params.mappings[0].map_outputs
         for output in config_params.mappings[0].outputs:
             self.output_names.append(output.name)
+            self.output_thresholds[output.name] = output.expected_value
 
     def get_status(self):
         status_msg = self.get_status_message_template()
@@ -17,15 +19,26 @@ class WifiFunctionalMonitor(MonitorBase):
         self.wifi_values = self.get_wifi_strength()
 
         if self.map_outputs:
+            status = True
             for interface in self.wifi_values:
                 interface_name = interface['name']
                 status_msg['healthStatus'][interface_name] = dict()
                 status_msg['healthStatus'][interface_name]['wifi_quality'] =  interface['quality']
                 status_msg['healthStatus'][interface_name]['wifi_strength'] = interface['strength']
+                if (float(interface['quality']) < float(self.output_thresholds['wifi_quality']) or
+                    float(interface['strength']) < float(self.output_thresholds['wifi_strength'])):
+                    status = False
+
+            status_msg['healthStatus']['status'] = status
         else:
             interface = self.wifi_values[0]
             status_msg['healthStatus']['wifi_quality'] =  interface['quality']
             status_msg['healthStatus']['wifi_strength'] = interface['strength']
+            if (float(interface['quality']) < float(self.output_thresholds['wifi_quality']) or
+                float(interface['strength']) < float(self.output_thresholds['wifi_strength'])):
+                status_msg['healthStatus']['status'] = False
+            else:
+                status_msg['healthStatus']['status'] = True
         return status_msg
 
     '''

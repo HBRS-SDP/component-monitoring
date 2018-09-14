@@ -9,6 +9,7 @@ class RosMasterMonitor(MonitorBase):
 
     def get_status(self):
         status_msg = self.get_status_message_template()
+        status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
 
         master_running = True
@@ -18,4 +19,5 @@ class RosMasterMonitor(MonitorBase):
             master_running = False
 
         status_msg['healthStatus'][self.status_name] = master_running
+        status_msg['healthStatus']['status'] = master_running
         return status_msg

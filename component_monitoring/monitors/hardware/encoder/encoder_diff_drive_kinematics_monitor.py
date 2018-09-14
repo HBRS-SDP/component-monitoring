@@ -23,7 +23,8 @@ class EncoderDiffDriveKinematicsMonitor(MonitorBase):
         # TODO: use the black box query interface to get the desired data
         data = list()
         status_msg['healthStatus'] = dict()
-        status_msg['healthStatus']['within_threshold'] = str(self.__process_data(data))
+        status_msg['healthStatus']['residual'] = 0.0
+        status_msg['healthStatus']['status'] = True
         return status_msg
 
     def __process_data(self, data):

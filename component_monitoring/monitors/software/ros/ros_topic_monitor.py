@@ -37,10 +37,16 @@ class RosTopicMonitor(MonitorBase):
                 self.topic_statuses[topic] = False
 
         status_msg = self.get_status_message_template()
+        status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
+        status = True
         for topic in self.topic_names:
             status_msg['healthStatus'][topic] = dict()
             status_msg['healthStatus'][topic][self.status_name] = self.topic_statuses[topic]
+            if (not 'published' in self.topic_statuses.keys() or not self.topic_statuses[topic]['published']):
+                status = False
+        status_msg['healthStatus']['status'] = status
+
         return status_msg
 
     def __create_node(self):

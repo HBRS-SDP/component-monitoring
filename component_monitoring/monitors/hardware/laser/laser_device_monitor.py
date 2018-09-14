@@ -15,8 +15,12 @@ class LaserDeviceMonitor(MonitorBase):
         status_msg = self.get_status_message_template()
         status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
+        status = True
         for i, dev_name in enumerate(self.dev_names):
             status_msg['healthStatus'][self.dev_status_names[i]] = self.__device_exists(dev_name)
+            if not status_msg['healthStatus'][self.dev_status_names[i]]:
+                status = False
+        status_msg['healthStatus']['status'] = status
         return status_msg
 
     def __device_exists(self, dev_name):
