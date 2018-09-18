@@ -57,26 +57,29 @@ class WifiFunctionalMonitor(MonitorBase):
         output = output.split("\n")
         name = ""
         names = []
-        for line in output :
-            if line[:9] != "         " :
+        for line in output:
+            if line[:9] != "         ":
                 name = line[:9]
-            if "Link Quality" in line :
+            if "Link Quality" in line:
                 quality_lines.append(line)
                 names.append(name)
-        if len(quality_lines) == 0 :
+        if len(quality_lines) == 0:
             return ({"name":"no wifi interface found", "quality":0.0, "strength":-10000},)
         '''
         example of a single quality_line
         quality_line = "Link Quality=68/70  Signal level=-42 dBm"
         '''
         answer = []
-        for i in range(len(names)) :
+        for i in range(len(names)):
             name = names[i]
             quality_line = quality_lines[i]
             quality = quality_line.split()[1].split("=")[1]
             actual, total = map(float, quality.split("/"))
             quality_percent = (actual*100)/total
             signal_strength = quality_line.split()[3].split("=")[1]
+            if '/' in signal_strength:
+                numerator, denominator = signal_strength.split('/')
+                signal_strength = ((float(numerator) / float(denominator)) / 2.) - 100.
             signal_strength_int = int(signal_strength)
             interface = {}
             interface["name"] = name.strip()
@@ -84,4 +87,3 @@ class WifiFunctionalMonitor(MonitorBase):
             interface["strength"] = signal_strength_int
             answer.append(interface)
         return tuple(answer)
-
