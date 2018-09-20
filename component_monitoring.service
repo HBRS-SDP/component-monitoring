@@ -1,0 +1,13 @@
+[Unit]
+Description=Component monitoring
+After=network.target
+
+[Service]
+EnvironmentFile=<path-to-component-monitoring-repository>/config/environment_variables.txt
+ExecStart=/bin/bash -c "export ROS_MASTER_URI=http://localhost:11311 && export PYTHONPATH=/opt/ros/kinetic/lib/python2.7/dist-packages && /usr/bin/python <path-to-component-monitoring-repository>/main.py"
+WorkingDirectory=<path-to-component-monitoring-repository>
+KillSignal=SIGKILL
+User=ropod
+
+[Install]
+WantedBy=multi-user.target
