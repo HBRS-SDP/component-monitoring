@@ -29,10 +29,16 @@ class ComponentMonitorConfigFileReader(object):
             print('name not specified')
             return ComponentMonitorConfig()
 
+        if 'description' in root.keys():
+            params.description = root['description']
+        else:
+            print('{0}: description not specified'.format(config_file_name))
+            return ComponentMonitorConfig()
+
         if 'component_name' in root.keys():
             params.component_name = root['component_name']
         else:
-            print('component_name not specified')
+            print('{0}: component_name not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
         if 'modes' in root.keys():
@@ -41,7 +47,7 @@ class ComponentMonitorConfigFileReader(object):
                                                                                   mode_config_file)
                 params.modes.append(mode_config)
         else:
-            print('modes not specified')
+            print('{0}: modes not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
         return params
@@ -63,7 +69,13 @@ class ComponentMonitorConfigFileReader(object):
         if 'name' in root.keys():
             params.name = root['name']
         else:
-            print('mode_config: name not specified')
+            print('{0}: name not specified'.format(config_file_name))
+            return MonitorModeConfig()
+
+        if 'description' in root.keys():
+            params.description = root['description']
+        else:
+            print('{0}: description not specified'.format(config_file_name))
             return MonitorModeConfig()
 
         if 'mappings' in root.keys():
@@ -87,7 +99,7 @@ class ComponentMonitorConfigFileReader(object):
                     fn_mapping_params.outputs.append(output_params)
                 params.mappings.append(fn_mapping_params)
         else:
-            print('mode_config: mappings not specified')
+            print('{0}: mappings not specified'.format(config_file_name))
             return MonitorModeConfig()
 
         if 'arguments' in root.keys():

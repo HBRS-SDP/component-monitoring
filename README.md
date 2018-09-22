@@ -13,7 +13,7 @@ Based on our abstraction, each component is associated with one or more monitors
 
 ```
 name: string                    [required] -- Monitor name (snake case should be used if the name has multiple words)
-description: string             [required] -- Monitor description
+description: string             [required] -- Monitored component
 component_name: string          [required] -- Component name (snake case should be used if the name has multiple words)
 modes: list<string>             [required] -- A list of path names to component monitor configuration files
 dependencies: list<string>      [optional] -- A list of components on which the component depends
@@ -50,7 +50,7 @@ The output produced by each component monitor is a string in JSON format which h
     "component": "",
     "modes":
     [
-        "monitorName": "",
+        "monitorDescription": "",
         "healthStatus":
         {
             ...

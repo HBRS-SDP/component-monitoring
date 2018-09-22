@@ -37,7 +37,7 @@ class RosTopicMonitor(MonitorBase):
                 self.topic_statuses[topic] = False
 
         status_msg = self.get_status_message_template()
-        status_msg['monitorName'] = self.config_params.name
+        status_msg['monitorDescription'] = self.config_params.description
         status_msg['healthStatus'] = dict()
         status = True
         for topic in self.topic_names:

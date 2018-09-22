@@ -6,18 +6,18 @@ class MonitorManager(object):
         self.hardware_monitors = dict()
         self.software_monitors = dict()
         for monitor_config in hw_monitor_config_params:
-            self.hardware_monitors[monitor_config.name] = list()
+            self.hardware_monitors[monitor_config.description] = list()
             for monitor_mode_config in monitor_config.modes:
                 monitor = MonitorFactory.get_hardware_monitor(monitor_config.component_name,
                                                               monitor_mode_config)
-                self.hardware_monitors[monitor_config.name].append(monitor)
+                self.hardware_monitors[monitor_config.description].append(monitor)
 
         for monitor_config in sw_monitor_config_params:
-            self.software_monitors[monitor_config.name] = list()
+            self.software_monitors[monitor_config.description] = list()
             for monitor_mode_config in monitor_config.modes:
                 monitor = MonitorFactory.get_software_monitor(monitor_config.component_name,
                                                               monitor_mode_config)
-                self.software_monitors[monitor_config.name].append(monitor)
+                self.software_monitors[monitor_config.description].append(monitor)
 
     def monitor_components(self):
         component_status_msg = list()

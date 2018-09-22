@@ -1,4 +1,5 @@
 name: wifi_functional_monitor
+description: Network quality and strength
 mappings:
     - mapping:
         inputs: []

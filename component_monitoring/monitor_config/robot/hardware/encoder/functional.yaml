@@ -1,4 +1,5 @@
 name: encoder_functional_monitor
+description: Matching between the measured and differentiated encoder velocities
 mappings:
     - mapping:
         inputs: [ros_sw_ethercat_parser/data]

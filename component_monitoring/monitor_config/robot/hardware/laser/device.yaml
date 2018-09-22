@@ -13,6 +13,7 @@
 #         value: bool | string | int | double | required
 
 name: laser_device_monitor
+description: Laser devices recognised by OS
 mappings:
     - mapping:
         inputs: [/dev/youbot/hokuyo_front]
