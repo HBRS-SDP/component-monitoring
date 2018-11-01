@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import sys
+import time
 from os import listdir
 from os.path import join, isfile
-from time import sleep
 import json
-import datetime
 import uuid
 
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
@@ -20,17 +19,16 @@ def get_files(dir_name):
             file_names.append(f_name)
     return file_names
 
-def generate_ropod_msg(status_msg, ropod_id):
-    d = datetime.datetime.now()
-    msg = {}
-    msg["header"] = {}
+def generate_robot_msg(status_msg, robot_id):
+    msg = dict()
+    msg["header"] = dict()
     msg["header"]["type"] = "HEALTH-STATUS"
     msg["header"]["metamodel"] = "ropod-msg-schema.json"
     msg["header"]["msgId"] = str(uuid.uuid4())
-    msg["header"]["timestamp"] = d.isoformat('T')
-    payload = {}
+    msg["header"]["timestamp"] = time.time()
+    payload = dict()
     payload["metamodel"] = "ropod-component-monitor-schema.json"
-    payload["ropodId"] = ropod_id
+    payload["robotId"] = robot_id
     payload["monitors"] = status_msg
     msg["payload"] = payload
     return json.dumps(msg)
@@ -38,11 +36,11 @@ def generate_ropod_msg(status_msg, ropod_id):
 
 if __name__ == '__main__':
     if (len(sys.argv) < 2):
-        ropod_id = 'ropod_1'
+        robot_id = 'ropod_001'
         print("Usage: main.py <ropod_id>")
-        print("using default ropod: ropod_1")
+        print("using default robot: ropod_001")
     else:
-        ropod_id = sys.argv[1]
+        robot_id = sys.argv[1]
 
     hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
     sw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/software'
@@ -64,14 +62,13 @@ if __name__ == '__main__':
         sw_monitor_config_params.append(component_config_params)
 
     monitor_manager = MonitorManager(hw_monitor_config_params, sw_monitor_config_params)
-    pyre_comm = PyreBaseCommunicator(ropod_id, ["MONITOR"], [])
+    pyre_comm = PyreBaseCommunicator(robot_id, ["MONITOR"], [])
     try:
         while True:
             msg = monitor_manager.monitor_components()
-            print(msg)
-            ropod_msg = generate_ropod_msg(msg, ropod_id)
-            pyre_comm.shout(ropod_msg)
-            sleep(0.5)
+            robot_msg = generate_robot_msg(msg, robot_id)
+            pyre_comm.shout(robot_msg)
+            time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
 
