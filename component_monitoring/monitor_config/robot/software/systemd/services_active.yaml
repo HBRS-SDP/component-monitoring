@@ -1,0 +1,10 @@
+name: systemd_services_active_monitor
+description: Available services
+mappings:
+    - mapping:
+        inputs: [roscore, ropod_com_mediator, overpass, ropod_world_model_mediator, ropod_route_navigation, ropod_route_planner, ropod_task_executor]
+        outputs:
+            - output:
+                name: active
+                type: bool
+        map_outputs: True
