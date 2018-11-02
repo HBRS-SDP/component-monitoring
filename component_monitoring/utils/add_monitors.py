@@ -19,6 +19,7 @@ def print_usage():
 def create_monitor_file(config_dir, component_name, mode_names):
     monitor_config_file = open(join(config_dir, component_name + '_monitor.yaml'), 'w')
     monitor_config_file.write('name: ' + component_name + '_monitor\n')
+    monitor_config_file.write('description: ' + component_name + '_monitor\n')
     monitor_config_file.write('component_name: ' + component_name + '\n')
     monitor_config_file.write('modes: [')
     for i in range(len(mode_names)-1):
@@ -31,6 +32,7 @@ def create_monitor_file(config_dir, component_name, mode_names):
 def create_mode_config_file(mode_config_dir, component_name, mode_name):
     config_file = open(join(mode_config_dir, mode_name + '.yaml'), 'w')
     config_file.write('name: ' + component_name + '_' + mode_name + '_monitor\n')
+    config_file.write('description: ' + component_name + '_' + mode_name + '_monitor\n')
     config_file.write('mappings:\n')
     config_file.write('    - mapping:\n')
     config_file.write('        inputs: []\n')
