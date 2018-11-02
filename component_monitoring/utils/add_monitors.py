@@ -54,6 +54,7 @@ def create_mode_source_file(monitor_source_dir, component_name, mode_name):
     source_file.write('    def get_status(self):\n')
     source_file.write('        status_msg = self.get_status_message_template()\n')
     source_file.write('        status_msg["monitorName"] = self.config_params.name\n')
+    source_file.write('        status_msg["monitorDescription"] = self.config_params.description\n')
     source_file.write('        status_msg["healthStatus"] = dict()\n')
     source_file.write('        return status_msg\n')
     source_file.close()
