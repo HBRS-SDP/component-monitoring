@@ -41,6 +41,12 @@ class ComponentMonitorConfigFileReader(object):
             print('{0}: component_name not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
+        if 'dependencies' in root.keys():
+            params.component_dependencies = root['dependencies']
+
+        if 'recovery_actions' in root.keys():
+            params.recovery_actions = root['recovery_actions']
+
         if 'modes' in root.keys():
             for mode_config_file in root['modes']:
                 mode_config = ComponentMonitorConfigFileReader.__load_mode_config(root_dir,

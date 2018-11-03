@@ -53,3 +53,7 @@ class ComponentMonitorConfig(object):
 
         ## a list of components on which the component depends
         self.component_dependencies = list()
+
+        ## a list of recovery actions to take in case
+        ## the component is not operating as expected
+        self.recovery_actions = list()

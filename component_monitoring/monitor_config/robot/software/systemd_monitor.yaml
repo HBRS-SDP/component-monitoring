@@ -3,3 +3,4 @@ description: System services
 component_name: systemd
 modes: [systemd/services_active.yaml]
 dependencies: []
+recovery_actions: [restart]
