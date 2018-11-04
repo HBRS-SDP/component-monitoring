@@ -20,9 +20,3 @@ mappings:
             - output:
                 name: hokuyo_front_working
                 type: bool
-    - mapping:
-        inputs: [/scan_rear]
-        outputs:
-            - output:
-                name: hokuyo_rear_working
-                type: bool

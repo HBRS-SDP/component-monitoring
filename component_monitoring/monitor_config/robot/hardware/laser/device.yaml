@@ -16,14 +16,8 @@ name: laser_device_monitor
 description: Laser devices recognised by OS
 mappings:
     - mapping:
-        inputs: [/dev/youbot/hokuyo_front]
+        inputs: [/dev/hokuyo_front]
         outputs:
             - output:
-                name: hokuyo_front_working
-                type: bool
-    - mapping:
-        inputs: [/dev/youbot/hokuyo_rear]
-        outputs:
-            - output:
-                name: hokuyo_rear_working
+                name: hokuyo_front
                 type: bool
