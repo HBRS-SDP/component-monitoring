@@ -7,9 +7,10 @@ from os.path import join, isfile
 import json
 import uuid
 
+from ropod.pyre_communicator.base_class import PyreBaseCommunicator
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
-from ropod.pyre_communicator.base_class import PyreBaseCommunicator
+from component_monitoring.utils.robot_store_interface import RobotStoreInterface
 
 def get_files(dir_name):
     file_names = list()
@@ -63,10 +64,15 @@ if __name__ == '__main__':
 
     monitor_manager = MonitorManager(hw_monitor_config_params, sw_monitor_config_params)
     pyre_comm = PyreBaseCommunicator(robot_id, ["MONITOR"], [])
+    robot_store_interface = RobotStoreInterface(db_name='robot_store',
+                                                monitor_collection_name='status',
+                                                db_port=27017)
     try:
         while True:
-            msg = monitor_manager.monitor_components()
-            robot_msg = generate_robot_msg(msg, robot_id)
+            status_msg = monitor_manager.monitor_components()
+            robot_store_interface.store_monitor_msg(status_msg)
+
+            robot_msg = generate_robot_msg(status_msg, robot_id)
             pyre_comm.shout(robot_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
