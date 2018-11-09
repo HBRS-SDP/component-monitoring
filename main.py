@@ -9,7 +9,7 @@ import uuid
 
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
-from pyre_communicator.base_class import PyreBaseCommunicator
+from ropod.pyre_communicator.base_class import PyreBaseCommunicator
 
 def get_files(dir_name):
     file_names = list()
