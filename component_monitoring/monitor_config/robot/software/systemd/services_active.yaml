@@ -8,6 +8,18 @@ mappings:
                 name: roscore
                 type: bool
     - mapping:
+        inputs: [ropod_teleop]
+        outputs:
+            - output:
+                name: ropod_teleop
+                type: bool
+    - mapping:
+        inputs: [ropod_sound_communicator]
+        outputs:
+            - output:
+                name: ropod_sound_communicator
+                type: bool
+    - mapping:
         inputs: [ropod_com_mediator]
         outputs:
             - output:
@@ -24,6 +36,12 @@ mappings:
         outputs:
             - output:
                 name: ropod_world_model_mediator
+                type: bool
+    - mapping:
+        inputs: [ropod_navigation]
+        outputs:
+            - output:
+                name: ropod_navigation
                 type: bool
     - mapping:
         inputs: [ropod_route_navigation]
