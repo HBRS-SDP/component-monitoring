@@ -62,11 +62,13 @@ if __name__ == '__main__':
                                                                         config_file)
         sw_monitor_config_params.append(component_config_params)
 
-    monitor_manager = MonitorManager(hw_monitor_config_params, sw_monitor_config_params)
     pyre_comm = PyreBaseCommunicator(robot_id, ["MONITOR"], [])
     robot_store_interface = RobotStoreInterface(db_name='robot_store',
                                                 monitor_collection_name='status',
                                                 db_port=27017)
+    monitor_manager = MonitorManager(hw_monitor_config_params,
+                                     sw_monitor_config_params,
+                                     robot_store_interface)
     try:
         while True:
             status_msg = monitor_manager.monitor_components()
