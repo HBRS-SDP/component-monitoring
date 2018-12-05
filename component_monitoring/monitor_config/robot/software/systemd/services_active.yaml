@@ -38,12 +38,6 @@ mappings:
                 name: ropod_world_model_mediator
                 type: bool
     - mapping:
-        inputs: [ropod_navigation]
-        outputs:
-            - output:
-                name: ropod_navigation
-                type: bool
-    - mapping:
         inputs: [ropod_route_navigation]
         outputs:
             - output:
