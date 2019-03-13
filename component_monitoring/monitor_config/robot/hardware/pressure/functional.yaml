@@ -1,0 +1,34 @@
+name: pressure_functional_monitor
+description: Fault based on wheel's pressure sensor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: pressure_sensor_1
+                type: bool
+            - output:
+                name: pressure_sensor_2
+                type: bool
+            - output:
+                name: pressure_sensor_3
+                type: bool
+            - output:
+                name: pressure_sensor_4
+                type: bool
+arguments:                                              
+    - arg:
+        name: median_window_size
+        value: 2
+    - arg:
+        name: fault_threshold
+        value: 10.0
+    - arg:
+        name: number_of_wheels
+        value: 4
+    - arg:
+        name: db_name
+        value: 'logs'
+    - arg:
+        name: collection_name
+        value: 'ros_sw_ethercat_parser_data'

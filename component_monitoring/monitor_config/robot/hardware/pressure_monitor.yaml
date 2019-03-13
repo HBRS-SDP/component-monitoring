@@ -1,0 +1,5 @@
+name: pressure_monitor
+description: Pressure monitor
+component_name: pressure
+modes: [pressure/functional.yaml]
+dependencies: []

@@ -7,7 +7,7 @@ from os.path import join, isfile
 import json
 import uuid
 
-from ropod.pyre_communicator.base_class import PyreBaseCommunicator
+from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
@@ -62,7 +62,7 @@ if __name__ == '__main__':
                                                                         config_file)
         sw_monitor_config_params.append(component_config_params)
 
-    pyre_comm = PyreBaseCommunicator(robot_id, ["MONITOR"], [])
+    pyre_comm = RopodPyre(robot_id, ["MONITOR"], [])
     robot_store_interface = RobotStoreInterface(db_name='robot_store',
                                                 monitor_collection_name='status',
                                                 db_port=27017)
