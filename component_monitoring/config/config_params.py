@@ -23,8 +23,11 @@ class FunctionalMappingConfig(object):
 
 class MonitorModeConfig(object):
     def __init__(self):
-        ## monitor mode name
+        ## monitor mode name (snake case should be used if the name has multiple words)
         self.name = ''
+
+        ## monitor mode description
+        self.description = ''
 
         ## a list of 'FunctionalMappingConfig' objects specifying
         ## the parameters of the monitor mode inputs and outputs
@@ -35,8 +38,11 @@ class MonitorModeConfig(object):
 
 class ComponentMonitorConfig(object):
     def __init__(self):
-        ## name of the monitor
+        ## name of the monitor (snake case should be used if the name has multiple words)
         self.name = ''
+
+        ## monitor description
+        self.description = ''
 
         ## name of the monitored component
         self.component_name = ''
@@ -47,3 +53,7 @@ class ComponentMonitorConfig(object):
 
         ## a list of components on which the component depends
         self.component_dependencies = list()
+
+        ## a list of recovery actions to take in case
+        ## the component is not operating as expected
+        self.recovery_actions = list()

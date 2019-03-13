@@ -13,13 +13,17 @@ class RosTopicMonitor(MonitorBase):
 
         self.topic_names = list()
         self.topic_statuses = self.process_manager.dict()
-        self.status_name = self.status_name = config_params.mappings[0].outputs[0].name
+        self.status_names = dict()
         self.subscribers = dict()
-        for topic in config_params.mappings[0].inputs:
+        for mapping in config_params.mappings:
+            topic = mapping.inputs[0]
             self.topic_names.append(topic)
             self.topic_statuses[topic] = False
+            self.status_names[topic] = mapping.outputs[0].name
+
         self.node_initialised = False
         self.node_thread = None
+        self.status_msg = self.__init_status_msg()
 
     def get_status(self):
         try:
@@ -36,11 +40,26 @@ class RosTopicMonitor(MonitorBase):
             for topic in self.topic_names:
                 self.topic_statuses[topic] = False
 
+        overall_status = True
+        for topic in self.topic_names:
+            self.status_msg['healthStatus'][topic] = dict()
+            self.status_msg['healthStatus'][self.status_names[topic]] = self.topic_statuses[topic]
+            if not self.topic_statuses[topic]:
+                overall_status = False
+        self.status_msg['healthStatus']['status'] = overall_status
+        return self.status_msg
+
+    def __init_status_msg(self):
+        '''Initialises a status message dictionary so that it doesn't have to
+        be recreated every time the status is requested
+        '''
         status_msg = self.get_status_message_template()
+        status_msg['monitorName'] = self.config_params.name
+        status_msg['monitorDescription'] = self.config_params.description
         status_msg['healthStatus'] = dict()
         for topic in self.topic_names:
-            status_msg['healthStatus'][topic] = dict()
-            status_msg['healthStatus'][topic][self.status_name] = self.topic_statuses[topic]
+            status_msg['healthStatus'][self.status_names[topic]] = False
+        status_msg['healthStatus']['status'] = False
         return status_msg
 
     def __create_node(self):

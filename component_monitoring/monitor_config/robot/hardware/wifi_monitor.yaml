@@ -1,4 +1,5 @@
 name: wifi_monitor
+description: Wireless network
 component_name: wifi
 modes: [wifi/functional.yaml]
 dependencies: []
