@@ -30,8 +30,11 @@ class PressureFunctionalMonitor(MonitorBase):
 
     def get_pressure_values(self):
         """Call db utils and data utils function from blackbox tools to get the
-        pressure values from blackbox database.
-        :returns: list of floats
+        pressure values from blackbox database. It checks for possible faults
+        by comparing pressure value of one wheel with another. (Assumption: all 
+        wheel must have same pressure values as they are always on the same floor)
+
+        @returns: list of booleans
 
         """
         docs = DBUtils.get_docs_of_last_n_secs(
@@ -40,18 +43,20 @@ class PressureFunctionalMonitor(MonitorBase):
                 self.median_window_size)
         values = DataUtils.get_all_measurements(docs, 'sensors/*/pressure', self.num_of_wheels, Filters.MEDIAN)
         avg_value = np.mean(values, axis=0)
-        fault_list = [True]*self.num_of_wheels
+        sensor_statuses = [True]*self.num_of_wheels
         odd_index = self.find_suspected_sensors(avg_value)
         for i in odd_index :
-            fault_list[i] = False
-        return fault_list
+            sensor_statuses[i] = False
+        return sensor_statuses
 
     def find_suspected_sensors(self, arr):
         """find an odd value if one exist out of a list of 4 values and return 
         the index of that value. Returns None if no odd values are found.
 
-        :arr: list of 4 floats
-        :returns: int/None
+        Parameters
+        @arr: list of floats (length of this list if num_of_wheels)
+
+        @returns: list of int
 
         """
         safe_set = set()
