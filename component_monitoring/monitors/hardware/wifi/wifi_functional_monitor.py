@@ -29,18 +29,19 @@ class WifiFunctionalMonitor(MonitorBase):
             status_msg['healthStatus']['wifi_strength'] = interface['strength']
         return status_msg
 
-    '''
-    Returns : a tuple of dictionaries where each dictionary object has 3 items
-                name : string of length less than 9 char
-                quality : float between 0.0 and 100.0
-                strength : int between -30 and -90
-
-    Calculates the quality of the wifi signal percentage and signal strength (in dbm)
-    from "iwconfig" shell command
-    '''
     def get_wifi_strength(self) :
+        ''' Returns : a tuple of dictionaries where each dictionary object has 3 items
+                    name : string of length less than 9 char
+                    quality : float between 0.0 and 100.0
+                    strength : int between -30 and -90
+
+        Calculates the quality of the wifi signal percentage and signal strength (in dbm)
+        from "iwconfig" shell command
+        '''
         output = subprocess.Popen("iwconfig",  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
         quality_lines = []
+        if isinstance(output, bytes):
+            output = output.decode('utf-8')
         output = output.split("\n")
         name = ""
         names = []
