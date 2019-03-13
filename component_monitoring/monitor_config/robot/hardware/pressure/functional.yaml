@@ -1,0 +1,24 @@
+name: pressure_functional_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: fault_wheel_1
+                type: bool
+            - output:
+                name: fault_wheel_2
+                type: bool
+            - output:
+                name: fault_wheel_3
+                type: bool
+            - output:
+                name: fault_wheel_4
+                type: bool
+arguments:                                              
+    - arg:
+        name: median_window_size
+        value: 2
+    - arg:
+        name: fault_threshold
+        value: 10.0
