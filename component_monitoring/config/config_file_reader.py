@@ -29,11 +29,23 @@ class ComponentMonitorConfigFileReader(object):
             print('name not specified')
             return ComponentMonitorConfig()
 
+        if 'description' in root.keys():
+            params.description = root['description']
+        else:
+            print('{0}: description not specified'.format(config_file_name))
+            return ComponentMonitorConfig()
+
         if 'component_name' in root.keys():
             params.component_name = root['component_name']
         else:
-            print('component_name not specified')
+            print('{0}: component_name not specified'.format(config_file_name))
             return ComponentMonitorConfig()
+
+        if 'dependencies' in root.keys():
+            params.component_dependencies = root['dependencies']
+
+        if 'recovery_actions' in root.keys():
+            params.recovery_actions = root['recovery_actions']
 
         if 'modes' in root.keys():
             for mode_config_file in root['modes']:
@@ -41,7 +53,7 @@ class ComponentMonitorConfigFileReader(object):
                                                                                   mode_config_file)
                 params.modes.append(mode_config)
         else:
-            print('modes not specified')
+            print('{0}: modes not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
         return params
@@ -63,7 +75,13 @@ class ComponentMonitorConfigFileReader(object):
         if 'name' in root.keys():
             params.name = root['name']
         else:
-            print('mode_config: name not specified')
+            print('{0}: name not specified'.format(config_file_name))
+            return MonitorModeConfig()
+
+        if 'description' in root.keys():
+            params.description = root['description']
+        else:
+            print('{0}: description not specified'.format(config_file_name))
             return MonitorModeConfig()
 
         if 'mappings' in root.keys():
@@ -82,12 +100,12 @@ class ComponentMonitorConfigFileReader(object):
                     output_params = OutputConfig()
                     output_params.name = output_node['name']
                     output_params.obtained_value_type = output_node['type']
-                    if 'expected' in output.keys():
+                    if 'expected' in output_node.keys():
                         output_params.expected_value = output_node['expected']
                     fn_mapping_params.outputs.append(output_params)
                 params.mappings.append(fn_mapping_params)
         else:
-            print('mode_config: mappings not specified')
+            print('{0}: mappings not specified'.format(config_file_name))
             return MonitorModeConfig()
 
         if 'arguments' in root.keys():

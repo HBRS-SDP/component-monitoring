@@ -1,4 +1,5 @@
 name: encoder_diff_drive_kinematics_monitor
+description: Matching between the expected and measured pivot angular velocity
 mappings:
     - mapping:
         inputs: [ros_sw_ethercat_parser/data]

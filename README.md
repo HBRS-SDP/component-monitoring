@@ -1,5 +1,10 @@
 # ROPOD component monitoring
 
+
+## Dependencies
+* [Pyre](https://github.com/ropod-project/pyre)
+* [Pyre base communicator](https://github.com/ropod-project/ropod_common)
+
 ## Component monitor specification
 
 We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.
@@ -7,29 +12,31 @@ We see monitors as functions that get a certain input and produce a component st
 Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. The configuration file for a given component thus specifies a list of modes and has the following format:
 
 ```
-name: string | required
-component_name: string | required
-modes: list<string> | required
-dependencies: list<string> | optional
+name: string                    [required] -- Monitor name (snake case should be used if the name has multiple words)
+description: string             [required] -- Monitored component
+component_name: string          [required] -- Component name (snake case should be used if the name has multiple words)
+modes: list<string>             [required] -- A list of path names to component monitor configuration files
+dependencies: list<string>      [optional] -- A list of components on which the component depends
 ```
 
-Here, `modes` is a list of path names to component monitor configuration files. Each of these files defines the input-output mapping mentioned above and has the format shown below:
+In `modes`, each file defines the input-output mapping mentioned above and has the format shown below:
 
 ```
-name: string | required
-mappings:
+name: string                                            [required] -- Monitor mode name (snake case should be used if the name has multiple words)
+description: string                                     [required] -- Monitor mode description
+mappings:                                               [required] -- Specified a list of functional input-output mappings for the monitor mode
     - mapping:
-        inputs: list[string] | required
-        outputs: | required
+        inputs: list<string>                            [required] -- A list of inputs to the monitor mode (e.g. data variable names)
+        outputs:                                        [required] -- A list of monitor outputs
             - output:
-                name: string | required
-                type: string | required
-                expected: bool | string | int | double | optional
-        map_outputs: bool | optional
-arguments: | optional
+                name: string                            [required] -- Output name
+                type: string                            [required] -- Output type (allowed types: bool, string, int, double)
+                expected: bool | string | int | double  [optional] -- Expected value of the output
+        map_outputs: bool                               [optional] -- Specifies whether the mapping outputs should be returned in a map or not (returning them in a map is useful if there may be an unknown number of output copies - e.g. if the number of sensors changes dynamically)
+arguments:                                              [optional] -- An optional list of arguments to the monitor mode (e.g. thresholds)
     - arg:
-        name: bool | string | int | double | required
-        value: bool | string | int | double | required
+        name: bool | string | int | double              [required] -- Argument name
+        value: bool | string | int | double             [required] -- Argument value
 ```
 
 In this specification, the optional output parameter `map_outputs` allows controlling the overall type of the monitor output, such that if `map_outputs` is set to `true`, the outputs will be returned in a dictionary. This is useful if the number of output value copies is unknown at design time.
@@ -40,15 +47,20 @@ The output produced by each component monitor is a string in JSON format which h
 
 ```
 {
-    "metamodel" : "ropod-component-monitor-schema.json",
-    "robotId" : "",
-    "monitorName": "",
-    "healthStatus":
-    {
+    "component": "",
+    "modes":
+    [
+        "monitorDescription": "",
+        "healthStatus":
+        {
+            ...
+        },
         ...
-    }
+    ]
 }
 ```
+
+For the full message description, see [ropod-models](https://git.ropod.org/ropod/communication/ropod-models/tree/master/schemas)
 
 In this message:
 * if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those
@@ -127,6 +139,33 @@ Battery example:
 ```
 
 ## Procedure for adding new monitors
+
+### Automatic procedure
+
+This is the recommended way of adding new monitors since it creates all necessary file skeletons at once.
+
+To add new monitors using this procedure, go to the repository's directory and run
+
+```
+component_monitoring/utils/add_monitors.py [monitor_config_dir] \
+[host_name] [monitor_name] [component_name] [mode_names]
+```
+
+where:
+* `[monitor_config_dir]` is the path to the component monitor config directory
+* `[host_name]` is the name of the host on which the monitors are running (either `robot` or `black-box`)
+* `[monitor_type]` is the type of monitor (either `hardware` or `software`)
+* `[component_name]` is the name of the component to be monitored
+* `[mode_names]` is a list of component monitor modes separated by space
+
+The script will create:
+1. A component monitor configuration file `[monitor_config_dir]/[host_name]/[monitor_type]/[component_name]_monitor.yaml`
+2. A directory `[monitor_config_dir]/[host_name]/[monitor_type]/[component_name]` and monitor mode configuration files inside it
+3. A directory `[monitor_type]/[component_name]` at the location of the package `component_monitoring.monitors` and individual Python scripts for the monitor modes inside it
+
+Once the necessary files are created, one simply has to complete the mode configuration files, the Python scripts of the monitor modes, and, if necessary, list dependencies in the component monitor configuration file.
+
+### Manual procedure
 
 1. Create a monitor configuration file `component_monitoring/monitor_config/<host>/<type>/<component-name>.yaml`, where `<host>` is either `robot` or `black-box` and `<type>` is either `hardware` or `software` depending on the type of component, and describe the monitoring modes as explained above. Make sure that the `component_name` parameter in the monitor configuration file is set to `<component-name>`
 2. Create a directory `component_monitoring/monitor_config/<host>/<type>/<component-name>` and add the mode configuration files there

@@ -1,0 +1,57 @@
+name: systemd_services_active_monitor
+description: Available services
+mappings:
+    - mapping:
+        inputs: [roscore]
+        outputs:
+            - output:
+                name: roscore
+                type: bool
+    - mapping:
+        inputs: [ropod_teleop]
+        outputs:
+            - output:
+                name: ropod_teleop
+                type: bool
+    - mapping:
+        inputs: [ropod_sound_communicator]
+        outputs:
+            - output:
+                name: ropod_sound_communicator
+                type: bool
+    - mapping:
+        inputs: [ropod_com_mediator]
+        outputs:
+            - output:
+                name: ropod_com_mediator
+                type: bool
+    - mapping:
+        inputs: [overpass]
+        outputs:
+            - output:
+                name: overpass
+                type: bool
+    - mapping:
+        inputs: [ropod_world_model_mediator]
+        outputs:
+            - output:
+                name: ropod_world_model_mediator
+                type: bool
+    - mapping:
+        inputs: [ropod_route_navigation]
+        outputs:
+            - output:
+                name: ropod_route_navigation
+                type: bool
+    - mapping:
+        inputs: [ropod_route_planner]
+        outputs:
+            - output:
+                name: ropod_route_planner
+                type: bool
+    - mapping:
+        inputs: [ropod_task_executor]
+        outputs:
+            - output:
+                name: ropod_task_executor
+                type: bool

@@ -1,9 +1,9 @@
 name: ros_topic_monitor
+description: Topics published
 mappings:
     - mapping:
         inputs: [cmd_vel]
         outputs:
             - output:
-                name: published
+                name: cmd_vel
                 type: bool
-        map_outputs: True

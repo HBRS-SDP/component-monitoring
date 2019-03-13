@@ -1,4 +1,5 @@
 name: ros_master_monitor
+description: ROS master running
 mappings:
     - mapping:
         inputs: []
