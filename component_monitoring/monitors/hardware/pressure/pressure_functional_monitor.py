@@ -22,13 +22,13 @@ class PressureFunctionalMonitor(MonitorBase):
         status_msg = self.get_status_message_template()
         status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
-        pressure_values = self.get_pressure_values()
+        pressure_values = self.get_pressure_statuses()
 
         for i in range(self.num_of_wheels) :
             status_msg['healthStatus']['pressure_sensor_'+str(i)] =  pressure_values[i]
         return status_msg
 
-    def get_pressure_values(self):
+    def get_pressure_statuses(self):
         """Call db utils and data utils function from blackbox tools to get the
         pressure values from blackbox database. It checks for possible faults
         by comparing pressure value of one wheel with another. (Assumption: all 

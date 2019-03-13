@@ -1,4 +1,5 @@
 name: pressure_functional_monitor
+description: Fault based on wheel's pressure sensor
 mappings:
     - mapping:
         inputs: []
