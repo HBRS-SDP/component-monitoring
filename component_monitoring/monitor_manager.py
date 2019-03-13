@@ -33,4 +33,4 @@ class MonitorManager(object):
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 component_status_msg[monitor_name].append(monitor_status)
-        print(json.dumps(component_status_msg))
+        # print(json.dumps(component_status_msg, indent=2))
