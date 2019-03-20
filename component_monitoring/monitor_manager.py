@@ -58,4 +58,20 @@ class MonitorManager(object):
                 monitor_status = monitor.get_status()
                 sw_monitor_msg['modes'].append(monitor_status)
             component_status_msg.append(sw_monitor_msg)
+        # print(component_status_msg)
         return component_status_msg
+
+    def stop_monitors(self):
+        """Call stop method of all monitors. The stop method is used for cleanup
+        (specifically for shutting down pyre nodes)
+
+        :return: None
+
+        """
+        for component_name, monitors in self.hw_monitors.items():
+            for monitor in monitors:
+                monitor.stop()
+
+        for component_name, monitors in self.sw_monitors.items():
+            for monitor in monitors:
+                monitor.stop()
