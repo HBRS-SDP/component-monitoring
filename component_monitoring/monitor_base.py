@@ -8,6 +8,9 @@ class MonitorBase(object):
     def get_status(self):
         pass
 
+    def stop(self):
+        pass
+
     def get_status_message_template(self):
         msg = dict()
         return msg

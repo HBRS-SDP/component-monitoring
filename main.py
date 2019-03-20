@@ -81,6 +81,7 @@ if __name__ == '__main__':
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
         pyre_comm.shutdown()
+        monitor_manager.stop_monitors()
 
     ### debugging printout
     # hardware_monitor_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir_name,
