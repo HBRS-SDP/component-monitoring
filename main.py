@@ -63,6 +63,7 @@ if __name__ == '__main__':
         sw_monitor_config_params.append(component_config_params)
 
     pyre_comm = RopodPyre(robot_id, ["MONITOR"], [])
+    pyre_comm.start()
     robot_store_interface = RobotStoreInterface(db_name='robot_store',
                                                 monitor_collection_name='status',
                                                 db_port=27017)
@@ -79,6 +80,7 @@ if __name__ == '__main__':
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
+        pyre_comm.shutdown()
 
     ### debugging printout
     # hardware_monitor_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir_name,
