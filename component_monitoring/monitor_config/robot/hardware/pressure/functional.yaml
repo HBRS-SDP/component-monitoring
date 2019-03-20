@@ -16,7 +16,7 @@ mappings:
             - output:
                 name: pressure_sensor_4
                 type: bool
-arguments:                                              
+arguments:
     - arg:
         name: median_window_size
         value: 2
@@ -27,11 +27,11 @@ arguments:
         name: number_of_wheels
         value: 4
     - arg:
-        name: collection_name
-        value: 'ros_sw_ethercat_parser_data'
+        name: variable_name_pattern
+        value: ros_sw_ethercat_parser_data/sensors/*/pressure
     - arg:
         name: black_box_id
-        value: 'black_box_001'
+        value: black_box_001
     - arg:
         name: wait_threshold
         value: 2.0
