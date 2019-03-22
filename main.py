@@ -45,6 +45,8 @@ if __name__ == '__main__':
         if len(sys.argv) == 2:
             if sys.argv[1] == '--debug':
                 debug = True
+                robot_id = 'ropod_001'
+                print("using default robot: ropod_001")
             else:
                 robot_id = sys.argv[1]
         elif len(sys.argv) == 3:
