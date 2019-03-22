@@ -36,12 +36,26 @@ def generate_robot_msg(status_msg, robot_id):
 
 
 if __name__ == '__main__':
+    debug = False
     if (len(sys.argv) < 2):
         robot_id = 'ropod_001'
         print("Usage: main.py <ropod_id>")
         print("using default robot: ropod_001")
     else:
-        robot_id = sys.argv[1]
+        if len(sys.argv) == 2:
+            if sys.argv[1] == '--debug':
+                debug = True
+            else:
+                robot_id = sys.argv[1]
+        elif len(sys.argv) == 3:
+            if sys.argv[1] == '--debug':
+                debug = True
+                robot_id = sys.argv[2]
+            elif sys.argv[2] == '--debug':
+                debug = True
+                robot_id = sys.argv[1]
+            else:
+                robot_id = sys.argv[1]
 
     hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
     sw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/software'
@@ -76,6 +90,7 @@ if __name__ == '__main__':
             robot_store_interface.store_monitor_msg(status_msg)
 
             robot_msg = generate_robot_msg(status_msg, robot_id)
+            print(json.dumps(status_msg, indent=2))
             pyre_comm.shout(robot_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
