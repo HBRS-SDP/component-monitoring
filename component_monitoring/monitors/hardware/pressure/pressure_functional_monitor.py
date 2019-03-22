@@ -33,10 +33,11 @@ class PressureFunctionalMonitor(MonitorBase):
         status_msg = self.get_status_message_template()
         status_msg['monitorName'] = self.config_params.name
         status_msg['healthStatus'] = dict()
-        pressure_values = self.get_pressure_statuses()
+        status, pressure_values = self.get_pressure_statuses()
 
         for i in range(self.num_of_wheels):
             status_msg['healthStatus']['pressure_sensor_' + str(i)] = pressure_values[i]
+        status_msg['healthStatus']['status'] = status
         return status_msg
 
     def get_pressure_statuses(self):
@@ -60,11 +61,11 @@ class PressureFunctionalMonitor(MonitorBase):
             time.sleep(0.1)
         sensor_statuses = [True] * self.num_of_wheels
         if self.pyre_comm.data_queue.empty():
-            return sensor_statuses
+            return (False, sensor_statuses)
 
         data = self.pyre_comm.data_queue.get()
         if [] in data:
-            return sensor_statuses
+            return (False, sensor_statuses)
 
         # the first dimension of the data is the number of wheels,
         # the second the number of data items, and the third
@@ -78,7 +79,7 @@ class PressureFunctionalMonitor(MonitorBase):
         odd_index = self.find_suspected_sensors(avg_value)
         for i in odd_index:
             sensor_statuses[i] = False
-        return sensor_statuses
+        return (True, sensor_statuses)
 
     def find_suspected_sensors(self, arr):
         """find an odd value if one exist out of a list of 4 values and return
