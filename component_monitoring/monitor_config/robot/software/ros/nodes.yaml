@@ -1,0 +1,63 @@
+name: ros_node_monitor
+description: Active ROS nodes
+mappings:
+    - mapping:
+        inputs: [ropod_low_level_control]
+        outputs:
+            - output:
+                name: bringup
+                type: bool
+    - mapping:
+        inputs: [ropod_wm_mediator]
+        outputs:
+            - output:
+                name: wm_mediator
+                type: bool
+    - mapping:
+        inputs: [joy]
+        outputs:
+            - output:
+                name: joy
+                type: bool
+    - mapping:
+        inputs: [ropod_teleop]
+        outputs:
+            - output:
+                name: ropod_teleop
+                type: bool
+    - mapping:
+        inputs: [ropod_task_executor]
+        outputs:
+            - output:
+                name: task_executor
+                type: bool
+    - mapping:
+        inputs: [route_planner_node]
+        outputs:
+            - output:
+                name: route_planner_node
+                type: bool
+    - mapping:
+        inputs: [route_navigation]
+        outputs:
+            - output:
+                name: route_navigation
+                type: bool
+    - mapping:
+        inputs: [initial_pose_publisher]
+        outputs:
+            - output:
+                name: initial_pose_publisher
+                type: bool
+    - mapping:
+        inputs: [ropod_com_mediator]
+        outputs:
+            - output:
+                name: ropod_com_mediator
+                type: bool
+    - mapping:
+        inputs: [osm_bridge_ros]
+        outputs:
+            - output:
+                name: osm_bridge_ros
+                type: bool
