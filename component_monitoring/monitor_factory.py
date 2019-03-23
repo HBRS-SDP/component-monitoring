@@ -43,5 +43,6 @@ class MonitorFactory(object):
             MonitorClass = getattr(importlib.import_module(module_name),
                                    class_name)
             return MonitorClass(monitor_config_params)
-        except:
+        except Exception as e:
+            print("While initialising", component_name, "got exception", str(e))
             return MonitorBase(monitor_config_params)
