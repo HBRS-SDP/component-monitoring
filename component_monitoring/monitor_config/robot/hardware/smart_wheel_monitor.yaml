@@ -1,0 +1,5 @@
+name: smart_wheel_monitor
+description: Smart Wheel
+component_name: smart_wheel
+modes: [smart_wheel/diff_drive_kinematics.yaml]
+dependencies: []

@@ -1,4 +1,4 @@
-name: encoder_diff_drive_kinematics_monitor
+name: diff_drive_kinematics_monitor
 description: Matching between the expected and measured pivot angular velocity
 mappings:
     - mapping:

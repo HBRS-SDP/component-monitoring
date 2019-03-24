@@ -1,5 +1,0 @@
-name: encoder_monitor
-description: Encoder
-component_name: encoder
-modes: [encoder/functional.yaml, encoder/diff_drive_kinematics.yaml]
-dependencies: []

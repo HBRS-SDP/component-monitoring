@@ -7,9 +7,9 @@ import uuid
 from component_monitoring.monitor_base import MonitorBase
 from black_box_tools.data_utils import DataUtils
 
-class EncoderDiffDriveKinematicsMonitor(MonitorBase):
+class DiffDriveKinematicsMonitor(MonitorBase):
     def __init__(self, config_params, black_box_comm):
-        super(EncoderDiffDriveKinematicsMonitor, self).__init__(config_params, black_box_comm)
+        super(DiffDriveKinematicsMonitor, self).__init__(config_params, black_box_comm)
 
         self.variable_names = list()
         self.status_names = list()
