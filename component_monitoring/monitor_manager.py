@@ -3,7 +3,7 @@ from component_monitoring.monitor_factory import MonitorFactory
 from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 
 class MonitorManager(object):
-    def __init__(self, hw_monitor_config_params, sw_monitor_config_params, robot_store_interface):
+    def __init__(self, hw_monitor_config_params, sw_monitor_config_params, robot_store_interface, black_box_comm):
         self.hw_monitors = dict()
         self.sw_monitors = dict()
 
@@ -18,7 +18,7 @@ class MonitorManager(object):
             self.hw_component_descriptions[monitor_config.component_name] = monitor_config.description
             for monitor_mode_config in monitor_config.modes:
                 monitor = MonitorFactory.get_hardware_monitor(monitor_config.component_name,
-                                                              monitor_mode_config)
+                                                              monitor_mode_config, black_box_comm)
                 self.hw_monitors[monitor_config.component_name].append(monitor)
 
             if monitor_config.recovery_actions:
@@ -30,7 +30,7 @@ class MonitorManager(object):
             self.sw_component_descriptions[monitor_config.component_name] = monitor_config.description
             for monitor_mode_config in monitor_config.modes:
                 monitor = MonitorFactory.get_software_monitor(monitor_config.component_name,
-                                                              monitor_mode_config)
+                                                              monitor_mode_config, black_box_comm)
                 self.sw_monitors[monitor_config.component_name].append(monitor)
 
             if monitor_config.recovery_actions:

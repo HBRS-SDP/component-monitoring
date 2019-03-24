@@ -5,6 +5,13 @@
 * [Pyre](https://github.com/ropod-project/pyre)
 * [Pyre base communicator](https://github.com/ropod-project/ropod_common)
 
+## Run
+Run by specifying ropod and black box IDs as three digit numbers:
+
+`python3 main.py <ropod_id> <black_box_id>`
+
+Example: `python3 main.py 001 001`
+
 ## Component monitor specification
 
 We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.

@@ -14,7 +14,7 @@ class MonitorFactory(object):
 
     '''
     @staticmethod
-    def get_hardware_monitor(component_name, monitor_config_params):
+    def get_hardware_monitor(component_name, monitor_config_params, black_box_comm):
         try:
             monitor_name = monitor_config_params.name
             module_name = 'component_monitoring.monitors.hardware.' \
@@ -22,10 +22,10 @@ class MonitorFactory(object):
             class_name = ''.join(x.title() for x in monitor_name.split('_'))
             MonitorClass = getattr(importlib.import_module(module_name),
                                    class_name)
-            return MonitorClass(monitor_config_params)
+            return MonitorClass(monitor_config_params, black_box_comm)
         except Exception as e:
             print("While initialising", component_name, "got exception", str(e))
-            return MonitorBase(monitor_config_params)
+            return MonitorBase(monitor_config_params, black_box_comm)
 
     '''Returns a software monitor as specified by the given name
 
@@ -34,7 +34,7 @@ class MonitorFactory(object):
 
     '''
     @staticmethod
-    def get_software_monitor(component_name, monitor_config_params):
+    def get_software_monitor(component_name, monitor_config_params, black_box_comm):
         try:
             monitor_name = monitor_config_params.name
             module_name = 'component_monitoring.monitors.software.' \
@@ -42,7 +42,7 @@ class MonitorFactory(object):
             class_name = ''.join(x.title() for x in monitor_name.split('_'))
             MonitorClass = getattr(importlib.import_module(module_name),
                                    class_name)
-            return MonitorClass(monitor_config_params)
+            return MonitorClass(monitor_config_params, black_box_comm)
         except Exception as e:
             print("While initialising", component_name, "got exception", str(e))
-            return MonitorBase(monitor_config_params)
+            return MonitorBase(monitor_config_params, black_box_comm)

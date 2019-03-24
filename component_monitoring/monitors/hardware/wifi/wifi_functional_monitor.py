@@ -3,8 +3,8 @@ import subprocess
 from component_monitoring.monitor_base import MonitorBase
 
 class WifiFunctionalMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(WifiFunctionalMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(WifiFunctionalMonitor, self).__init__(config_params, black_box_comm)
         self.output_names = list()
         self.output_thresholds = dict()
         self.map_outputs = config_params.mappings[0].map_outputs

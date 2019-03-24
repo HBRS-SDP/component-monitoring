@@ -3,8 +3,8 @@ import rospy
 from component_monitoring.monitor_base import MonitorBase
 
 class RosMasterMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(RosMasterMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(RosMasterMonitor, self).__init__(config_params, black_box_comm)
 
     def get_status(self):
         status_msg = self.get_status_message_template()

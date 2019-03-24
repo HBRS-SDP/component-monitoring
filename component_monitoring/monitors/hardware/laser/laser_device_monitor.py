@@ -3,8 +3,8 @@ from os import stat
 from component_monitoring.monitor_base import MonitorBase
 
 class LaserDeviceMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(LaserDeviceMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(LaserDeviceMonitor, self).__init__(config_params, black_box_comm)
         self.dev_names = list()
         self.dev_status_names = list()
         for mapping in config_params.mappings:

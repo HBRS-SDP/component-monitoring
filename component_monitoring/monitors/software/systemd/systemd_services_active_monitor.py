@@ -2,8 +2,8 @@ import subprocess
 from component_monitoring.monitor_base import MonitorBase
 
 class SystemdServicesActiveMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(SystemdServicesActiveMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(SystemdServicesActiveMonitor, self).__init__(config_params, black_box_comm)
         self.service_names = list()
         self.service_statuses = dict()
         self.status_names = dict()
