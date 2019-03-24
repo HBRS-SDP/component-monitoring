@@ -49,7 +49,7 @@ class DiffDriveKinematicsMonitor(MonitorBase):
 
     def __process_data(self, var_names, data):
         if not data:
-            return False
+            return {}, False
 
         encoder1_vel = [[] for i in range(self.num_wheels)]
         encoder2_vel = [[] for i in range(self.num_wheels)]
