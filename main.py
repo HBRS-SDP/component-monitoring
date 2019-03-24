@@ -38,7 +38,8 @@ def generate_robot_msg(status_msg, robot_id):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Monitor component status',
+            epilog='EXAMPLE: python3 main.py 001 001')
     parser.add_argument('ropod_id', type=str, default='001', help='ropod ID (as 3 digit number)')
     parser.add_argument('black_box_id', type=str, default='001', help='black box ID (as 3 digit number)')
     parser.add_argument('-d', '--debug', help='print debug output', action='store_true')

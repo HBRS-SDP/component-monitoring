@@ -154,7 +154,7 @@ This is the recommended way of adding new monitors since it creates all necessar
 To add new monitors using this procedure, go to the repository's directory and run
 
 ```
-component_monitoring/utils/add_monitors.py [monitor_config_dir] \
+python3 component_monitoring/utils/add_monitors.py [monitor_config_dir] \
 [host_name] [monitor_name] [component_name] [mode_names]
 ```
 
