@@ -29,6 +29,3 @@ arguments:
     - arg:
         name: variable_name_pattern
         value: ros_sw_ethercat_parser_data/sensors/*/pressure
-    - arg:
-        name: wait_threshold
-        value: 2.0

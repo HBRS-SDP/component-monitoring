@@ -62,12 +62,27 @@ class BlackBoxPyreCommunicator(RopodPyre):
 
         :start_time: float
         :end_time: float
+        :variables: list of strings
         :returns: None
 
         """
         msg_sender_id = str(uuid.uuid4())
         data_query_msg = DataUtils.get_bb_query_msg(msg_sender_id, self.black_box_id,
                                                     variables, start_time, end_time)
+        return self.get_black_box_data(data_query_msg)
+
+    def send_latest_data_query(self, variables):
+        """
+        create and send a query message to black box query interface through
+        pyre shout.
+
+        :variables: list of strings
+        :returns: None
+
+        """
+        msg_sender_id = str(uuid.uuid4())
+        data_query_msg = DataUtils.get_bb_latest_data_query_msg(
+                msg_sender_id, self.black_box_id, variables)
         return self.get_black_box_data(data_query_msg)
 
     def get_black_box_data(self, query_msg):

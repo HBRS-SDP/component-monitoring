@@ -1,0 +1,5 @@
+name: battery_monitor
+description: battery_monitor
+component_name: battery
+modes: [battery/functional.yaml]
+dependencies: []

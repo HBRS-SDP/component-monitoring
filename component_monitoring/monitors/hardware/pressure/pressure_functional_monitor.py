@@ -20,7 +20,6 @@ class PressureFunctionalMonitor(MonitorBase):
         self.num_of_wheels = config_params.arguments.get('number_of_wheels', 4)
         self.variable_name_pattern = config_params.arguments.get('variable_name_pattern',
                                                                  'ros_sw_ethercat_parser_data/sensors/*/pressure')
-        self.wait_threshold = config_params.arguments.get('wait_threshold', 2.0)
 
     def get_status(self):
         status_msg = self.get_status_message_template()
