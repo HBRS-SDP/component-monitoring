@@ -5,8 +5,8 @@ import rosnode
 from component_monitoring.monitor_base import MonitorBase
 
 class RosNodeMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(RosNodeMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(RosNodeMonitor, self).__init__(config_params, black_box_comm)
 
         self.node_names = list()
         self.node_statuses = dict()

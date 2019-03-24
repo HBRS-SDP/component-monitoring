@@ -3,8 +3,8 @@ import numpy as np
 from component_monitoring.monitor_base import MonitorBase
 
 class EncoderFunctionalMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(EncoderFunctionalMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(EncoderFunctionalMonitor, self).__init__(config_params, black_box_comm)
 
         self.variable_names = list()
         self.status_names = list()

@@ -1,15 +1,20 @@
+from __future__ import print_function
 import numpy as np
 
+import time
+import uuid
+
 from component_monitoring.monitor_base import MonitorBase
+from black_box_tools.data_utils import DataUtils
 
 class EncoderDiffDriveKinematicsMonitor(MonitorBase):
-    def __init__(self, config_params):
-        super(EncoderDiffDriveKinematicsMonitor, self).__init__(config_params)
+    def __init__(self, config_params, black_box_comm):
+        super(EncoderDiffDriveKinematicsMonitor, self).__init__(config_params, black_box_comm)
 
         self.variable_names = list()
         self.status_names = list()
         for mapping in config_params.mappings:
-            self.variable_names.append(mapping.inputs[0])
+            self.variable_names.extend(mapping.inputs)
             for output_mapping in mapping.outputs:
                 self.status_names.append(output_mapping.name)
         self.num_wheels = config_params.arguments['number_of_wheels']
@@ -21,14 +26,28 @@ class EncoderDiffDriveKinematicsMonitor(MonitorBase):
         status_msg = self.get_status_message_template()
         status_msg['monitorName'] = self.config_params.name
         status_msg['monitorDescription'] = self.config_params.description
-        # TODO: use the black box query interface to get the desired data
-        data = list()
+        result, overall_result = self.get_diff_drive_statuses()
+
         status_msg['healthStatus'] = dict()
-        status_msg['healthStatus']['residual'] = 0.0
-        status_msg['healthStatus']['status'] = True
+        status_msg['healthStatus']['result'] = result
+        status_msg['healthStatus']['status'] = overall_result
         return status_msg
 
-    def __process_data(self, data):
+    def get_diff_drive_statuses(self):
+        current_time = time.time()
+        variables = []
+        for inp in self.variable_names:
+            v = [inp.replace('*', str(i)) for i\
+                         in range(self.num_wheels)]
+            variables.extend(v)
+        dict_msg = self.black_box_comm.send_query(current_time-1.0,
+                                                  current_time,
+                                                  variables)
+        var_names, data = DataUtils.parse_bb_data_msg(dict_msg)
+        result, overall_result = self.__process_data(var_names, data)
+        return result, overall_result
+
+    def __process_data(self, var_names, data):
         if not data:
             return False
 
@@ -37,23 +56,33 @@ class EncoderDiffDriveKinematicsMonitor(MonitorBase):
         pivot_encoder_vel = [[] for i in range(self.num_wheels)]
 
         times = []
-        for item in data:
-            for i in range(len(item['sensors'])):
-                encoder1_vel[i].append(item['sensors'][i]['velocity_1'])
-                encoder2_vel[i].append(item['sensors'][i]['velocity_2'])
-                pivot_encoder_vel[i].append(item['sensors'][i]['velocity_pivot'])
-            times.append(item['timestamp'])
+        wheel_num_pos = self.variable_names[0].find('*')
+        for index, v in enumerate(var_names):
+            data_list = data[index]
+            wheel_index = int(v[wheel_num_pos])
+            if v.endswith('velocity_1'):
+                for data_instance in data_list:
+                    encoder1_vel[wheel_index].append(data_instance[1])
+            elif v.endswith('velocity_2'):
+                for data_instance in data_list:
+                    encoder2_vel[wheel_index].append(data_instance[1])
+            elif v.endswith('velocity_pivot'):
+                for data_instance in data_list:
+                    pivot_encoder_vel[wheel_index].append(data_instance[1])
 
         result = {}
+        overall_result = True
         for i in range(self.num_wheels):
             wheel = 'wheel_{0}'.format(i+1)
-            diff_kinematics_consistent = self.__is_diff_kinematics_consistent(encoder1_vel[i],
+            diff_kinematics_consistent, residual = self.__is_diff_kinematics_consistent(encoder1_vel[i],
                                                                               encoder2_vel[i],
                                                                               pivot_encoder_vel[i])
 
+            overall_result = overall_result and diff_kinematics_consistent
             result[wheel] = {}
             result[wheel][self.status_names[0]] = diff_kinematics_consistent
-        return result
+            result[wheel][self.status_names[1]] = residual
+        return result, overall_result
 
     def __is_diff_kinematics_consistent(self, enc1_v, enc2_v, pivot_enc_v):
         r = self.wheel_diameter / 2.0
@@ -65,5 +94,5 @@ class EncoderDiffDriveKinematicsMonitor(MonitorBase):
             diffs.append(np.abs(x - pivot_enc_v[i]))
 
         if np.median(diffs) < self.pivot_velocity_threshold:
-            return True
-        return False
+            return True, np.median(diffs)
+        return False, np.median(diffs)

@@ -30,8 +30,5 @@ arguments:
         name: variable_name_pattern
         value: ros_sw_ethercat_parser_data/sensors/*/pressure
     - arg:
-        name: black_box_id
-        value: black_box_001
-    - arg:
         name: wait_threshold
         value: 2.0

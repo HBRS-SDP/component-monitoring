@@ -6,11 +6,13 @@ from os import listdir
 from os.path import join, isfile
 import json
 import uuid
+import argparse
 
 from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
 from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
+from component_monitoring.communication import BlackBoxPyreCommunicator
 
 def get_files(dir_name):
     file_names = list()
@@ -36,28 +38,14 @@ def generate_robot_msg(status_msg, robot_id):
 
 
 if __name__ == '__main__':
-    debug = False
-    if (len(sys.argv) < 2):
-        robot_id = 'ropod_001'
-        print("Usage: main.py <ropod_id>")
-        print("using default robot: ropod_001")
-    else:
-        if len(sys.argv) == 2:
-            if sys.argv[1] == '--debug':
-                debug = True
-                robot_id = 'ropod_001'
-                print("using default robot: ropod_001")
-            else:
-                robot_id = sys.argv[1]
-        elif len(sys.argv) == 3:
-            if sys.argv[1] == '--debug':
-                debug = True
-                robot_id = sys.argv[2]
-            elif sys.argv[2] == '--debug':
-                debug = True
-                robot_id = sys.argv[1]
-            else:
-                robot_id = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('ropod_id', type=str, default='001', help='ropod ID (as 3 digit number)')
+    parser.add_argument('black_box_id', type=str, default='001', help='black box ID (as 3 digit number)')
+    parser.add_argument('-d', '--debug', help='print debug output', action='store_true')
+
+    args = parser.parse_args()
+    robot_id = 'ropod_' + args.ropod_id
+    black_box_id = 'black_box_' + args.black_box_id
 
     hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
     sw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/software'
@@ -83,22 +71,26 @@ if __name__ == '__main__':
     robot_store_interface = RobotStoreInterface(db_name='robot_store',
                                                 monitor_collection_name='status',
                                                 db_port=27017)
+    black_box_comm = BlackBoxPyreCommunicator('component_monitor_query_node', ['MONITOR', 'ROPOD'], black_box_id)
     monitor_manager = MonitorManager(hw_monitor_config_params,
                                      sw_monitor_config_params,
-                                     robot_store_interface)
+                                     robot_store_interface,
+                                     black_box_comm)
     try:
         while True:
             status_msg = monitor_manager.monitor_components()
             robot_store_interface.store_monitor_msg(status_msg)
 
             robot_msg = generate_robot_msg(status_msg, robot_id)
-            print(json.dumps(status_msg, indent=2))
+            if (args.debug):
+                print(json.dumps(status_msg, indent=2))
             pyre_comm.shout(robot_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
         pyre_comm.shutdown()
         monitor_manager.stop_monitors()
+        black_box_comm.shutdown()
 
     ### debugging printout
     # hardware_monitor_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir_name,
