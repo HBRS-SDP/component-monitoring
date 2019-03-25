@@ -1,0 +1,9 @@
+name: docker_container_monitor
+description: Active docker containers
+mappings:
+    - mapping:
+        inputs: ["overpass:latest"]
+        outputs:
+            - output:
+                name: overpassAPI
+                type: bool
