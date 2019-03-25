@@ -42,6 +42,9 @@ class EStopFunctionalMonitor(MonitorBase):
             return (False, True)
 
         _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        for i in data:
+            if i is None:
+                return (False, True)
         status_list = [i[1] for i in data]
 
         if status_list.count(status_list[0]) != len(status_list): # if different wheel have different status

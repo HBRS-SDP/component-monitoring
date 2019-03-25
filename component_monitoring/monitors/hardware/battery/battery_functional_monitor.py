@@ -41,6 +41,9 @@ class BatteryFunctionalMonitor(MonitorBase):
         if dict_msg is None:
             return (False, 0.0)
         _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        for i in data:
+            if i is None:
+                return (False, 0.0)
         battery_voltage = sum([i[1] for i in data])/self.num_of_wheels
         battery_percentage = ((battery_voltage - self.lowest_voltage) / \
                 (self.highest_voltage - self.lowest_voltage)) * 100.0
