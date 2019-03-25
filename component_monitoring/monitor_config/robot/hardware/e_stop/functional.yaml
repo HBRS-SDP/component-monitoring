@@ -1,0 +1,16 @@
+name: e_stop_functional_monitor
+description: e_stop_functional_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: e_stop_pressed
+                type: bool
+arguments:
+    - arg:
+        name: variable_name_pattern
+        value: ros_sw_ethercat_parser_data/sensors/*/status1
+    - arg:
+        name: number_of_wheels
+        value: 4
