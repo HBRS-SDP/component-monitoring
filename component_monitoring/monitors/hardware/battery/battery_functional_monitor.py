@@ -25,7 +25,7 @@ class BatteryFunctionalMonitor(MonitorBase):
         status_msg["healthStatus"] = dict()
         status, battery_level = self.get_avg_battery()
         status_msg["healthStatus"][self.output_names[0]] = battery_level
-        status_msg["status"] = status
+        status_msg["healthStatus"]["status"] = status
         return status_msg
 
     def get_avg_battery(self):
