@@ -11,7 +11,7 @@ class BlackBoxPyreCommunicator(RopodPyre):
 
     Heavily based on /remote_monitoring/zyre_communicator.py
     '''
-    def __init__(self, node_name, groups, black_box_id, data_timeout=10.):
+    def __init__(self, node_name, groups, black_box_id, data_timeout=2.):
         '''
         Keyword arguments:
         node_name -- name of the zyre node
