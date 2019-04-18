@@ -3,7 +3,8 @@ from component_monitoring.monitor_factory import MonitorFactory
 from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 
 class MonitorManager(object):
-    def __init__(self, hw_monitor_config_params, sw_monitor_config_params, robot_store_interface, black_box_comm):
+    def __init__(self, hw_monitor_config_params, sw_monitor_config_params,
+                 robot_store_interface, black_box_comm):
         self.hw_monitors = dict()
         self.sw_monitors = dict()
 
@@ -42,6 +43,7 @@ class MonitorManager(object):
         for component_name, monitors in self.hw_monitors.items():
             hw_monitor_msg = dict()
             hw_monitor_msg['component'] = self.hw_component_descriptions[component_name]
+            hw_monitor_msg['component_id'] = component_name
             hw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(self.hw_component_descriptions[component_name])
             hw_monitor_msg['modes'] = list()
             for monitor in monitors:
@@ -52,13 +54,13 @@ class MonitorManager(object):
         for component_name, monitors in self.sw_monitors.items():
             sw_monitor_msg = dict()
             sw_monitor_msg['component'] = self.sw_component_descriptions[component_name]
+            sw_monitor_msg['component_id'] = component_name
             sw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(self.sw_component_descriptions[component_name])
             sw_monitor_msg['modes'] = list()
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 sw_monitor_msg['modes'].append(monitor_status)
             component_status_msg.append(sw_monitor_msg)
-        # print(component_status_msg)
         return component_status_msg
 
     def stop_monitors(self):
