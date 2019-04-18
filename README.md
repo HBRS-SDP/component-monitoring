@@ -6,11 +6,14 @@
 * [Pyre base communicator](https://github.com/ropod-project/ropod_common)
 
 ## Run
-Run by specifying ropod and black box IDs as three digit numbers:
 
-`python3 main.py <ropod_id> <black_box_id>`
+Run by specifying the path to a configuration file:
 
-Example: `python3 main.py 001 001`
+`python3 main.py [config_file_path]`
+
+Example: `python3 main.py config/component_monitoring_config.yaml`
+
+Note that the default value of `[config_file_path]` is `config/component_monitoring_config.yaml`.
 
 ## Component monitor specification
 
@@ -55,6 +58,8 @@ The output produced by each component monitor is a string in JSON format which h
 ```
 {
     "component": "",
+    "component_id": "",
+    "component_sm_state": "",
     "modes":
     [
         "monitorDescription": "",
@@ -155,7 +160,7 @@ To add new monitors using this procedure, go to the repository's directory and r
 
 ```
 python3 component_monitoring/utils/add_monitors.py [monitor_config_dir] \
-[host_name] [monitor_type] [component_name] [mode_names]
+[host_name] [monitor_name] [component_name] [mode_names]
 ```
 
 where:
