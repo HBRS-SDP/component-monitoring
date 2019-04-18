@@ -1,26 +1,23 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import sys
 import time
-from os import listdir
-from os.path import join, isfile
 import json
 import uuid
 import argparse
+import yaml
 
 from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
+from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
 from component_monitoring.communication import BlackBoxPyreCommunicator
 
-def get_files(dir_name):
-    file_names = list()
-    for f_name in listdir(dir_name):
-        f_path = join(dir_name, f_name)
-        if isfile(f_path):
-            file_names.append(f_name)
-    return file_names
+def get_config_data(config_file_path):
+    config_data = {}
+    with open(config_file_path, 'r') as config_file:
+        config_data = yaml.load(config_file)
+    return config_data
 
 def generate_robot_msg(status_msg, robot_id):
     msg = dict()
@@ -39,40 +36,45 @@ def generate_robot_msg(status_msg, robot_id):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Monitor component status',
-            epilog='EXAMPLE: python3 main.py 001 001')
-    parser.add_argument('ropod_id', type=str, default='001', help='ropod ID (as 3 digit number)')
-    parser.add_argument('black_box_id', type=str, default='001', help='black box ID (as 3 digit number)')
+                                     epilog='EXAMPLE: python3 main.py 001 001')
+    parser.add_argument('config_file', type=str,
+                        default='config/component_monitoring_config',
+                        help='Path to a configuration file')
     parser.add_argument('-d', '--debug', help='print debug output', action='store_true')
 
     args = parser.parse_args()
-    robot_id = 'ropod_' + args.ropod_id
-    black_box_id = 'black_box_' + args.black_box_id
+    config_file_path = args.config_file
+    config_data = get_config_data(config_file_path)
+    robot_id = config_data['robot_id']
 
-    hw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/hardware'
-    sw_monitor_config_dir_name = 'component_monitoring/monitor_config/robot/software'
+    hw_monitor_config_dir = config_data['config_dirs']['hardware']
+    sw_monitor_config_dir = config_data['config_dirs']['software']
 
-    hw_config_files = get_files(hw_monitor_config_dir_name)
+    hw_config_files = ConfigUtils.get_file_names_in_dir(hw_monitor_config_dir)
     hw_monitor_config_params = list()
     for config_file in hw_config_files:
         print('Reading parameters of hardware monitor {0}'.format(config_file))
-        component_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir_name,
+        component_config_params = ComponentMonitorConfigFileReader.load(hw_monitor_config_dir,
                                                                         config_file)
         hw_monitor_config_params.append(component_config_params)
 
-    sw_config_files = get_files(sw_monitor_config_dir_name)
+    sw_config_files = ConfigUtils.get_file_names_in_dir(sw_monitor_config_dir)
     sw_monitor_config_params = list()
     for config_file in sw_config_files:
         print('Reading parameters of software monitor {0}'.format(config_file))
-        component_config_params = ComponentMonitorConfigFileReader.load(sw_monitor_config_dir_name,
+        component_config_params = ComponentMonitorConfigFileReader.load(sw_monitor_config_dir,
                                                                         config_file)
         sw_monitor_config_params.append(component_config_params)
 
-    pyre_comm = RopodPyre(robot_id, ["MONITOR"], [])
+    pyre_comm = RopodPyre(robot_id, config_data['status_communication']['zyre_groups'], [])
     pyre_comm.start()
-    robot_store_interface = RobotStoreInterface(db_name='robot_store',
-                                                monitor_collection_name='status',
-                                                db_port=27017)
-    black_box_comm = BlackBoxPyreCommunicator('component_monitor_query_node', ['MONITOR', 'ROPOD'], black_box_id)
+
+    robot_store_interface = RobotStoreInterface(db_name=config_data['robot_store_interface']['db_name'],
+                                                monitor_collection_name=config_data['robot_store_interface']['monitor_collection_name'],
+                                                db_port=config_data['robot_store_interface']['db_port'])
+    black_box_comm = BlackBoxPyreCommunicator(config_data['black_box']['zyre_node_name'],
+                                              config_data['black_box']['zyre_groups'],
+                                              config_data['black_box']['id'])
     monitor_manager = MonitorManager(hw_monitor_config_params,
                                      sw_monitor_config_params,
                                      robot_store_interface,

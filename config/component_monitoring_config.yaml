@@ -1,0 +1,14 @@
+robot_id: ropod_001
+config_dirs:
+    hardware: component_monitoring/monitor_config/robot/hardware
+    software: component_monitoring/monitor_config/robot/software
+robot_store_interface:
+    db_name: robot_store
+    monitor_collection_name: status
+    db_port: 27017
+status_communication:
+    zyre_groups: ['MONITOR']
+black_box:
+    id: black_box_001
+    zyre_node_name: component_monitor_query_node
+    zyre_groups: ['MONITOR', 'ROPOD']
