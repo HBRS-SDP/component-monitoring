@@ -1,5 +1,5 @@
 name: pressure_functional_monitor
-description: Fault based on wheel's pressure sensor
+description: Pressure sensor operation monitor based on consistency between redundant presssure measurements
 mappings:
     - mapping:
         inputs: []

@@ -1,5 +1,5 @@
 name: battery_functional_monitor
-description: battery_functional_monitor
+description: Battery level
 mappings:
     - mapping:
         inputs: []
