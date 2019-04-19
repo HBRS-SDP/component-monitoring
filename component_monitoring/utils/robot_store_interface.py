@@ -45,13 +45,13 @@ class RobotStoreInterface(object):
 
     def store_monitor_msg(self, component_status_list):
         '''Stores the given status of all components into the database.
-        In particular, creates or updates a single "status" document of
-        the following format:
+        In particular, creates or updates a one document per component
+        with the following format:
 
         {
-            "id": "status",
+            "id": <component-name>,
             "timestamp": <current-time>,
-            "status": [list-of-component-statuses]
+            "monitor_status": <list-of-component-monitor-statuses>
         }
 
         Keyword arguments:
@@ -63,11 +63,12 @@ class RobotStoreInterface(object):
             db = client[self.db_name]
             collection = db[self.monitor_collection_name]
 
-            status_msg = dict()
-            status_msg['id'] = 'status'
-            status_msg['timestamp'] = time.time()
-            status_msg['status'] = component_status_list
-            collection.replace_one({'id': 'status'}, status_msg, upsert=True)
+            for component_status in component_status_list:
+                component_name = component_status['component_id']
+                status_msg = {'id': component_name,
+                              'timestamp': time.time(),
+                              'monitor_status': component_status['modes']}
+                collection.replace_one({'id': component_name}, status_msg, upsert=True)
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/store_monitor_msg] {0}'.format(exc))
 

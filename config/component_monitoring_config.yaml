@@ -1,7 +1,7 @@
 robot_id: ropod_001
 config_dirs:
-    hardware: component_monitoring/monitor_config/robot/hardware
-    software: component_monitoring/monitor_config/robot/software
+    hardware: component_monitoring/component_config/robot/hardware
+    software: component_monitoring/component_config/robot/software
 robot_store_interface:
     db_name: robot_store
     component_collection_name: components
