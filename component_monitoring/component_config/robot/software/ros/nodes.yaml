@@ -53,11 +53,17 @@ mappings:
         inputs: [ropod_com_mediator]
         outputs:
             - output:
-                name: ropod_com_mediator
+                name: com_mediator
                 type: bool
     - mapping:
         inputs: [osm_bridge_ros]
         outputs:
             - output:
                 name: osm_bridge_ros
+                type: bool
+    - mapping:
+        inputs: [sw_ethercat_parser]
+        outputs:
+            - output:
+                name: sw_ethercat_parser
                 type: bool
