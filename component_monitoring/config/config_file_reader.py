@@ -23,22 +23,16 @@ class ComponentMonitorConfigFileReader(object):
 
         file_path = join(root_dir, config_file_name)
         root = ComponentMonitorConfigFileReader.__read_yaml_file(file_path)
-        if 'name' in root.keys():
-            params.name = root['name']
+        if 'component_name' in root.keys():
+            params.component_name = root['component_name']
         else:
-            print('name not specified')
+            print('{0}: component_name not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
         if 'description' in root.keys():
             params.description = root['description']
         else:
             print('{0}: description not specified'.format(config_file_name))
-            return ComponentMonitorConfig()
-
-        if 'component_name' in root.keys():
-            params.component_name = root['component_name']
-        else:
-            print('{0}: component_name not specified'.format(config_file_name))
             return ComponentMonitorConfig()
 
         if 'dependencies' in root.keys():

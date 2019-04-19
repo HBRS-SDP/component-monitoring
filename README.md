@@ -22,9 +22,8 @@ We see monitors as functions that get a certain input and produce a component st
 Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. The configuration file for a given component thus specifies a list of modes and has the following format:
 
 ```
-name: string                    [required] -- Monitor name (snake case should be used if the name has multiple words)
-description: string             [required] -- Monitored component
 component_name: string          [required] -- Component name (snake case should be used if the name has multiple words)
+description: string             [required] -- Monitored component
 modes: list<string>             [required] -- A list of path names to component monitor configuration files
 dependencies: list<string>      [optional] -- A list of components on which the component depends
 ```
@@ -160,7 +159,7 @@ To add new monitors using this procedure, go to the repository's directory and r
 
 ```
 python3 component_monitoring/utils/add_monitors.py [component_config_dir] \
-[host_name] [monitor_name] [component_name] [mode_names]
+[host_name] [monitor_type] [component_name] [mode_names]
 ```
 
 where:

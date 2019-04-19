@@ -38,14 +38,11 @@ class MonitorModeConfig(object):
 
 class ComponentMonitorConfig(object):
     def __init__(self):
-        ## name of the monitor (snake case should be used if the name has multiple words)
-        self.name = ''
+        ## name of the monitored component
+        self.component_name = ''
 
         ## monitor description
         self.description = ''
-
-        ## name of the monitored component
-        self.component_name = ''
 
         ## a list of 'MonitorModeConfig' objects specifying
         ## the parameters of the monitor modes

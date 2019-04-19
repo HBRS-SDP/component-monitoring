@@ -1,5 +1,4 @@
-name: battery_monitor
-description: battery_monitor
 component_name: battery
+description: Battery
 modes: [battery/functional.yaml]
 dependencies: []

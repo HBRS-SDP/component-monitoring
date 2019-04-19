@@ -1,4 +1,3 @@
-from __future__ import print_function
 from component_monitoring.monitor_factory import MonitorFactory
 from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 

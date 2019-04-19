@@ -1,5 +1,4 @@
-name: docker_monitor
-description: docker_monitor
 component_name: docker
+description: docker_monitor
 modes: [docker/running.yaml]
 dependencies: []
