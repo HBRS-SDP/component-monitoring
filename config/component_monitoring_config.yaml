@@ -4,6 +4,7 @@ config_dirs:
     software: component_monitoring/monitor_config/robot/software
 robot_store_interface:
     db_name: robot_store
+    component_collection_name: components
     monitor_collection_name: status
     db_port: 27017
 status_communication:

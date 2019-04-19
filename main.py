@@ -88,6 +88,10 @@ if __name__ == '__main__':
                                                 monitor_collection_name=config_data['robot_store_interface']['monitor_collection_name'],
                                                 db_port=config_data['robot_store_interface']['db_port'])
 
+    # we store the component configuration in the database
+    robot_store_interface.store_component_configuration(hw_monitor_config_params,
+                                                        sw_monitor_config_params)
+
     # we initialise a manager for the monitors that will continuously
     # update the component status message
     monitor_manager = MonitorManager(hw_monitor_config_params,
