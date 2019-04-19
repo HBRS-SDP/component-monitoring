@@ -51,6 +51,11 @@ class ComponentMonitorConfig(object):
         ## a list of components on which the component depends
         self.component_dependencies = list()
 
+        ## a dictionary in which each key corresponds to one
+        ## of the dependencies in self.component_dependencies
+        ## and the values are dictionaries of monitor descriptions
+        self.dependency_monitors = dict()
+
         ## a list of recovery actions to take in case
         ## the component is not operating as expected
         self.recovery_actions = list()

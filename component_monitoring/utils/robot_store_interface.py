@@ -38,6 +38,7 @@ class RobotStoreInterface(object):
                 component_name = component_config.component_name
                 doc = {'component_name': component_name,
                        'dependencies': component_config.component_dependencies,
+                       'dependency_monitors': component_config.dependency_monitors,
                        'recovery_actions': component_config.recovery_actions}
                 collection.replace_one({'component_name': component_name}, doc, upsert=True)
         except pm.errors.OperationFailure as exc:
