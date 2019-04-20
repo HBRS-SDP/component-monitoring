@@ -8,15 +8,7 @@ mappings:
                 name: battery_percentage
                 type: float
 arguments:
-    - arg:
-        name: lowest_voltage
-        value: 5.0
-    - arg:
-        name: highest_voltage
-        value: 30.0
-    - arg:
-        name: variable_name_pattern
-        value: ros_sw_ethercat_parser_data/sensors/*/voltage_bus
-    - arg:
-        name: number_of_wheels
-        value: 4
+    lowest_voltage: 5.0
+    highest_voltage: 30.0
+    variable_name_pattern: ros_sw_ethercat_parser_data/sensors/*/voltage_bus
+    number_of_wheels: 4

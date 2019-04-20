@@ -1,24 +1,23 @@
-from __future__ import print_function
 from os.path import join
 import yaml
 from component_monitoring.config.config_params import ComponentMonitorConfig, MonitorModeConfig, \
                                                       FunctionalMappingConfig, OutputConfig
 
-'''An interface for reading component monitor configuration files
-
-@author Alex Mitrevski, Santosh Thoduka
-@contact aleksandar.mitrevski@h-brs.de, santosh.thoduka@h-brs.de
-'''
 class ComponentMonitorConfigFileReader(object):
-    '''Loads the configuration parameters of a component monitor from the given YAML file
+    '''An interface for reading component monitor configuration files
 
-    Keyword arguments:
-    @param root_dir component monitor configuration file directory
-    @param config_file_name absolute path of a config file
-
+    @author Alex Mitrevski, Santosh Thoduka
+    @contact aleksandar.mitrevski@h-brs.de, santosh.thoduka@h-brs.de
     '''
     @staticmethod
     def load(root_dir, config_file_name):
+        '''Loads the configuration parameters of a component monitor from the given YAML file
+
+        Keyword arguments:
+        @param root_dir component monitor configuration file directory
+        @param config_file_name absolute path of a config file
+
+        '''
         params = ComponentMonitorConfig()
 
         file_path = join(root_dir, config_file_name)
@@ -26,14 +25,12 @@ class ComponentMonitorConfigFileReader(object):
         if 'component_name' in root:
             params.component_name = root['component_name']
         else:
-            print('{0}: component_name not specified'.format(config_file_name))
-            return ComponentMonitorConfig()
+            raise AssertionError('{0}: component_name not specified'.format(config_file_name))
 
         if 'description' in root:
             params.description = root['description']
         else:
-            print('{0}: description not specified'.format(config_file_name))
-            return ComponentMonitorConfig()
+            raise AssertionError('{0}: description not specified'.format(config_file_name))
 
         if 'dependencies' in root:
             params.component_dependencies = root['dependencies']
@@ -50,20 +47,19 @@ class ComponentMonitorConfigFileReader(object):
                                                                                   mode_config_file)
                 params.modes.append(mode_config)
         else:
-            print('{0}: modes not specified'.format(config_file_name))
-            return ComponentMonitorConfig()
+            raise AssertionError('{0}: modes not specified'.format(config_file_name))
 
         return params
 
-    '''Loads the configuration parameters of a component monitor mode from the given YAML file
-
-    Keyword arguments:
-    @param root_dir component monitor configuration file directory
-    @param config_file_name absolute path of a config file
-
-    '''
     @staticmethod
     def __load_mode_config(root_dir, config_file_name):
+        '''Loads the configuration parameters of a component monitor mode from the given YAML file
+
+        Keyword arguments:
+        @param root_dir component monitor configuration file directory
+        @param config_file_name absolute path of a config file
+
+        '''
         params = MonitorModeConfig()
 
         file_path = join(root_dir, config_file_name)
@@ -72,14 +68,15 @@ class ComponentMonitorConfigFileReader(object):
         if 'name' in root.keys():
             params.name = root['name']
         else:
-            print('{0}: name not specified'.format(config_file_name))
-            return MonitorModeConfig()
+            raise AssertionError('{0}: name not specified'.format(config_file_name))
 
         if 'description' in root.keys():
             params.description = root['description']
         else:
-            print('{0}: description not specified'.format(config_file_name))
-            return MonitorModeConfig()
+            raise AssertionError('{0}: description not specified'.format(config_file_name))
+
+        if 'arguments' in root.keys():
+            params.arguments = root['arguments']
 
         if 'mappings' in root.keys():
             for mapping in root['mappings']:
@@ -102,15 +99,7 @@ class ComponentMonitorConfigFileReader(object):
                     fn_mapping_params.outputs.append(output_params)
                 params.mappings.append(fn_mapping_params)
         else:
-            print('{0}: mappings not specified'.format(config_file_name))
-            return MonitorModeConfig()
-
-        if 'arguments' in root.keys():
-            for argument in root['arguments']:
-                argument_node = argument['arg']
-                arg_name = argument_node['name']
-                arg_value = argument_node['value']
-                params.arguments[arg_name] = arg_value
+            raise AssertionError('{0}: mappings not specified'.format(config_file_name))
 
         return params
 
