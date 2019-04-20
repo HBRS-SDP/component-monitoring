@@ -1,11 +1,10 @@
-# ROPOD component monitoring
-
+# ROPOD Component Monitoring
 
 ## Dependencies
 * [Pyre](https://github.com/ropod-project/pyre)
 * [Pyre base communicator](https://github.com/ropod-project/ropod_common)
 
-## Run
+## How to run
 
 Run by specifying the path to a configuration file:
 
@@ -19,38 +18,58 @@ Note that the default value of `[config_file_path]` is `config/component_monitor
 
 We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.
 
-Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. The configuration file for a given component thus specifies a list of modes and has the following format:
+Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. We classify monitoring modes into different types, in particular:
+* `Existence monitors`: Validate the existence of a component (e.g. whether a hardware device is recognised by the host operating system or whether a process is running)
+* `Functional monitors`: Validate the operation of a component, namely whether the component satisfies a predefined functional specification
+
+The configuration file for a given component specifies a list of modes and has the following format:
 
 ```
-component_name: string          [required] -- Component name (snake case should be used if the name has multiple words)
+component_name: string          [required] -- Component name (snake case should be used
+                                              if the name has multiple words)
 description: string             [required] -- Monitored component
-modes: list<string>             [required] -- A list of path names to component monitor configuration files
+modes: list<string>             [required] -- A list of path names to component monitor
+                                              configuration files
 dependencies: list<string>      [optional] -- A list of components on which the component depends
+dependency_monitors: dict       [optional] -- For each dependency in "dependencies", specifies
+                                              the types and names of the monitors that are
+                                              of interest to the component
 ```
 
 In `modes`, each file defines the input-output mapping mentioned above and has the format shown below:
 
 ```
-name: string                                            [required] -- Monitor mode name (snake case should be used if the name has multiple words)
+name: string                                            [required] -- Monitor mode name (snake case
+                                                                      should be used if the name has
+                                                                      multiple words)
 description: string                                     [required] -- Monitor mode description
-mappings:                                               [required] -- Specified a list of functional input-output mappings for the monitor mode
+mappings:                                               [required] -- Specified a list of functional
+                                                                      input-output mappings for the
+                                                                      monitor mode
     - mapping:
-        inputs: list<string>                            [required] -- A list of inputs to the monitor mode (e.g. data variable names)
+        inputs: list<string>                            [required] -- A list of inputs to the monitor mode
+                                                                      (e.g. data variable names)
         outputs:                                        [required] -- A list of monitor outputs
             - output:
                 name: string                            [required] -- Output name
-                type: string                            [required] -- Output type (allowed types: bool, string, int, double)
+                type: string                            [required] -- Output type (allowed types: bool,
+                                                                      string, int, double)
                 expected: bool | string | int | double  [optional] -- Expected value of the output
-        map_outputs: bool                               [optional] -- Specifies whether the mapping outputs should be returned in a map or not (returning them in a map is useful if there may be an unknown number of output copies - e.g. if the number of sensors changes dynamically)
-arguments:                                              [optional] -- An optional list of arguments to the monitor mode (e.g. thresholds)
-    - arg:
-        name: bool | string | int | double              [required] -- Argument name
-        value: bool | string | int | double             [required] -- Argument value
+        map_outputs: bool                               [optional] -- Specifies whether the mapping outputs
+                                                                      should be returned in a map or not
+                                                                      (returning them in a map is useful if there
+                                                                      may be an unknown number of output copies -
+                                                                      e.g. if the number of sensors changes
+                                                                      dynamically)
+arguments:                                              [optional] -- An optional dictionary of arguments to the
+                                                                      monitor mode (e.g. thresholds). The arguments
+                                                                      should be specified as name-value pairs
+    name_n: value_n
 ```
 
 In this specification, the optional output parameter `map_outputs` allows controlling the overall type of the monitor output, such that if `map_outputs` is set to `true`, the outputs will be returned in a dictionary. This is useful if the number of output value copies is unknown at design time.
 
-## Monitor Output
+## Monitor output
 
 The output produced by each component monitor is a string in JSON format which has the general format shown below:
 
@@ -61,6 +80,7 @@ The output produced by each component monitor is a string in JSON format which h
     "component_sm_state": "",
     "modes":
     [
+        "monitorName": "",
         "monitorDescription": "",
         "healthStatus":
         {
@@ -123,11 +143,11 @@ mappings:
                 type: bool
 ```
 
-Laser scanner device monitor example:
+Laser scanner device monitor result example:
 ```
 {
-    "metamodel" : "ropod-component-monitor-schema.json",
-    "robotId" : "ropod_0",
+    "monitorName" : "laser_device_monitor",
+    "monitorDescription" : "Monitor verifying that laser devices are recognised by the operating system",
     "healthStatus":
     {
         "hokuyo_front_working": true,
@@ -136,11 +156,11 @@ Laser scanner device monitor example:
 }
 ```
 
-Battery example:
+Battery monitor result example:
 ```
 {
-    "metamodel" : "ropod-component-monitor-schema.json",
-    "robotId" : "ropod_0",
+    "monitorName" : "battery_functional_monitor",
+    "monitorDescription" : "Battery level monitor",
     "healthStatus":
     {
         "battery_working": true,
