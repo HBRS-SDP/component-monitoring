@@ -20,7 +20,7 @@ class ComponentMonitoringQueryInterface(RopodPyre):
         self.main_dir = main_dir
         super(ComponentMonitoringQueryInterface, self).__init__(
                 'component_monitoring_query_interface_' + self.robot_id,
-                 ['ROPOD', 'MONITOR'], 
+                 ['ROPOD'], 
                  list(),
                  verbose=True)
         self.start()
@@ -108,9 +108,11 @@ class ComponentMonitoringQueryInterface(RopodPyre):
         config['main_config'] = config_data
 
         hw_monitor_config_dir = os.path.join(self.main_dir, config_data['config_dirs']['hardware'])
-        config['hw_monitor_config_params'] = ConfigUtils.get_config_params(hw_monitor_config_dir)
+        hw_monitor_config_params = ConfigUtils.get_config_params(hw_monitor_config_dir)
+        config['hw_config'] = [i.get_dict() for i in hw_monitor_config_params]
         sw_monitor_config_dir = os.path.join(self.main_dir, config_data['config_dirs']['software'])
-        config['sw_monitor_config_params'] = ConfigUtils.get_config_params(sw_monitor_config_dir)
+        sw_monitor_config_params = ConfigUtils.get_config_params(sw_monitor_config_dir)
+        config['sw_config'] = [i.get_dict() for i in sw_monitor_config_params]
 
         return config
 

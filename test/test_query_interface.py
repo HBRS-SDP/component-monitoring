@@ -13,7 +13,7 @@ from component_monitoring.utils.component_monitoring_query_interface import Comp
 
 class QueryTest(RopodPyre):
     def __init__(self):
-        super(QueryTest, self).__init__('comp_mon_query_test', ['ROPOD', 'MONITOR'], [], verbose=True, acknowledge=True)
+        super(QueryTest, self).__init__('comp_mon_query_test', ['ROPOD'], [], verbose=False, acknowledge=True)
         self.response = None
         self.start()
 
