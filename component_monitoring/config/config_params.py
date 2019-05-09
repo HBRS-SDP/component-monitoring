@@ -9,6 +9,17 @@ class OutputConfig(object):
         ## expected output value
         self.expected_value = ''
 
+    def __repr__(self):
+        obj = self.get_dict()
+        return str(obj)
+
+    def get_dict(self):
+        obj = dict()
+        obj['name'] = self.name
+        obj['obtained_value_type'] = self.obtained_value_type
+        obj['expected_value'] = self.expected_value
+        return obj
+
 class FunctionalMappingConfig(object):
     def __init__(self):
         ## a list of input parameters for the monitor mode
@@ -20,6 +31,17 @@ class FunctionalMappingConfig(object):
 
         ## specifies whether the outputs are returned in a dictionary
         self.map_outputs = False
+
+    def __repr__(self):
+        obj = self.get_dict()
+        return str(obj)
+
+    def get_dict(self):
+        obj = dict()
+        obj['inputs'] = self.inputs
+        obj['outputs'] = [i.get_dict() for i in self.outputs]
+        obj['map_outputs'] = self.map_outputs
+        return obj
 
 class MonitorModeConfig(object):
     def __init__(self):
@@ -35,6 +57,18 @@ class MonitorModeConfig(object):
 
         ## a dictionary of monitor mode arguments
         self.arguments = dict()
+
+    def __repr__(self):
+        obj = self.get_dict()
+        return str(obj)
+
+    def get_dict(self):
+        obj = dict()
+        obj['name'] = self.name
+        obj['description'] = self.description
+        obj['mappings'] = [i.get_dict() for i in self.mappings]
+        obj['arguments'] = self.arguments
+        return obj
 
 class ComponentMonitorConfig(object):
     def __init__(self):
@@ -59,3 +93,18 @@ class ComponentMonitorConfig(object):
         ## a list of recovery actions to take in case
         ## the component is not operating as expected
         self.recovery_actions = list()
+
+    def get_dict(self):
+        obj = dict()
+        obj['component_name'] = self.component_name
+        obj['description'] = self.description
+        obj['modes'] = [i.get_dict() for i in self.modes]
+        obj['component_dependencies'] = self.component_dependencies
+        obj['dependency_monitors'] = self.dependency_monitors
+        obj['recovery_actions'] = self.recovery_actions
+        return obj
+
+    def __repr__(self):
+        obj = self.get_dict()
+        return str(obj)
+
