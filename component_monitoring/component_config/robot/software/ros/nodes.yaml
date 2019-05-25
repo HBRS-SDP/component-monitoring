@@ -11,7 +11,7 @@ mappings:
         inputs: [ropod_wm_mediator]
         outputs:
             - output:
-                name: wm_mediator
+                name: world_model_mediator
                 type: bool
     - mapping:
         inputs: [joy]
@@ -78,4 +78,10 @@ mappings:
         outputs:
             - output:
                 name: floor_detection
+                type: bool
+    - mapping:
+        inputs: [map_switcher]
+        outputs:
+            - output:
+                name: map_switcher
                 type: bool
