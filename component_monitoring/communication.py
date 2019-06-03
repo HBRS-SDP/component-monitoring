@@ -52,7 +52,7 @@ class BlackBoxPyreCommunicator(RopodPyre):
         if message_type == 'DATA-QUERY' or \
            message_type == 'LATEST-DATA-QUERY':
             for session_id in self.__request_data:
-                if dict_msg['payload']['receiverId'] == session_id:
+                if dict_msg['payload']['senderId'] == session_id:
                     self.__request_data[session_id] = dict_msg
 
     def send_query(self, start_time, end_time, variables):
