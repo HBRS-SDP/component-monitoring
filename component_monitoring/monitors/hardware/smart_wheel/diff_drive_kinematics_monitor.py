@@ -61,12 +61,15 @@ class DiffDriveKinematicsMonitor(MonitorBase):
             wheel_index = int(v[wheel_num_pos])
             if v.endswith('velocity_1'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     encoder1_vel[wheel_index].append(data_instance[1])
             elif v.endswith('velocity_2'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     encoder2_vel[wheel_index].append(data_instance[1])
             elif v.endswith('velocity_pivot'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     pivot_encoder_vel[wheel_index].append(data_instance[1])
 
         result = {}
