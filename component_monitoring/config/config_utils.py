@@ -29,7 +29,7 @@ class ConfigUtils(object):
         '''
         config_data = {}
         with open(config_file_path, 'r') as config_file:
-            config_data = yaml.load(config_file)
+            config_data = yaml.safe_load(config_file)
         return config_data
 
     @staticmethod

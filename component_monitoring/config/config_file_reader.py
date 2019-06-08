@@ -106,6 +106,6 @@ class ComponentMonitorConfigFileReader(object):
     @staticmethod
     def __read_yaml_file(file_name):
         file_handle = open(file_name, 'r')
-        data = yaml.load(file_handle)
+        data = yaml.safe_load(file_handle)
         file_handle.close()
         return data

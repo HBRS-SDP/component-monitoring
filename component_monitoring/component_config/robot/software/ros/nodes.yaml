@@ -2,7 +2,7 @@ name: ros_node_monitor
 description: Active ROS nodes
 mappings:
     - mapping:
-        inputs: [ropod_low_level_control]
+        inputs: [ropod/ropod_low_level_control]
         outputs:
             - output:
                 name: bringup
