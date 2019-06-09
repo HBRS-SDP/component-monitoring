@@ -1,0 +1,9 @@
+component_name: door_status_detector
+description: Door status detector
+modes: []
+dependencies: [laser, roscore]
+dependency_monitors:
+    heartbeat:
+        laser: laser/laser_device_monitor
+    functional:
+        roscore: ros/ros_master_monitor

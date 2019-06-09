@@ -1,11 +1,11 @@
 component_name: elevator_navigation
 description: Elevator navigation
 modes: []
-dependencies: [roscore, world_model_mediator, door_status_detection, floor_detection, map_switcher]
+dependencies: [roscore, world_model_mediator, door_status_detector, floor_detector, map_switcher]
 dependency_monitors:
     functional:
         roscore: ros/ros_master_monitor
         world_model_mediator: ros/ros_node_monitor
-        door_status_detection: ros/ros_node_monitor
-        floor_detection: ros/ros_node_monitor
+        door_status_detector: ros/ros_node_monitor
+        floor_detector: ros/ros_node_monitor
         map_switcher: ros/ros_node_monitor

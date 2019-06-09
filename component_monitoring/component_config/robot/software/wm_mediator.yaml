@@ -1,0 +1,9 @@
+component_name: wm_mediator
+description: World model mediator
+modes: []
+dependencies: [roscore, route_planner, osm_bridge_ros_wrapper]
+dependency_monitors:
+    functional:
+        roscore: ros/ros_master_monitor
+        route_planner: ros/ros_node_monitor
+        osm_bridge_ros_wrapper: ros/ros_node_monitor
