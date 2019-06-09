@@ -23,6 +23,9 @@ class ComponentNetwork(object):
         self.config_data = ConfigUtils.read_config(config_file_path)
         self.network = self.__create_network()
 
+    def is_acyclic(self):
+        return nx.is_directed_acyclic_graph(self.network)
+
     def __create_network(self) -> nx.DiGraph:
         '''Creates a directed networkx graph in which the nodes represent components
         and the edges represent dependencies between the components (an arrow from
