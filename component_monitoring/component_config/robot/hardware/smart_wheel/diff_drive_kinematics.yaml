@@ -11,15 +11,7 @@ mappings:
                 name: residual
                 type: double
 arguments:
-    - arg:
-        name: number_of_wheels
-        value: 4
-    - arg:
-        name: pivot_velocity_threshold
-        value: 1.0
-    - arg:
-        name: wheel_diameter
-        value: 0.073
-    - arg:
-        name: inter_wheel_distance
-        value: 0.0893
+    number_of_wheels: 4
+    pivot_velocity_threshold: 1.0
+    wheel_diameter: 0.073
+    inter_wheel_distance: 0.0893

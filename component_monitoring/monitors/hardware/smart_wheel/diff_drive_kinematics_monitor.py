@@ -48,26 +48,28 @@ class DiffDriveKinematicsMonitor(MonitorBase):
         return result, overall_result
 
     def __process_data(self, var_names, data):
-        if not data:
+        if not data or all(not x for x in data):
             return {}, False
 
         encoder1_vel = [[] for i in range(self.num_wheels)]
         encoder2_vel = [[] for i in range(self.num_wheels)]
         pivot_encoder_vel = [[] for i in range(self.num_wheels)]
 
-        times = []
         wheel_num_pos = self.variable_names[0].find('*')
         for index, v in enumerate(var_names):
             data_list = data[index]
             wheel_index = int(v[wheel_num_pos])
             if v.endswith('velocity_1'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     encoder1_vel[wheel_index].append(data_instance[1])
             elif v.endswith('velocity_2'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     encoder2_vel[wheel_index].append(data_instance[1])
             elif v.endswith('velocity_pivot'):
                 for data_instance in data_list:
+                    data_instance = data_instance if data_instance else [0.0, 0.0]
                     pivot_encoder_vel[wheel_index].append(data_instance[1])
 
         result = {}
@@ -75,8 +77,8 @@ class DiffDriveKinematicsMonitor(MonitorBase):
         for i in range(self.num_wheels):
             wheel = 'wheel_{0}'.format(i+1)
             diff_kinematics_consistent, residual = self.__is_diff_kinematics_consistent(encoder1_vel[i],
-                                                                              encoder2_vel[i],
-                                                                              pivot_encoder_vel[i])
+                                                                                        encoder2_vel[i],
+                                                                                        pivot_encoder_vel[i])
 
             overall_result = overall_result and diff_kinematics_consistent
             result[wheel] = {}

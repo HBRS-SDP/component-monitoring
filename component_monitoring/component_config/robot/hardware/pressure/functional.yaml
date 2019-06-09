@@ -1,5 +1,5 @@
 name: pressure_functional_monitor
-description: Fault based on wheel's pressure sensor
+description: Pressure sensor operation monitor based on consistency between redundant presssure measurements
 mappings:
     - mapping:
         inputs: []
@@ -17,15 +17,7 @@ mappings:
                 name: pressure_sensor_4
                 type: bool
 arguments:
-    - arg:
-        name: median_window_size
-        value: 2
-    - arg:
-        name: fault_threshold
-        value: 10.0
-    - arg:
-        name: number_of_wheels
-        value: 4
-    - arg:
-        name: variable_name_pattern
-        value: ros_sw_ethercat_parser_data/sensors/*/pressure
+    median_window_size: 2
+    fault_threshold: 10.0
+    number_of_wheels: 4
+    variable_name_pattern: ros_sw_ethercat_parser_data/sensors/*/pressure

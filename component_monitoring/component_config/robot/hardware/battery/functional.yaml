@@ -1,0 +1,14 @@
+name: battery_functional_monitor
+description: Battery level
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: battery_percentage
+                type: float
+arguments:
+    lowest_voltage: 5.0
+    highest_voltage: 30.0
+    variable_name_pattern: ros_sw_ethercat_parser_data/sensors/*/voltage_bus
+    number_of_wheels: 4

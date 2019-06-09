@@ -1,5 +1,4 @@
-name: e_stop_monitor
-description: e_stop_monitor
 component_name: e_stop
+description: Emergency stop
 modes: [e_stop/functional.yaml]
 dependencies: []

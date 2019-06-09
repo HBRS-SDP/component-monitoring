@@ -1,5 +1,5 @@
 name: docker_container_monitor
-description: Active docker containers
+description: Active Docker containers
 mappings:
     - mapping:
         inputs: ["overpass:latest"]

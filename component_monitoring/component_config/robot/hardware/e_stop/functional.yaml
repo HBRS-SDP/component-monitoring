@@ -1,0 +1,12 @@
+name: e_stop_functional_monitor
+description: Emergency stop status
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: e_stop_pressed
+                type: bool
+arguments:
+    variable_name_pattern: ros_sw_ethercat_parser_data/sensors/*/status1
+    number_of_wheels: 4

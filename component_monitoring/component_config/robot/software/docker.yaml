@@ -1,0 +1,4 @@
+component_name: docker
+description: Docker
+modes: [docker/active_containers.yaml]
+dependencies: []
