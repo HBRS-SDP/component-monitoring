@@ -1,10 +1,11 @@
 component_name: task_executor
 description: Task executor
 modes: []
-dependencies: [roscore, route_navigation, com_mediator, task_planner]
+dependencies: [roscore, route_navigation, com_mediator, task_planner, cart_collector]
 dependency_monitors:
     functional:
         roscore: ros/ros_master_monitor
         route_navigation: ros/ros_node_monitor
         com_mediator: ros/ros_node_monitor
         task_planner: none
+        cart_collector: none
