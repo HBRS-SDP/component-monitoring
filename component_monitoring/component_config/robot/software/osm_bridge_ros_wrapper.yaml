@@ -1,0 +1,8 @@
+component_name: osm_bridge_ros_wrapper
+description: OSM bridge ROS wrapper
+modes: []
+dependencies: [roscore, overpass]
+dependency_monitors:
+    functional:
+        roscore: ros/ros_master_monitor
+        overpass: docker/docker_container_monitor
