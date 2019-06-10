@@ -31,6 +31,9 @@ class ComponentNetwork(object):
         and the edges represent dependencies between the components (an arrow from
         component A to component B signifies that A depends on B).
 
+        The resulting graph only contains nodes of degree > 0, i.e. all nodes that
+        are not connected to any other node in the graph are removed from the graph.
+
         The resulting graph combines both hardware and software components.
         '''
         # we get a network of the hardware components
@@ -45,8 +48,15 @@ class ComponentNetwork(object):
                                                              sw_monitor_config_dir))
         sw_component_network = self.__get_component_graph(sw_component_config)
 
-        # the two networks are finally composed
+        # the two networks are composed
         network = nx.compose(hw_component_network, sw_component_network)
+
+        # we remove all nodes that are not connected to any other nodes in the graph
+        nodes_to_remove = [node for node in network.nodes
+                                if network.degree(node) == 0]
+        for node in nodes_to_remove:
+            network.remove_node(node)
+
         return network
 
     def __get_monitor_config(self, config_dir: str) -> Sequence[ComponentMonitorConfig]:
