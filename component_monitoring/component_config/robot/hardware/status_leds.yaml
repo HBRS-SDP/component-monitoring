@@ -1,0 +1,4 @@
+component_name: status_leds
+description: Robot status LEDs
+modes: []
+dependencies: [smart_wheel, battery, e_stop]

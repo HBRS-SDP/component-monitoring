@@ -1,0 +1,4 @@
+component_name: ethercat
+description: EtherCAT
+modes: []
+dependencies: []
