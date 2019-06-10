@@ -1,4 +1,4 @@
 component_name: smart_wheel
 description: Smart Wheel
 modes: [smart_wheel/diff_drive_kinematics.yaml]
-dependencies: []
+dependencies: [ethercat]

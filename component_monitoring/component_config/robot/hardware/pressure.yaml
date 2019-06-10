@@ -1,4 +1,4 @@
 component_name: pressure
 description: Pressure monitor
 modes: [pressure/functional.yaml]
-dependencies: []
+dependencies: [smart_wheel]
