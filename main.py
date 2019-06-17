@@ -79,7 +79,7 @@ if __name__ == '__main__':
                                               config_data['black_box']['id'])
 
     # we create a status communicator
-    pyre_comm = RopodPyre(robot_id, config_data['status_communication']['zyre_groups'], [])
+    pyre_comm = RopodPyre('component_monitoring_'+robot_id, config_data['status_communication']['zyre_groups'], [])
     pyre_comm.start()
 
     # we create an interface to the robot store interface for saving the status
