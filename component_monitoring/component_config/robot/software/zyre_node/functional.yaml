@@ -8,7 +8,7 @@ mappings:
                 name: component_monitoring
                 type: bool
     - mapping:
-        inputs: [component_monitoring_query_interface_ropod_ROPODID]
+        inputs: [component_monitoring_query_node_ropod_ROPODID]
         outputs:
             - output:
                 name: component_monitoring_query_interface

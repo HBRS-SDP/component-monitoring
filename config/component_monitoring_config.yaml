@@ -11,5 +11,5 @@ status_communication:
     zyre_groups: ['MONITOR']
 black_box:
     id: black_box_001
-    zyre_node_name: component_monitor_query_node
+    zyre_node_name: component_monitoring_query_node_ropod_001
     zyre_groups: ['MONITOR', 'ROPOD']
