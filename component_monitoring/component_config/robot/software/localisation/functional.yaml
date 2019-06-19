@@ -1,0 +1,21 @@
+name: localisation_functional_monitor
+description: localisation_functional_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: variance_x
+                type: float
+            - output:
+                name: variance_y
+                type: float
+            - output:
+                name: variance_theta
+                type: float
+            - output:
+                name: localised
+                type: bool
+arguments:
+    avg_variance_threshold: 0.01
+    bb_variable_name: ros_amcl_pose/pose/covariance

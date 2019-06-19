@@ -1,0 +1,5 @@
+component_name: localisation
+monitor_name: localisation_monitor
+description: localisation_monitor
+modes: [localisation/functional.yaml]
+dependencies: []
