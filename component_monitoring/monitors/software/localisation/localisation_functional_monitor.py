@@ -8,7 +8,7 @@ class LocalisationFunctionalMonitor(MonitorBase):
         for output in config_params.mappings[0].outputs:
             self.output_names.append(output.name)
 
-        self.avg_variance_threshold = config_params.arguments.get('avg_variance_threshold', 80.0)
+        self.avg_variance_threshold = config_params.arguments.get('avg_variance_threshold', 0.01)
         self.bb_variable_name = config_params.arguments.get('bb_variable_name',
                                                                  'ros_amcl_pose/pose/covariance')
 
