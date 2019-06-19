@@ -10,7 +10,7 @@ class LocalisationFunctionalMonitor(MonitorBase):
 
         self.avg_variance_threshold = config_params.arguments.get('avg_variance_threshold', 0.01)
         self.bb_variable_name = config_params.arguments.get('bb_variable_name',
-                                                                 'ros_amcl_pose/pose/covariance')
+                                                            'ros_amcl_pose/pose/covariance')
 
     def get_status(self):
         status_msg = self.get_status_message_template()
