@@ -71,8 +71,8 @@ class MonitorManager(object):
         """
         for component_name, monitors in self.hw_monitors.items():
             for monitor in monitors:
-                monitor.stop()
+                monitor.stop_monitor()
 
         for component_name, monitors in self.sw_monitors.items():
             for monitor in monitors:
-                monitor.stop()
+                monitor.stop_monitor()
