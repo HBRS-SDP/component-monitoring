@@ -18,7 +18,9 @@ class BlackBoxPyreCommunicator(RopodPyre):
         groups -- groups that the node should join
         data_timeout -- timeout (in seconds) for data queries and messages (default 10.)
         '''
-        super(BlackBoxPyreCommunicator, self).__init__(node_name, groups, [])
+        super(BlackBoxPyreCommunicator, self).__init__({'node_name': node_name,
+                                                        'groups': groups,
+                                                        'message_types': []})
 
         # timeout (in seconds) for data queries and messages
         self.__data_timeout = data_timeout

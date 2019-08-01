@@ -18,10 +18,10 @@ class ComponentMonitoringQueryInterface(RopodPyre):
         self.robot_id = config_data['robot_id']
         self.config_file = config_file
         self.main_dir = main_dir
-        super(ComponentMonitoringQueryInterface, self).__init__(
-                'component_monitoring_query_interface_' + self.robot_id,
-                 ['ROPOD'], 
-                 list(),
+        super(ComponentMonitoringQueryInterface, self).__init__({
+                'node_name': 'component_monitoring_query_interface_' + self.robot_id,
+                'groups': ['ROPOD'], 
+                'message_types': list()},
                  verbose=True)
         self.start()
 

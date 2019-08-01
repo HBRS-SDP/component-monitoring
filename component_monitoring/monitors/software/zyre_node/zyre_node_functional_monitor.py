@@ -5,7 +5,9 @@ from ropod.pyre_communicator.base_class import RopodPyre
 class ZyreNodeFunctionalMonitor(MonitorBase, RopodPyre):
     def __init__(self, config_params, black_box_comm):
         MonitorBase.__init__(self, config_params, black_box_comm)
-        RopodPyre.__init__(self, 'zyre_node_functional_monitor', ['ROPOD', 'MONITOR'], [])
+        RopodPyre.__init__(self, {'node_name': 'zyre_node_functional_monitor',
+                                  'groups': ['ROPOD', 'MONITOR'],
+                                  'message_types': []})
         robot_id = os.environ.get('ROPOD_ID', 'ropod_001')
         try:
             self.ropod_id = robot_id.split('_')[1]
