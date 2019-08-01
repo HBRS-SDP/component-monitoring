@@ -1,0 +1,7 @@
+component_name: cart_plane_detector
+description: Cart plane detector
+modes: []
+dependencies: [roscore]
+dependency_monitors:
+    functional:
+        roscore: ros/ros_master_monitor
