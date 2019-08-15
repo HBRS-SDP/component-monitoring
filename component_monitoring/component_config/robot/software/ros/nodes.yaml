@@ -38,10 +38,34 @@ mappings:
                 name: route_planner_node
                 type: bool
     - mapping:
+        inputs: [maneuver_navigation]
+        outputs:
+            - output:
+                name: maneuver_navigation
+                type: bool
+    - mapping:
         inputs: [route_navigation]
         outputs:
             - output:
                 name: route_navigation
+                type: bool
+    - mapping:
+        inputs: [elevator_navigation]
+        outputs:
+            - output:
+                name: elevator_navigation
+                type: bool
+    - mapping:
+        inputs: [cart_collector]
+        outputs:
+            - output:
+                name: cart_collector
+                type: bool
+    - mapping:
+        inputs: [cart_plane_detector]
+        outputs:
+            - output:
+                name: cart_plane_detector
                 type: bool
     - mapping:
         inputs: [initial_pose_publisher]
@@ -68,10 +92,10 @@ mappings:
                 name: sw_ethercat_parser
                 type: bool
     - mapping:
-        inputs: [door_status_detection]
+        inputs: [door_status_detector]
         outputs:
             - output:
-                name: door_status_detection
+                name: door_status_detector
                 type: bool
     - mapping:
         inputs: [floor_detection]
