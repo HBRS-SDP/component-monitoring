@@ -1,9 +1,10 @@
 component_name: floor_detector
 description: Floor detector
 modes: []
-dependencies: [smart_wheel, pressure]
+dependencies: [roscore, smart_wheel, pressure]
 dependency_monitors:
     heartbeat:
+        roscore: ros/ros_master_monitor
         smart_wheel: ros/ros_node_monitor
     functional:
         pressure: pressure/pressure_functional_monitor
