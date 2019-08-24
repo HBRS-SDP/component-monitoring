@@ -87,7 +87,6 @@ class RecoveryManager(object):
         component_type = recovery_params.component_type
         if component_type == 'systemd':
             try:
-                print('Recovering {0}'.format(recovery_params.executable_to_restart))
                 subprocess.check_output(['sudo', self.systemd_script_path,
                                          recovery_params.executable_to_restart])
             except subprocess.CalledProcessError as exc:
