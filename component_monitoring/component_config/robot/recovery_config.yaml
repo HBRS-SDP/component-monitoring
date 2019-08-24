@@ -3,7 +3,6 @@ roscore:
     monitored_parameter: status
     restart: roscore.service
     component_type: systemd
-    recover_children: True
 smart_wheel:
     monitor: ros/ros_node_monitor
     monitored_parameter: sw_ethercat_parser
@@ -44,7 +43,6 @@ route_navigation:
     monitored_parameter: route_navigation
     restart: ropod_route_navigation.service
     component_type: systemd
-    recover_children: True
 maneuver_navigation:
     monitor: ros/ros_node_monitor
     monitored_parameter: maneuver_navigation
