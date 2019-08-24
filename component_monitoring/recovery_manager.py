@@ -77,7 +77,7 @@ class RecoveryManager(object):
             recovered_components = []
 
             # we sleep for a while before checking the statuses again
-            time.sleep(0.5)
+            time.sleep(1.)
             print()
 
     def perform_recovery(self, component_name: str,
