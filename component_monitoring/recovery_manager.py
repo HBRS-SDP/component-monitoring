@@ -11,7 +11,8 @@ import pymongo as pm
 from component_monitoring.config.config_params import ComponentRecoveryConfig
 
 class RecoveryManager(object):
-    def __init__(self, recovery_config_file: str, component_network: nx.DiGraph,
+    def __init__(self, recovery_config: Dict[str, str],
+                 component_network: nx.DiGraph,
                  robot_store_db_name='robot_store',
                  robot_store_db_port=27017,
                  robot_store_status_collection='status'):
@@ -20,8 +21,12 @@ class RecoveryManager(object):
 
         self.component_network = component_network
 
-        config_abs_path = os.path.join(os.environ['COMPONENT_MONITORING_ROOT'], recovery_config_file)
+        config_abs_path = os.path.join(os.environ['COMPONENT_MONITORING_ROOT'],
+                                       recovery_config['config_path'])
         self.config_params_map = self.__read_config_file(config_abs_path)
+
+        self.systemd_script_path = os.path.join(os.environ['COMPONENT_MONITORING_ROOT'],
+                                                recovery_config['systemd_script_path'])
 
         self.db_name = robot_store_db_name
         self.db_port = robot_store_db_port
@@ -64,6 +69,7 @@ class RecoveryManager(object):
                                                                                                component))
                     continue
 
+                print(monitor_status)
                 if not monitor_status[recovery_params.monitored_param] and not component in recovered_components:
                     recovered_components.extend(self.perform_recovery(component, recovery_params, []))
 
@@ -80,10 +86,12 @@ class RecoveryManager(object):
         print('[perform_recovery] Recovering {0}'.format(component_name))
         component_type = recovery_params.component_type
         if component_type == 'systemd':
-            cmd_output = subprocess.check_output('systemctl', 'restart',
-                                                 recovery_params.executable_to_restart)
-            # TODO: process the command output
-
+            try:
+                print('Recovering {0}'.format(recovery_params.executable_to_restart))
+                subprocess.check_output(['sudo', self.systemd_script_path,
+                                         recovery_params.executable_to_restart])
+            except subprocess.CalledProcessError as exc:
+                print('[perform_recovery] ERROR: {0}'.format(str(exc)))
             recovered_components.append(component_name)
         else:
             print('[perform_recovery] Unknown component type {0} for component {1}'.format(component_type,

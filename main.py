@@ -104,8 +104,8 @@ if __name__ == '__main__':
 
     component_network = ComponentNetwork(config_file_path)
 
-    recovery_config_file = config_data['recovery_config']
-    recovery_manager = RecoveryManager(recovery_config_file, component_network)
+    recovery_config = config_data['recovery_config']
+    recovery_manager = RecoveryManager(recovery_config, component_network)
 
     # we initialise an overall status message that will continuously
     # be updated with the component statuses

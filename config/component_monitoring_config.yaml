@@ -2,7 +2,9 @@ robot_id: ropod_001
 config_dirs:
     hardware: component_monitoring/component_config/robot/hardware
     software: component_monitoring/component_config/robot/software
-recovery_config: component_monitoring/component_config/robot/recovery_config.yaml
+recovery_config:
+    config_path: component_monitoring/component_config/robot/recovery_config.yaml
+    systemd_script_path: config/restart_systemd_service.sh
 robot_store_interface:
     db_name: robot_store
     component_collection_name: components

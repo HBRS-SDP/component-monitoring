@@ -1,0 +1,1 @@
+systemctl restart $1
