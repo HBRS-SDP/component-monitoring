@@ -4,7 +4,7 @@ config_dirs:
     software: component_monitoring/component_config/robot/software
 recovery_config:
     config_path: component_monitoring/component_config/robot/recovery_config.yaml
-    systemd_script_path: config/restart_systemd_service.sh
+    systemd_script_path: config/manage_systemd_service.sh
 robot_store_interface:
     db_name: robot_store
     component_collection_name: components

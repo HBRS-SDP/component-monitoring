@@ -105,13 +105,13 @@ if __name__ == '__main__':
     component_network = ComponentNetwork(config_file_path)
 
     recovery_config = config_data['recovery_config']
-    recovery_manager = RecoveryManager(recovery_config, component_network)
+    recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
 
     # we initialise an overall status message that will continuously
     # be updated with the component statuses
     overall_status_msg = generate_robot_status_msg(robot_id)
     try:
-        recovery_manager.start()
+        recovery_manager.start_manager()
         while True:
             component_status_msg = monitor_manager.monitor_components()
             robot_store_interface.store_monitor_msg(component_status_msg)

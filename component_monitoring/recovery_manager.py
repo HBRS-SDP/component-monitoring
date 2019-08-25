@@ -2,22 +2,32 @@ from typing import Dict
 
 import os
 import time
+import uuid
 import subprocess
 import threading
 import yaml
 import networkx as nx
 import pymongo as pm
 
+from ropod.pyre_communicator.base_class import RopodPyre
+
 from component_monitoring.config.config_params import ComponentRecoveryConfig
 
-class RecoveryManager(object):
-    def __init__(self, recovery_config: Dict[str, str],
+class RecoveryManager(RopodPyre):
+    def __init__(self, robot_id: str,
+                 recovery_config: Dict[str, str],
                  component_network: nx.DiGraph,
                  robot_store_db_name='robot_store',
                  robot_store_db_port=27017,
                  robot_store_status_collection='status'):
         if not 'COMPONENT_MONITORING_ROOT' in os.environ:
             raise AssertionError('The COMPONENT_MONITORING_ROOT environment variable has to be set to the path of the component monitoring application')
+
+        self.robot_id = robot_id
+        super(RecoveryManager, self).__init__({'node_name': self.robot_id + '_recovery_manager',
+                                               'groups': ['ROPOD'],
+                                               'message_types': []},
+                                               verbose=True)
 
         self.component_network = component_network
 
@@ -35,15 +45,73 @@ class RecoveryManager(object):
         self.running = False
         self.monitoring_thread = None
 
-    def start(self):
+    def start_manager(self):
+        # we start the automatic recovery thread
         self.running = True
         self.monitoring_thread = threading.Thread(target=self.monitor_components)
         self.monitoring_thread.start()
 
+        # we start the recovery zyre node
+        self.start()
+
     def stop(self):
+        # we stop the automatic recovery thread
         self.running = False
         self.monitoring_thread.join()
         self.monitoring_thread = None
+
+        # we stop the recovery zyre node
+        self.shutdown()
+
+    def zyre_event_cb(self, zyre_msg: str):
+        '''Listens to "SHOUT" and "WHISPER" messages and returns a response
+        if the incoming message is a recovery request for this robot.
+        '''
+        if zyre_msg.msg_type in ("SHOUT", "WHISPER"):
+            response_msg = self.receive_msg_cb(zyre_msg.msg_content)
+            if response_msg:
+                self.whisper(response_msg, zyre_msg.peer_uuid)
+
+    def receive_msg_cb(self, msg: Dict):
+        '''Processes recovery requests and returns a JSON response message.
+        Only listens to "COMPONENT-MANAGEMENT-REQUEST" messages for the robot
+        with id self.robot_id; ignores all other messages (returns None in such cases).
+
+        Keyword arguments:
+        @param msg: Dict -- a message in JSON format
+
+        '''
+        dict_msg = self.convert_zyre_msg_to_dict(msg)
+
+        # we check the message for correctness
+        if dict_msg is None:
+            return
+        if 'header' not in dict_msg or 'payload' not in dict_msg or 'type' not in \
+                dict_msg['header'] or 'robotId' not in dict_msg['header'] or \
+                'senderId' not in dict_msg['payload']:
+            return
+
+        message_type = dict_msg['header']['type']
+        if message_type == 'COMPONENT-MANAGEMENT-REQUEST':
+            robot_id = dict_msg['header']['robotId']
+            if robot_id != self.robot_id:
+                return
+
+            components = dict_msg['payload']['components']
+            action_type = dict_msg['payload']['action']
+
+            successfully_managed_components = []
+            print('[zyre_msg_cb] Executing action {0} for components {1}'.format(action_type,
+                                                                                 components))
+            for component in components:
+                action_successful = self.__manage_service(action_type, component)
+                # if action_successful:
+                successfully_managed_components.append(component)
+            response_msg = self.__get_response_msg_skeleton()
+            response_msg['payload']['receiverId'] = dict_msg['payload']['senderId']
+            response_msg['payload']['components'] = successfully_managed_components
+            return response_msg
+        return None
 
     def monitor_components(self) -> None:
         recovered_components = []
@@ -69,7 +137,6 @@ class RecoveryManager(object):
                                                                                                component))
                     continue
 
-                print(monitor_status)
                 if not monitor_status[recovery_params.monitored_param] and not component in recovered_components:
                     recovered_components.extend(self.perform_recovery(component, recovery_params, []))
 
@@ -86,12 +153,9 @@ class RecoveryManager(object):
         print('[perform_recovery] Recovering {0}'.format(component_name))
         component_type = recovery_params.component_type
         if component_type == 'systemd':
-            try:
-                subprocess.check_output(['sudo', self.systemd_script_path,
-                                         recovery_params.executable_to_restart])
-            except subprocess.CalledProcessError as exc:
-                print('[perform_recovery] ERROR: {0}'.format(str(exc)))
-            recovered_components.append(component_name)
+            component_recovered = self.__manage_service('restart', recovery_params.executable_to_restart)
+            if component_recovered:
+                recovered_components.append(component_name)
         else:
             print('[perform_recovery] Unknown component type {0} for component {1}'.format(component_type,
                                                                                            component_name))
@@ -131,6 +195,15 @@ class RecoveryManager(object):
             config_param_map[component] = component_recovery_config
         return config_param_map
 
+    def __manage_service(self, action: str, executable_to_recover: str) -> bool:
+        try:
+            subprocess.check_output(['sudo', self.systemd_script_path,
+                                     action, executable_to_recover])
+            return True
+        except subprocess.CalledProcessError as exc:
+            print('[perform_recovery] ERROR: {0}'.format(str(exc)))
+            return False
+
     def __get_collection(self, collection_name) -> pm.collection.Collection:
         '''Returns a MongoDB collection with the given name
         from the "self.db" database.
@@ -144,6 +217,33 @@ class RecoveryManager(object):
         collection = db[collection_name]
         return collection
 
+    def __get_response_msg_skeleton(self):
+        '''Returns a dictionary of the following format:
+        {
+            "header":
+            {
+                "metamodel": "ropod-msg-schema.json",
+                "type": "COMPONENT-MANAGEMENT-RESPONSE",
+                "msgId": message-uuid,
+                "timestamp": current-time
+            },
+            "payload":
+            {
+                "receiverId": ""
+            }
+        }
+
+        '''
+        response_msg = dict()
+        response_msg['header'] = dict()
+        response_msg['header']['metamodel'] = 'ropod-msg-schema.json'
+        response_msg['header']['type'] = 'COMPONENT-MANAGEMENT-RESPONSE'
+        response_msg['header']['msgId'] = str(uuid.uuid4())
+        response_msg['header']['timestamp'] = time.time()
+        response_msg['payload'] = dict()
+        response_msg['payload']['receiverId'] = ''
+        return response_msg
+
 if __name__ == '__main__':
     from component_monitoring.config.config_utils import ConfigUtils
     from component_monitoring.utils.component_network import ComponentNetwork
@@ -156,7 +256,7 @@ if __name__ == '__main__':
                                        component_network.network)
 
     try:
-        recovery_manager.start()
+        recovery_manager.start_manager()
         while True:
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
