@@ -1,0 +1,70 @@
+roscore:
+    monitor: ros/ros_master_monitor
+    monitored_parameter: status
+    restart: roscore.service
+    component_type: systemd
+smart_wheel:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: sw_ethercat_parser
+    restart: smart_wheel_ethercat_parser.service
+    component_type: systemd
+door_status_detector:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: door_status_detector
+    restart: door_status_detection.service
+    component_type: systemd
+floor_detector:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: floor_detection
+    restart: floor_detection.service
+    component_type: systemd
+osm_bridge_ros_wrapper:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: osm_bridge_ros
+    restart: osm_bridge_ros_wrapper.service
+    component_type: systemd
+wm_mediator:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: world_model_mediator
+    restart: ropod_world_model_mediator.service
+    component_type: systemd
+com_mediator:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: com_mediator
+    restart: ropod_com_mediator.service
+    component_type: systemd
+route_planner:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: route_planner_node
+    restart: ropod_route_planner.service
+    component_type: systemd
+route_navigation:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: route_navigation
+    restart: ropod_route_navigation.service
+    component_type: systemd
+maneuver_navigation:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: maneuver_navigation
+    restart: ropod_maneuver_navigation.service
+    component_type: systemd
+elevator_navigation:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: elevator_navigation
+    restart: ropod_elevator_navigation.service
+    component_type: systemd
+cart_collector:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: cart_collector
+    restart: ropod_cart_collection.service
+    component_type: systemd
+cart_plane_detector:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: cart_plane_detector
+    restart: ropod_cart_plane_detection.service
+    component_type: systemd
+task_executor:
+    monitor: ros/ros_node_monitor
+    monitored_parameter: task_executor
+    restart: ropod_task_executor.service
+    component_type: systemd

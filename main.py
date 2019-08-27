@@ -7,7 +7,9 @@ import argparse
 from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
+from component_monitoring.recovery_manager import RecoveryManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
+from component_monitoring.utils.component_network import ComponentNetwork
 from component_monitoring.communication import BlackBoxPyreCommunicator
 
 def generate_robot_status_msg(robot_id):
@@ -100,10 +102,16 @@ if __name__ == '__main__':
                                      robot_store_interface,
                                      black_box_comm)
 
+    component_network = ComponentNetwork(config_file_path)
+
+    recovery_config = config_data['recovery_config']
+    recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
+
     # we initialise an overall status message that will continuously
     # be updated with the component statuses
     overall_status_msg = generate_robot_status_msg(robot_id)
     try:
+        recovery_manager.start_manager()
         while True:
             component_status_msg = monitor_manager.monitor_components()
             robot_store_interface.store_monitor_msg(component_status_msg)
@@ -119,3 +127,4 @@ if __name__ == '__main__':
         pyre_comm.shutdown()
         monitor_manager.stop_monitors()
         black_box_comm.shutdown()
+        recovery_manager.stop()

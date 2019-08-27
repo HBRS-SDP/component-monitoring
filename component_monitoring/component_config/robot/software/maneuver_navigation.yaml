@@ -1,0 +1,7 @@
+component_name: maneuver_navigation
+description: Maneuver navigation
+modes: []
+dependencies: [roscore]
+dependency_monitors:
+    heartbeat:
+        roscore: ros/ros_master_monitor

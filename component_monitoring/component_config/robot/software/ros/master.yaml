@@ -5,5 +5,5 @@ mappings:
         inputs: []
         outputs:
             - output:
-                name: master_running
+                name: status
                 type: bool
