@@ -3,5 +3,5 @@ description: Maneuver navigation
 modes: []
 dependencies: [roscore]
 dependency_monitors:
-    heartbeath:
+    heartbeat:
         roscore: ros/ros_master_monitor
