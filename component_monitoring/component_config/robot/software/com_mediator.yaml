@@ -3,5 +3,5 @@ description: Communication mediator
 modes: []
 dependencies: [roscore]
 dependency_monitors:
-    functional:
+    heartbeat:
         roscore: ros/ros_master_monitor
