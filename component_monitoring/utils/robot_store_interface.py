@@ -73,6 +73,27 @@ class RobotStoreInterface(object):
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/init_sm_state_collection] {0}'.format(exc))
 
+    def store_component_status_msg(self, component_name, component_status_msg):
+        '''Stores the status message of "component" into the database.
+
+        Keyword arguments:
+        component_name: str -- name of a monitored component
+        component_status_msg: Dict -- message containing the statuses of potentially
+                                      multiple component monitoring modes
+
+        '''
+        try:
+            client = pm.MongoClient(port=self.db_port)
+            db = client[self.db_name]
+            collection = db[self.monitor_collection_name]
+
+            status_msg = {'id': component_name,
+                          'timestamp': time.time(),
+                          'monitor_status': component_status_msg['modes']}
+            collection.replace_one({'id': component_name}, status_msg, upsert=True)
+        except pm.errors.OperationFailure as exc:
+            print('[component_monitoring/store_component_status_msg] {0}'.format(exc))
+
     def store_monitor_msg(self, component_status_list):
         '''Stores the given status of all components into the database.
         In particular, creates or updates a one document per component
