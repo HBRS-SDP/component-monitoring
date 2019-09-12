@@ -68,7 +68,7 @@ class RobotStoreInterface(object):
             for component_config in components:
                 component_name = component_config.component_name
                 doc = {'component_name': component_name,
-                       'dependencies': 'unknown'}
+                       'state': 'unknown'}
                 collection.replace_one({'component_name': component_name}, doc, upsert=True)
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/init_sm_state_collection] {0}'.format(exc))
