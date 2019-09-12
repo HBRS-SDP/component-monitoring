@@ -38,27 +38,31 @@ class MonitorManager(object):
                 self.sw_recovery_managers[monitor_config.component_name] = rec_manager
 
     def monitor_components(self):
-        component_status_msg = list()
-        for component_name, monitors in self.hw_monitors.items():
+        component_status_msg = []
+        for component_id, monitors in self.hw_monitors.items():
             hw_monitor_msg = dict()
-            hw_monitor_msg['component'] = self.hw_component_descriptions[component_name]
-            hw_monitor_msg['component_id'] = component_name
-            hw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(self.hw_component_descriptions[component_name])
-            hw_monitor_msg['modes'] = list()
+            component_name = self.hw_component_descriptions[component_id]
+            hw_monitor_msg['component'] = component_name
+            hw_monitor_msg['component_id'] = component_id
+            hw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(component_id)
+            hw_monitor_msg['modes'] = []
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 hw_monitor_msg['modes'].append(monitor_status)
+            self.robot_store_interface.store_component_status_msg(component_id, hw_monitor_msg)
             component_status_msg.append(hw_monitor_msg)
 
-        for component_name, monitors in self.sw_monitors.items():
+        for component_id, monitors in self.sw_monitors.items():
             sw_monitor_msg = dict()
-            sw_monitor_msg['component'] = self.sw_component_descriptions[component_name]
-            sw_monitor_msg['component_id'] = component_name
-            sw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(self.sw_component_descriptions[component_name])
-            sw_monitor_msg['modes'] = list()
+            component_name = self.sw_component_descriptions[component_id]
+            sw_monitor_msg['component'] = component_name
+            sw_monitor_msg['component_id'] = component_id
+            sw_monitor_msg['component_sm_state'] = self.robot_store_interface.read_component_sm_status(component_id)
+            sw_monitor_msg['modes'] = []
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 sw_monitor_msg['modes'].append(monitor_status)
+            self.robot_store_interface.store_component_status_msg(component_id, sw_monitor_msg)
             component_status_msg.append(sw_monitor_msg)
         return component_status_msg
 
