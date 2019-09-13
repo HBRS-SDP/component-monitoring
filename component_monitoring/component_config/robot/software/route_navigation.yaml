@@ -3,8 +3,9 @@ description: Route navigation
 modes: []
 dependencies: [roscore, world_model_mediator, route_planner, maneuver_navigation]
 dependency_monitors:
-    functional:
+    heartbeat:
         roscore: ros/ros_master_monitor
+    functional:
         world_model_mediator: ros/ros_node_monitor
         route_planner: ros/ros_node_monitor
         maneuver_navigation: ros/ros_node_monitor
