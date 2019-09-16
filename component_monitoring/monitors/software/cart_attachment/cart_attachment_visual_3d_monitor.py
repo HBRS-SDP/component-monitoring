@@ -2,6 +2,7 @@ from component_monitoring.monitor_base import MonitorBase
 import rospy
 import geometry_msgs.msg
 import numpy as np
+import time
 from multiprocessing import Process, Manager
 
 class CartAttachmentVisual3DMonitor(MonitorBase):
@@ -16,8 +17,10 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
                                                             '/manuever_navigation/is_load_attached')
         self.nominal_plane_distance = config_params.arguments.get('nominal_plane_distance', 0.55)
         self.plane_distance_tolerance = config_params.arguments.get('plane_distance_tolerance', 0.05)
-        self.last_received_time = None
-        self.last_cart_pose = None
+        self.process_manager = Manager()
+        self.cart_state = self.process_manager.dict()
+        self.cart_state['cart_pose'] = None
+        self.cart_state['last_received_time'] = time.time()
         self.node_initialised = False
 
     def get_status(self):
@@ -50,9 +53,9 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
     def __init_subscribers(self):
         self.cart_pose_sub = rospy.Subscriber(self.cart_pose_topic_name, geometry_msgs.msg.PoseStamped, self.pose_callback)
 
-    def pose_callback(msg):
-        self.last_cart_pose = msg.pose
-        self.last_received_time = rospy.Time.now()
+    def pose_callback(self, msg):
+        self.cart_state['cart_pose'] = msg.pose
+        self.cart_state['last_received_time'] = time.time()
 
     def _get_cart_status(self):
         """
@@ -65,11 +68,12 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
         is_cart_attached = rospy.get_param(self.cart_attached_param_name, False)
         if not is_cart_attached:
             return True, True
-        if self.last_cart_pose is None or self.last_received_time is None or \
-           (rospy.Time.now() - self.last_received_time) > rospy.Duration(5.0):
+
+        if self.cart_state['cart_pose'] is None or \
+           (time.time() - self.cart_state['last_received_time']) > 10.0:
             return False, False
 
-        dist = np.linalg.norm([pose.postion.x, pose.position.y])
+        dist = np.linalg.norm([self.cart_state['cart_pose'].position.x, self.cart_state['cart_pose'].position.y])
         if (dist < self.nominal_plane_distance + self.plane_distance_tolerance and
             dist > self.nominal_plane_distance - self.plane_distance_tolerance):
             return True, True

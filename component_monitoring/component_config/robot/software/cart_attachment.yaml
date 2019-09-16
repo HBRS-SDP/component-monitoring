@@ -1,5 +1,5 @@
 component_name: cart_attachment
 monitor_name: cart_attachment_monitor
-description: Monitors whether a cart is attached to the robot when it should be
+description: Cart Attachment Monitor
 modes: [cart_attachment/visual_3d.yaml]
 dependencies: []

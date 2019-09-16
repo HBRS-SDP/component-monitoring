@@ -8,7 +8,7 @@ mappings:
                 name: cart_attachment_status
                 type: bool
 arguments:
-    nominal_plane_distance: 0.48
+    nominal_plane_distance: 0.55
     plane_distance_tolerance: 0.05
     cart_pose_topic_name: /cart_plane_detector/plane_pose
     cart_attached_param_name: /maneuver_navigation/is_load_attached
