@@ -1,0 +1,15 @@
+name: cart_attachment_visual_3d_monitor
+description: Cart attachment monitor using 3D lidar
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: cart_attachment_status
+                type: bool
+arguments:
+    nominal_plane_distance: 0.48
+    plane_distance_tolerance: 0.05
+    cart_pose_topic_name: /cart_plane_detector/plane_pose
+    cart_attached_param_name: /maneuver_navigation/is_load_attached
+
