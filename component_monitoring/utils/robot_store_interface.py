@@ -73,13 +73,13 @@ class RobotStoreInterface(object):
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/init_sm_state_collection] {0}'.format(exc))
 
-    def store_component_status_msg(self, component_name, component_status_msg):
+    def store_component_status_msg(self, component_name, component_status_msgs):
         '''Stores the status message of "component" into the database.
 
         Keyword arguments:
         component_name: str -- name of a monitored component
-        component_status_msg: Dict -- message containing the statuses of potentially
-                                      multiple component monitoring modes
+        component_status_msg: List[Dict] -- message containing the statuses of potentially
+                                            multiple component monitoring modes
 
         '''
         try:
@@ -89,7 +89,7 @@ class RobotStoreInterface(object):
 
             status_msg = {'id': component_name,
                           'timestamp': time.time(),
-                          'monitor_status': component_status_msg['modes']}
+                          'monitor_status': component_status_msgs}
             collection.replace_one({'id': component_name}, status_msg, upsert=True)
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/store_component_status_msg] {0}'.format(exc))
