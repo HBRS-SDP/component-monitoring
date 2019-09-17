@@ -59,6 +59,9 @@ class MonitorManager(object):
             self.monitor_status_msgs[component_id]['modes'] = monitor_msgs
             self.monitor_status_msgs[component_id]['component_sm_state'] = self.robot_store_interface.read_component_sm_status(component_id)
 
+    def get_component_status_list(self):
+        return [msg for msg in self.monitor_status_msgs.values()]
+
     def stop_monitors(self):
         """Call stop method of all monitors. The stop method is used for cleanup
         (specifically for shutting down pyre nodes)

@@ -114,11 +114,11 @@ if __name__ == '__main__':
         monitor_manager.start_monitors()
         recovery_manager.start_manager()
         while True:
-            # overall_status_msg["header"]["timestamp"] = time.time()
-            # overall_status_msg["payload"]["monitors"] = component_status_msg
-            # if args.debug:
-            #    print(json.dumps(overall_status_msg, indent=2))
-            # pyre_comm.shout(overall_status_msg)
+            overall_status_msg["header"]["timestamp"] = time.time()
+            overall_status_msg["payload"]["monitors"] = monitor_manager.get_component_status_list()
+            if args.debug:
+               print(json.dumps(overall_status_msg, indent=2))
+            pyre_comm.shout(overall_status_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
