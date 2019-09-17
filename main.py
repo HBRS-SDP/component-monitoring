@@ -111,16 +111,14 @@ if __name__ == '__main__':
     # be updated with the component statuses
     overall_status_msg = generate_robot_status_msg(robot_id)
     try:
+        monitor_manager.start_monitors()
         recovery_manager.start_manager()
         while True:
-            component_status_msg = monitor_manager.monitor_components()
-            robot_store_interface.store_monitor_msg(component_status_msg)
-
-            overall_status_msg["header"]["timestamp"] = time.time()
-            overall_status_msg["payload"]["monitors"] = component_status_msg
-            if args.debug:
-                print(json.dumps(overall_status_msg, indent=2))
-            pyre_comm.shout(overall_status_msg)
+            # overall_status_msg["header"]["timestamp"] = time.time()
+            # overall_status_msg["payload"]["monitors"] = component_status_msg
+            # if args.debug:
+            #    print(json.dumps(overall_status_msg, indent=2))
+            # pyre_comm.shout(overall_status_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
