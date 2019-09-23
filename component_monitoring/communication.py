@@ -55,7 +55,8 @@ class BlackBoxPyreCommunicator(RopodPyre):
             if self.black_box_id != dict_msg['payload']['blackBoxId']:
                 return
 
-            for msg_id in self.__request_data:
+            request_data = dict(self.__request_data)
+            for msg_id in request_data:
                 if dict_msg['payload']['requestMsgId'] == msg_id:
                     self.__request_data[msg_id] = dict_msg
 
