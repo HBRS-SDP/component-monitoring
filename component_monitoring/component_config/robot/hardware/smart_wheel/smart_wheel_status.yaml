@@ -1,0 +1,21 @@
+name: smart_wheel_status_monitor
+description: Status of smart wheels
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: status_wheel_1
+                type: bool
+            - output:
+                name: status_wheel_2
+                type: bool
+            - output:
+                name: status_wheel_3
+                type: bool
+            - output:
+                name: status_wheel_4
+                type: bool
+arguments:
+    variable_name_pattern: ros_sw_ethercat_parser_data/sensors/*/status1
+    number_of_wheels: 4

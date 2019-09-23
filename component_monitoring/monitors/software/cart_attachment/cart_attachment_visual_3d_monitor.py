@@ -72,7 +72,14 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
         :returns: (bool, bool)
 
         """
-        is_cart_attached = rospy.get_param(self.cart_attached_param_name, False)
+        is_cart_attached = False
+        try:
+            rospy.get_master().getPid()
+            is_cart_attached = rospy.get_param(self.cart_attached_param_name, False)
+        except:
+            print('[cart_attachment_visual_3d_monitor] ROS master not running')
+
+
         if not is_cart_attached:
             return True, True
 
