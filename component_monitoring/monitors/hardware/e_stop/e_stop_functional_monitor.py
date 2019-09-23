@@ -52,7 +52,10 @@ class EStopFunctionalMonitor(MonitorBase):
         if status_list.count(status_list[0]) != len(status_list):
             return (False, True)
 
-        status1 = status_list[0]
-        # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
-        flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
-        return (True, flag_list[2])
+        e_stop_pressed_list = []
+        for wheel_number in range(self.num_of_wheels):
+            status1 = status_list[wheel_number]
+            # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
+            flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
+            e_stop_pressed_list.append(flag_list[2])
+        return (True, all(e_stop_pressed_list))
