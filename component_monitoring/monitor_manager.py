@@ -34,6 +34,7 @@ class MonitorManager(object):
         self.monitor_status_msgs = dict()
         self.monitor_threads = dict()
         self.monitoring = False
+        self.monitor_status_dict_lock = threading.Lock()
         for component_id, monitors in self.component_monitor_data:
             monitor_msg = dict()
             component_name = self.component_descriptions[component_id]
@@ -56,13 +57,17 @@ class MonitorManager(object):
             for monitor in monitors:
                 monitor_status = monitor.get_status()
                 monitor_msgs.append(monitor_status)
-            self.robot_store_interface.store_component_status_msg(component_id, monitor_msgs)
+            self.monitor_status_dict_lock.acquire()
             self.monitor_status_msgs[component_id]['modes'] = monitor_msgs
             self.monitor_status_msgs[component_id]['component_sm_state'] = self.robot_store_interface.read_component_sm_status(component_id)
+            self.robot_store_interface.store_component_status_msg(component_id, self.monitor_status_msgs[component_id])
+            self.monitor_status_dict_lock.release()
             time.sleep(0.1)
 
     def get_component_status_list(self):
-        return [msg for msg in self.monitor_status_msgs.values()]
+        return [self.robot_store_interface.get_component_status_msg(component_id)
+                for component_id in self.monitor_status_msgs.keys()
+                if self.monitor_status_msgs[component_id]['modes']]
 
     def stop_monitors(self):
         """Call stop method of all monitors. The stop method is used for cleanup

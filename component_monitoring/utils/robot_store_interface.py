@@ -73,7 +73,7 @@ class RobotStoreInterface(object):
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/init_sm_state_collection] {0}'.format(exc))
 
-    def store_component_status_msg(self, component_name, component_status_msgs):
+    def store_component_status_msg(self, component_name, component_status_msg):
         '''Stores the status message of "component" into the database.
 
         Keyword arguments:
@@ -86,11 +86,7 @@ class RobotStoreInterface(object):
             client = pm.MongoClient(port=self.db_port)
             db = client[self.db_name]
             collection = db[self.monitor_collection_name]
-
-            status_msg = {'id': component_name,
-                          'timestamp': time.time(),
-                          'monitor_status': component_status_msgs}
-            collection.replace_one({'id': component_name}, status_msg, upsert=True)
+            collection.replace_one({'component_id': component_name}, component_status_msg, upsert=True)
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/store_component_status_msg] {0}'.format(exc))
 
@@ -141,3 +137,20 @@ class RobotStoreInterface(object):
         except pm.errors.OperationFailure as exc:
             print('[component_monitoring/read_component_sm_status] {0}'.format(exc))
         return 'unknown'
+
+    def get_component_status_msg(self, component_id):
+        '''Reads the status message of the given component.
+
+        Keyword arguments:
+        component_id: str -- ID of a component
+
+        '''
+        try:
+            client = pm.MongoClient(port=self.db_port)
+            db = client[self.db_name]
+            collection = db[self.monitor_collection_name]
+            status_msg = collection.find_one({'component_id': component_id})
+            return status_msg
+        except pm.errors.OperationFailure as exc:
+            print('[component_monitoring/read_component_status_msg] {0}'.format(exc))
+        return None
