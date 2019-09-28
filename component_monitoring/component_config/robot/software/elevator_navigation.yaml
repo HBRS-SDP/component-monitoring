@@ -3,8 +3,9 @@ description: Elevator navigation
 modes: []
 dependencies: [roscore, world_model_mediator, door_status_detector, floor_detector, map_switcher]
 dependency_monitors:
-    functional:
+    heartbeat:
         roscore: ros/ros_master_monitor
+    functional:
         world_model_mediator: ros/ros_node_monitor
         door_status_detector: ros/ros_node_monitor
         floor_detector: ros/ros_node_monitor
