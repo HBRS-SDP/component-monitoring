@@ -1,5 +1,6 @@
 from copy import deepcopy
 import time
+import threading
 import uuid
 from ropod.pyre_communicator.base_class import RopodPyre
 from black_box_tools.data_utils import DataUtils
@@ -18,20 +19,20 @@ class BlackBoxPyreCommunicator(RopodPyre):
         groups -- groups that the node should join
         data_timeout -- timeout (in seconds) for data queries and messages (default 10.)
         '''
-        super(BlackBoxPyreCommunicator, self).__init__(node_name, groups, [])
+        super(BlackBoxPyreCommunicator, self).__init__({'node_name': node_name,
+                                                        'groups': groups,
+                                                        'message_types': []})
 
         # timeout (in seconds) for data queries and messages
         self.__data_timeout = data_timeout
 
-        # a dictionary in which the keys are session IDs
-        # and the values are types of requests for the particular users
-        self.__request_type = dict()
-
-        # a dictionary in which the keys are session IDs
-        # and the values are messages for the particular users
+        # a dictionary in which the keys are message IDs
+        # and the values are message replies
         self.__request_data = dict()
 
         self.black_box_id = black_box_id
+
+        self.zyre_lock = threading.Lock()
 
         self.start()
 
@@ -51,9 +52,13 @@ class BlackBoxPyreCommunicator(RopodPyre):
         message_type = dict_msg['header']['type']
         if message_type == 'DATA-QUERY' or \
            message_type == 'LATEST-DATA-QUERY':
-            for session_id in self.__request_data:
-                if dict_msg['payload']['receiverId'] == session_id:
-                    self.__request_data[session_id] = dict_msg
+            if self.black_box_id != dict_msg['payload']['blackBoxId']:
+                return
+
+            request_data = dict(self.__request_data)
+            for msg_id in request_data:
+                if dict_msg['payload']['requestMsgId'] == msg_id:
+                    self.__request_data[msg_id] = dict_msg
 
     def send_query(self, start_time, end_time, variables):
         """
@@ -92,32 +97,35 @@ class BlackBoxPyreCommunicator(RopodPyre):
         query_msg -- a dictionary black box query message
 
         '''
-        session_id = query_msg['payload']['senderId']
-        self.__request_data[session_id] = None
+        msg_id = query_msg['header']['msgId']
+        self.__request_data[msg_id] = None
+
+        # we only shout the message once the thread acquires a lock;
+        # the lock is released after shouting so that another
+        # thread (if any) can shout
+        self.zyre_lock.acquire()
         self.shout(query_msg)
-        data = self.__wait_for_data(session_id)
+        self.zyre_lock.release()
+
+        data = self.__wait_for_data(msg_id)
         return data
 
-    def __wait_for_data(self, session_id):
-        '''Waits for incoming data for the user with the provided session ID
-        and returns the received data. Returns None if not data is received
-        within "self.__data_timeout" seconds
+    def __wait_for_data(self, msg_id):
+        '''Waits for a reply to the message with the given ID. Returns None
+        if not data is received within "self.__data_timeout" seconds.
 
         Keyword arguments:
-        session_id -- Session ID of a user requesting data
+        msg_id -- ID of the message whose reply we want to wait for
 
         '''
         start_time = time.time()
         elapsed_time = 0.
-        while not self.__request_data[session_id] and elapsed_time < self.__data_timeout:
+        while not self.__request_data[msg_id] and elapsed_time < self.__data_timeout:
             time.sleep(0.1)
             elapsed_time = time.time() - start_time
 
         data = None
-        if self.__request_data[session_id]:
-            data = self.__request_data[session_id]
-
-        self.__request_data.pop(session_id)
-        if session_id in self.__request_type:
-            self.__request_type.pop(session_id)
+        if self.__request_data[msg_id]:
+            data = self.__request_data[msg_id]
+        self.__request_data.pop(msg_id)
         return data

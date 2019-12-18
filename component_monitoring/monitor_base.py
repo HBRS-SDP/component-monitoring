@@ -9,7 +9,7 @@ class MonitorBase(object):
     def get_status(self):
         pass
 
-    def stop(self):
+    def stop_monitor(self):
         pass
 
     def get_status_message_template(self):

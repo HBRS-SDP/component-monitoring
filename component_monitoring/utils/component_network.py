@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from os.path import abspath, dirname, join
 from typing import Sequence
 import networkx as nx
@@ -12,15 +13,17 @@ class ComponentNetwork(object):
     @author Alex Mitrevski
     @contact aleksandar.mitrevski@h-brs.de
     '''
-    def __init__(self, config_file_path: str, root_dir: str):
+    def __init__(self, config_file_path: str):
         '''Keyword arguments:
 
         config_file_path -- path to a configuration file for the component monitoring application
-        root_dir -- root directory of the component monitoring application
 
         '''
-        self.root_dir = root_dir
-        self.config_data = ConfigUtils.read_config(config_file_path)
+        if not 'COMPONENT_MONITORING_ROOT' in os.environ:
+            raise AssertionError('The COMPONENT_MONITORING_ROOT environment variable has to be set to the path of the component monitoring application')
+
+        self.root_dir = os.environ['COMPONENT_MONITORING_ROOT']
+        self.config_data = ConfigUtils.read_config(join(self.root_dir, config_file_path))
         self.network = self.__create_network()
 
     def is_acyclic(self):
@@ -83,11 +86,7 @@ class ComponentNetwork(object):
         return network
 
 if __name__ == '__main__':
-    util_dir = abspath(dirname(__file__))
-    package_dir = dirname(util_dir)
-    root_dir = dirname(package_dir)
-
-    config_file = join(root_dir, 'config/component_monitoring_config.yaml')
-    component_network = ComponentNetwork(config_file, root_dir)
+    config_file = 'config/component_monitoring_config.yaml'
+    component_network = ComponentNetwork(config_file)
     nx.draw_planar(component_network.network, with_labels=True)
     plt.show()

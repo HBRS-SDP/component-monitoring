@@ -1,0 +1,34 @@
+name: zyre_node_functional_monitor
+description: zyre_node_functional_monitor
+mappings:
+    - mapping:
+        inputs: [component_monitoring_ropod_ROPODID]
+        outputs:
+            - output:
+                name: component_monitoring
+                type: bool
+    - mapping:
+        inputs: [component_monitoring_query_node_ropod_ROPODID]
+        outputs:
+            - output:
+                name: component_monitoring_query_interface
+                type: bool
+
+    - mapping:
+        inputs: [ropod_ROPODID]
+        outputs:
+            - output:
+                name: ropod_com_mediator
+                type: bool
+    - mapping:
+        inputs: [black_box_ROPODID]
+        outputs:
+            - output:
+                name: black_box
+                type: bool
+    - mapping:
+        inputs: [black_box_ROPODID_query_interface]
+        outputs:
+            - output:
+                name: black_box_query_interface
+                type: bool

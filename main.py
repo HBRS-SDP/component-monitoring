@@ -7,7 +7,9 @@ import argparse
 from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
+from component_monitoring.recovery_manager import RecoveryManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
+from component_monitoring.utils.component_network import ComponentNetwork
 from component_monitoring.communication import BlackBoxPyreCommunicator
 
 def generate_robot_status_msg(robot_id):
@@ -79,7 +81,9 @@ if __name__ == '__main__':
                                               config_data['black_box']['id'])
 
     # we create a status communicator
-    pyre_comm = RopodPyre(robot_id, config_data['status_communication']['zyre_groups'], [])
+    pyre_comm = RopodPyre({'node_name': 'component_monitoring_'+robot_id,
+                           'groups': config_data['status_communication']['zyre_groups'],
+                           'message_types': []})
     pyre_comm.start()
 
     # we create an interface to the robot store interface for saving the status
@@ -98,18 +102,22 @@ if __name__ == '__main__':
                                      robot_store_interface,
                                      black_box_comm)
 
+    component_network = ComponentNetwork(config_file_path)
+
+    recovery_config = config_data['recovery_config']
+    recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
+
     # we initialise an overall status message that will continuously
     # be updated with the component statuses
     overall_status_msg = generate_robot_status_msg(robot_id)
     try:
+        monitor_manager.start_monitors()
+        recovery_manager.start_manager()
         while True:
-            component_status_msg = monitor_manager.monitor_components()
-            robot_store_interface.store_monitor_msg(component_status_msg)
-
             overall_status_msg["header"]["timestamp"] = time.time()
-            overall_status_msg["payload"]["monitors"] = component_status_msg
+            overall_status_msg["payload"]["monitors"] = monitor_manager.get_component_status_list()
             if args.debug:
-                print(json.dumps(overall_status_msg, indent=2))
+               print(json.dumps(overall_status_msg, indent=2))
             pyre_comm.shout(overall_status_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
@@ -117,3 +125,4 @@ if __name__ == '__main__':
         pyre_comm.shutdown()
         monitor_manager.stop_monitors()
         black_box_comm.shutdown()
+        recovery_manager.stop()

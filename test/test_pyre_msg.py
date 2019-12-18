@@ -13,8 +13,11 @@ class PyreCommunicator(RopodPyre):
     """
 
     def __init__(self, groups, black_box_id):
-        super(PyreCommunicator, self).__init__(
-                'comp_monitor_test', groups, list(), verbose=False)
+        super(PyreCommunicator, self).__init__({
+                'node_name': 'comp_monitor_test',
+                'groups': groups, 
+                'message_types': list()},
+                verbose=False)
         self.msg_counter = 0
         self.start()
 
@@ -50,7 +53,7 @@ class PyreCommunicator(RopodPyre):
 if __name__ == "__main__":
     pyre_comm = PyreCommunicator(['MONITOR'], 'ropod_001')
     test_start_time = time.time()
-    test_duration = 5
+    test_duration = 15
     print("Testing ... (for", test_duration, "seconds)")
     while test_start_time + test_duration > time.time():
         time.sleep(0.1)

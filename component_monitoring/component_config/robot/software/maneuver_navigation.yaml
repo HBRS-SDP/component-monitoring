@@ -1,5 +1,5 @@
-component_name: com_mediator
-description: Communication mediator
+component_name: maneuver_navigation
+description: Maneuver navigation
 modes: []
 dependencies: [roscore]
 dependency_monitors:

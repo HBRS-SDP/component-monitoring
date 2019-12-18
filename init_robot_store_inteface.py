@@ -34,3 +34,9 @@ if __name__ == '__main__':
     print('Saving the component configuration in the robot store interface')
     robot_store_interface.store_component_configuration(hw_monitor_config_params,
                                                         sw_monitor_config_params)
+
+
+    # we initialise the components' FTSM states in the database
+    print('Initialising the components\' FTSM states in the robot store interface')
+    robot_store_interface.init_sm_state_collection(hw_monitor_config_params,
+                                                   sw_monitor_config_params)

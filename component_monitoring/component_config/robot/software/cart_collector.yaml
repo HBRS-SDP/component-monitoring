@@ -1,11 +1,9 @@
 component_name: cart_collector
 description: Cart collector
 modes: []
-dependencies: [laser, roscore, ed, route_navigation]
+dependencies: [roscore, world_model_mediator, cart_plane_detector]
 dependency_monitors:
-    heartbeat:
-        laser: laser/laser_device_monitor
     functional:
         roscore: ros/ros_master_monitor
-        ed: none
-        route_navigation: ros/ros_node_monitor
+        world_model_mediator: ros/ros_node_monitor
+        cart_plane_detector: ros/ros_node_monitor

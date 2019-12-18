@@ -1,0 +1,5 @@
+component_name: zyre_node
+monitor_name: zyre_node_monitor
+description: zyre_node_monitor
+modes: [zyre_node/functional.yaml]
+dependencies: []

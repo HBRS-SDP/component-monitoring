@@ -1,0 +1,5 @@
+component_name: cart_attachment
+monitor_name: cart_attachment_monitor
+description: Cart Attachment Monitor
+modes: [cart_attachment/visual_3d.yaml]
+dependencies: []

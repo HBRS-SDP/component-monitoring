@@ -1,0 +1,4 @@
+networkx
+matplotlib
+scipy
+git+https://github.com/ropod-project/black-box-tools.git
