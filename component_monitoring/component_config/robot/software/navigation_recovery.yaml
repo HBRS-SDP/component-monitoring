@@ -1,0 +1,9 @@
+component_name: navigation_recovery
+description: Recovery for navigation components
+modes: []
+dependencies: [roscore, cart_attachment]
+dependency_monitors:
+    heartbeat:
+        roscore: ros/ros_master_monitor
+    functional:
+        cart_attachment: cart_attachment/cart_attachment_visual_3d_monitor
