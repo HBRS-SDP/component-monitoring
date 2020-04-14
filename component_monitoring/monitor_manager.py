@@ -35,6 +35,7 @@ class MonitorManager(object):
         self.monitor_threads = dict()
         self.monitoring = False
         self.monitor_status_dict_lock = threading.Lock()
+        self.robot_store_connections = dict()
         for component_id, monitors in self.component_monitor_data:
             monitor_msg = dict()
             component_name = self.component_descriptions[component_id]
@@ -42,6 +43,7 @@ class MonitorManager(object):
             monitor_msg['component_id'] = component_id
             monitor_msg['component_sm_state'] = 'unknown'
             monitor_msg['modes'] = []
+            self.robot_store_connections[component_id] = self.robot_store_interface.get_connection()
             self.monitor_status_msgs[component_id] = monitor_msg
             self.monitor_threads[component_id] = threading.Thread(target=self.monitor_components,
                                                                   args=(component_id, monitors))
@@ -59,13 +61,17 @@ class MonitorManager(object):
                 monitor_msgs.append(monitor_status)
             self.monitor_status_dict_lock.acquire()
             self.monitor_status_msgs[component_id]['modes'] = monitor_msgs
-            self.monitor_status_msgs[component_id]['component_sm_state'] = self.robot_store_interface.read_component_sm_status(component_id)
-            self.robot_store_interface.store_component_status_msg(component_id, self.monitor_status_msgs[component_id])
+            self.monitor_status_msgs[component_id]['component_sm_state'] = \
+                self.robot_store_interface.read_component_sm_status(component_id,
+                                                                    self.robot_store_connections[component_id])
+            self.robot_store_interface.store_component_status_msg(component_id,
+                                                                  self.monitor_status_msgs[component_id],
+                                                                  self.robot_store_connections[component_id])
             self.monitor_status_dict_lock.release()
-            time.sleep(0.1)
+            time.sleep(1.0)
 
     def get_component_status_list(self):
-        return [self.robot_store_interface.get_component_status_msg(component_id)
+        return [self.robot_store_interface.get_component_status_msg(component_id, self.robot_store_connections[component_id])
                 for component_id in self.monitor_status_msgs.keys()
                 if self.monitor_status_msgs[component_id]['modes']]
 

@@ -1,0 +1,15 @@
+name: slip_monitor
+description: Performs consistency checks with laser measurements and odometry to detect instances of the robot colliding and continuing to move towards an obstacle, and thus slipping
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: slip_detected 
+                type: bool
+
+arguments:
+    laser_scan_topic_name: /projected_scan_front
+    back_laser_scan_topic_name: /projected_scan_back
+    odometry_topic_name: /ropod/odom
+    use_HMM: True

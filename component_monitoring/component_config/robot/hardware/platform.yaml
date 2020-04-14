@@ -1,0 +1,4 @@
+component_name: platform
+description: Robot platform
+modes: [platform/slip.yaml]
+dependencies: []

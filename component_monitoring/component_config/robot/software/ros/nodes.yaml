@@ -56,22 +56,16 @@ mappings:
                 name: elevator_navigation
                 type: bool
     - mapping:
-        inputs: [cart_collector]
+        inputs: [cart_collection]
         outputs:
             - output:
-                name: cart_collector
+                name: cart_collection
                 type: bool
     - mapping:
         inputs: [cart_plane_detector]
         outputs:
             - output:
                 name: cart_plane_detector
-                type: bool
-    - mapping:
-        inputs: [initial_pose_publisher]
-        outputs:
-            - output:
-                name: initial_pose_publisher
                 type: bool
     - mapping:
         inputs: [ropod_com_mediator]
@@ -92,10 +86,10 @@ mappings:
                 name: sw_ethercat_parser
                 type: bool
     - mapping:
-        inputs: [door_status_detector]
+        inputs: [door_status_detection]
         outputs:
             - output:
-                name: door_status_detector
+                name: door_status_detection
                 type: bool
     - mapping:
         inputs: [floor_detection]

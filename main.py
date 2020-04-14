@@ -3,6 +3,7 @@ import time
 import json
 import uuid
 import argparse
+import rospy
 
 from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
@@ -50,6 +51,7 @@ def generate_robot_status_msg(robot_id):
     return msg
 
 if __name__ == '__main__':
+    rospy.init_node('component_monitor', disable_signals=True)
     parser = argparse.ArgumentParser(description='Monitor component status',
                                      epilog='EXAMPLE: python3 main.py 001 001')
     parser.add_argument('config_file', type=str,

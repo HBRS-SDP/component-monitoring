@@ -1,7 +1,7 @@
 from component_monitoring.monitor_base import MonitorBase
 import numpy as np
 import time
-from multiprocessing import Process, Manager
+import threading
 import rospy
 import geometry_msgs.msg
 from ropod_ros_msgs.srv import ToggleObjectPublisher
@@ -19,8 +19,7 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
         self.toggle_publisher_srv_name = config_params.arguments.get('toggle_publisher_srv_name', '/cart_plane_detector/toggle_object_publisher')
         self.nominal_plane_distance = config_params.arguments.get('nominal_plane_distance', 0.55)
         self.plane_distance_tolerance = config_params.arguments.get('plane_distance_tolerance', 0.05)
-        self.process_manager = Manager()
-        self.cart_state = self.process_manager.dict()
+        self.cart_state = dict()
         self.cart_state['cart_pose'] = None
         self.cart_state['last_received_time'] = time.time()
         self.node_initialised = False
@@ -29,12 +28,12 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
         try:
             rospy.get_master().getPid()
             if not self.node_initialised:
-                self.node_thread = Process(target=self.__create_node)
+                self.node_thread = threading.Thread(target=self.__create_node)
                 self.node_thread.start()
                 self.node_initialised = True
+                time.sleep(2.0)
         except:
             if self.node_initialised:
-                rosnode.kill_nodes('cart_attachment_monitor')
                 self.node_thread.terminate()
             self.node_initialised = False
 
@@ -48,7 +47,6 @@ class CartAttachmentVisual3DMonitor(MonitorBase):
         return status_msg
 
     def __create_node(self):
-        rospy.init_node('cart_attachment_monitor', disable_signals=True)
         self.__init_subscribers()
         loop_rate = rospy.Rate(2.0)
         while not rospy.is_shutdown():
