@@ -1,6 +1,11 @@
 # ROPOD Component Monitoring
 
 ## Dependencies
+
+* `PyYaml`
+* `NetworkX`
+* `PyMongo`
+* `Matplotlib`
 * [Pyre](https://github.com/ropod-project/pyre)
 * [Pyre base communicator](https://github.com/ropod-project/ropod_common)
 
@@ -43,7 +48,7 @@ name: string                                            [required] -- Monitor mo
                                                                       should be used if the name has
                                                                       multiple words)
 description: string                                     [required] -- Monitor mode description
-mappings:                                               [required] -- Specified a list of functional
+mappings:                                               [required] -- Specifies a list of functional
                                                                       input-output mappings for the
                                                                       monitor mode
     - mapping:
@@ -61,8 +66,8 @@ mappings:                                               [required] -- Specified 
                                                                       may be an unknown number of output copies -
                                                                       e.g. if the number of sensors changes
                                                                       dynamically)
-arguments:                                              [optional] -- An optional dictionary of arguments to the
-                                                                      monitor mode (e.g. thresholds). The arguments
+arguments:                                              [optional] -- A dictionary of arguments to the monitor
+                                                                      mode (e.g. thresholds). The arguments
                                                                       should be specified as name-value pairs
     name_n: value_n
 ```
@@ -95,11 +100,11 @@ For the full message description, see [ropod-models](https://git.ropod.org/ropod
 
 In this message:
 * if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those
-* on the other hand, if `map_outputs` is set to `true`, `healthStatus` is a dictionary in which each value is a list of key-value pairs of the output names
+* if `map_outputs` is set to `true`, `healthStatus` is a dictionary in which each value is a list of key-value pairs of the output names
 
 ## Specification example
 
-To illustrate the component monitoring configuration described above, we can consider an example in which a robot has two laser scanners whose status we want to monitor. Let us suppose that we have two monitoring modes for the scanners, namely we can monitor whether (i) the hardware devices as such are recognised by the host operating system and (ii) the scanners are operational. A configuration file for this scenario would look as follows:
+To illustrate the component monitoring configuration described above, we can consider an example in which a robot has two laser scanners whose status we want to monitor. Let us suppose that we have two monitoring modes for the scanners. Namely, we can monitor whether the scanners are: (i) recognised by the host operating system, and (ii) operational. A configuration file for this scenario would look as follows:
 
 ```
 name: laser_monitor
