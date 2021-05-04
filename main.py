@@ -5,13 +5,13 @@ import uuid
 import argparse
 import rospy
 
-from ropod.pyre_communicator.base_class import RopodPyre
+#from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
-from component_monitoring.recovery_manager import RecoveryManager
+#from component_monitoring.recovery_manager import RecoveryManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
 from component_monitoring.utils.component_network import ComponentNetwork
-from component_monitoring.communication import BlackBoxPyreCommunicator
+#from component_monitoring.communication import BlackBoxPyreCommunicator
 
 def generate_robot_status_msg(robot_id):
     '''Returns a status message dictionary with the following format:
@@ -77,16 +77,17 @@ if __name__ == '__main__':
     ConfigUtils.hw_monitor_config_params = hw_monitor_config_params
     ConfigUtils.sw_monitor_config_params = sw_monitor_config_params
 
+    black_box_comm = None
     # we initialise a communicator for querying the black box
-    black_box_comm = BlackBoxPyreCommunicator(config_data['black_box']['zyre_node_name'],
-                                              config_data['black_box']['zyre_groups'],
-                                              config_data['black_box']['id'])
+    #black_box_comm = BlackBoxPyreCommunicator(config_data['black_box']['zyre_node_name'],
+    #                                          config_data['black_box']['zyre_groups'],
+    #                                          config_data['black_box']['id'])
 
     # we create a status communicator
-    pyre_comm = RopodPyre({'node_name': 'component_monitoring_'+robot_id,
-                           'groups': config_data['status_communication']['zyre_groups'],
-                           'message_types': []})
-    pyre_comm.start()
+    #pyre_comm = RopodPyre({'node_name': 'component_monitoring_'+robot_id,
+    #                       'groups': config_data['status_communication']['zyre_groups'],
+    #                       'message_types': []})
+    #pyre_comm.start()
 
     # we create an interface to the robot store interface for saving the status
     robot_store_interface = RobotStoreInterface(db_name=config_data['robot_store_interface']['db_name'],
@@ -107,24 +108,24 @@ if __name__ == '__main__':
     component_network = ComponentNetwork(config_file_path)
 
     recovery_config = config_data['recovery_config']
-    recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
+    #recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
 
     # we initialise an overall status message that will continuously
     # be updated with the component statuses
     overall_status_msg = generate_robot_status_msg(robot_id)
     try:
         monitor_manager.start_monitors()
-        recovery_manager.start_manager()
+        #recovery_manager.start_manager()
         while True:
             overall_status_msg["header"]["timestamp"] = time.time()
             overall_status_msg["payload"]["monitors"] = monitor_manager.get_component_status_list()
             if args.debug:
                print(json.dumps(overall_status_msg, indent=2))
-            pyre_comm.shout(overall_status_msg)
+            #pyre_comm.shout(overall_status_msg)
             time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
-        pyre_comm.shutdown()
+        #pyre_comm.shutdown()
         monitor_manager.stop_monitors()
-        black_box_comm.shutdown()
-        recovery_manager.stop()
+        #black_box_comm.shutdown()
+        #recovery_manager.stop()

@@ -1,7 +1,7 @@
 import time
 import threading
 from component_monitoring.monitor_factory import MonitorFactory
-from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
+#from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 
 class MonitorManager(object):
     def __init__(self, hw_monitor_config_params, sw_monitor_config_params,

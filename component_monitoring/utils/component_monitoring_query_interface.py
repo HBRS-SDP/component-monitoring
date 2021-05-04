@@ -5,7 +5,7 @@ import sys
 import uuid
 import time
 
-from ropod.pyre_communicator.base_class import RopodPyre
+#from ropod.pyre_communicator.base_class import RopodPyre
 
 from component_monitoring.config.config_utils import ConfigUtils
 
