@@ -45,17 +45,18 @@ class DockerContainerMonitor(MonitorBase):
 
         We extract the image names, and compare them to the set of docker images we expect to be running as containers
         '''
-        for k in self.image_statuses.keys():
-            self.image_statuses[k] = False
+        # for k in self.image_statuses.keys():
+        #     self.image_statuses[k] = False
 
-        output = subprocess.check_output(["docker", "ps"]).splitlines()
-        if len(output) < 2: # only header is printed; i.e. no containers running
-            return
+        # output = subprocess.check_output(["docker", "ps"]).splitlines()
+        # if len(output) < 2: # only header is printed; i.e. no containers running
+        #     return
 
-        image_list = output[1:] # remove header
-        for i in image_list:
-            fields = i.split()
-            img_name = fields[1].decode('utf-8') # get the second field (i.e. image name)
-            if img_name in self.image_names:
-                self.image_statuses[img_name] = True
+        # image_list = output[1:] # remove header
+        # for i in image_list:
+        #     fields = i.split()
+        #     img_name = fields[1].decode('utf-8') # get the second field (i.e. image name)
+        #     if img_name in self.image_names:
+        #         self.image_statuses[img_name] = True
+        # return
         return

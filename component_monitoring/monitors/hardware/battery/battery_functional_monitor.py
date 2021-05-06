@@ -33,20 +33,20 @@ class BatteryFunctionalMonitor(MonitorBase):
         :returns: (bool, float) == (status, percentage)
 
         """
-        variables = [self.variable_name_pattern.replace('*', str(i)) for i\
-                     in range(self.num_of_wheels)]
-        dict_msg = self.black_box_comm.send_latest_data_query(variables)
-        if dict_msg is None:
-            return (False, 0.0)
+        # variables = [self.variable_name_pattern.replace('*', str(i)) for i\
+        #              in range(self.num_of_wheels)]
+        # dict_msg = self.black_box_comm.send_latest_data_query(variables)
+        # if dict_msg is None:
+        #     return (False, 0.0)
 
-        _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
-        if not data or all(not x for x in data):
-            return (False, 0.0)
+        # _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        # if not data or all(not x for x in data):
+        #     return (False, 0.0)
 
-        for i in data:
-            if i is None:
-                return (False, 0.0)
-        battery_voltage = sum([i[1] for i in data])/self.num_of_wheels
-        battery_percentage = ((battery_voltage - self.lowest_voltage) / \
-                (self.highest_voltage - self.lowest_voltage)) * 100.0
-        return (True, battery_percentage)
+        # for i in data:
+        #     if i is None:
+        #         return (False, 0.0)
+        # battery_voltage = sum([i[1] for i in data])/self.num_of_wheels
+        # battery_percentage = ((battery_voltage - self.lowest_voltage) / \
+        #         (self.highest_voltage - self.lowest_voltage)) * 100.0
+        return (True, 100)

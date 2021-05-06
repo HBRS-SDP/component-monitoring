@@ -34,18 +34,19 @@ class DiffDriveKinematicsMonitor(MonitorBase):
         return status_msg
 
     def get_diff_drive_statuses(self):
-        current_time = time.time()
-        variables = []
-        for inp in self.variable_names:
-            v = [inp.replace('*', str(i)) for i\
-                         in range(self.num_wheels)]
-            variables.extend(v)
-        dict_msg = self.black_box_comm.send_query(current_time-1.0,
-                                                  current_time,
-                                                  variables)
-        var_names, data = DataUtils.parse_bb_data_msg(dict_msg)
-        result, overall_result = self.__process_data(var_names, data)
-        return result, overall_result
+        # current_time = time.time()
+        # variables = []
+        # for inp in self.variable_names:
+        #     v = [inp.replace('*', str(i)) for i\
+        #                  in range(self.num_wheels)]
+        #     variables.extend(v)
+        # dict_msg = self.black_box_comm.send_query(current_time-1.0,
+        #                                           current_time,
+        #                                           variables)
+        # var_names, data = DataUtils.parse_bb_data_msg(dict_msg)
+        # result, overall_result = self.__process_data(var_names, data)
+        #return result, overall_result
+        return None, None
 
     def __process_data(self, var_names, data):
         if not data or all(not x for x in data):

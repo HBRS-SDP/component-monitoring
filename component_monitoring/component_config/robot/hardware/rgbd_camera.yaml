@@ -1,0 +1,5 @@
+component_name: rgbd_camera
+monitor_name: rgbd_camera_monitor
+description: rgbd_camera_monitor
+modes: [rgbd_camera/pointcloud_monitor.yaml]
+dependencies: []

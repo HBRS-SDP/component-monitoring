@@ -29,14 +29,15 @@ class LocalisationFunctionalMonitor(MonitorBase):
         :returns: (bool, float, float, float, bool)
 
         """
-        dict_msg = self.black_box_comm.send_latest_data_query([self.bb_variable_name])
-        if not dict_msg:
-            return (False, 0.0, 0.0, 0.0, False)
+        # dict_msg = self.black_box_comm.send_latest_data_query([self.bb_variable_name])
+        # if not dict_msg:
+        #     return (False, 0.0, 0.0, 0.0, False)
 
-        _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
-        if not data or not data[0]:
-            return (False, 0.0, 0.0, 0.0, False)
-        covariance_matrix = data[0][1]
-        avg_variance = (covariance_matrix[0] + covariance_matrix[7] + covariance_matrix[35])/3.0
-        return (True, covariance_matrix[0], covariance_matrix[7],
-                covariance_matrix[35], avg_variance<self.avg_variance_threshold)
+        # _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        # if not data or not data[0]:
+        #     return (False, 0.0, 0.0, 0.0, False)
+        # covariance_matrix = data[0][1]
+        # avg_variance = (covariance_matrix[0] + covariance_matrix[7] + covariance_matrix[35])/3.0
+        # return (True, covariance_matrix[0], covariance_matrix[7],
+        #         covariance_matrix[35], avg_variance<self.avg_variance_threshold)
+        return [False, 100., 100., 100., 100.]

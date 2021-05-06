@@ -1,0 +1,9 @@
+name: rgbd_camera_pointcloud_monitor_monitor
+description: rgbd_camera_pointcloud_monitor_monitor
+mappings:
+    - mapping:
+        inputs: []
+        outputs:
+            - output:
+                name: 
+                type:

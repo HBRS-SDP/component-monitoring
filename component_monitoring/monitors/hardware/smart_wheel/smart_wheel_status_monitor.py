@@ -32,26 +32,27 @@ class SmartWheelStatusMonitor(MonitorBase):
         :returns: (bool, list of bool)  == (status, [status_wheel_1, status_wheel_2, ...])
 
         """
-        variables = [self.variable_name_pattern.replace('*', str(i)) for i\
-                     in range(self.num_of_wheels)]
-        dict_msg = self.black_box_comm.send_latest_data_query(variables)
+        # variables = [self.variable_name_pattern.replace('*', str(i)) for i\
+        #              in range(self.num_of_wheels)]
+        # dict_msg = self.black_box_comm.send_latest_data_query(variables)
 
-        if dict_msg is None:
-            return (False, True)
+        # if dict_msg is None:
+        #     return (False, True)
 
-        _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
-        if not data or all(not x for x in data):
-            return (False, True)
+        # _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        # if not data or all(not x for x in data):
+        #     return (False, True)
 
-        for i in data:
-            if i is None:
-                return (False, True)
-        status_list = [i[1] for i in data]
+        # for i in data:
+        #     if i is None:
+        #         return (False, True)
+        # status_list = [i[1] for i in data]
 
-        wheel_statuses = []
-        for wheel_number in range(self.num_of_wheels):
-            status1 = status_list[wheel_number]
-            # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
-            flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
-            wheel_statuses.append(flag_list[0])
-        return (True, wheel_statuses)
+        # wheel_statuses = []
+        # for wheel_number in range(self.num_of_wheels):
+        #     status1 = status_list[wheel_number]
+        #     # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
+        #     flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
+        #     wheel_statuses.append(flag_list[0])
+        #return (True, wheel_statuses)
+        return (True, [True, True, True, True])

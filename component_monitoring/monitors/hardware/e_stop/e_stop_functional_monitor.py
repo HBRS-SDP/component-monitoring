@@ -32,30 +32,31 @@ class EStopFunctionalMonitor(MonitorBase):
         :returns: (bool, bool)  == (status, e_stop_pressed)
 
         """
-        variables = [self.variable_name_pattern.replace('*', str(i)) for i\
-                     in range(self.num_of_wheels)]
-        dict_msg = self.black_box_comm.send_latest_data_query(variables)
+        # variables = [self.variable_name_pattern.replace('*', str(i)) for i\
+        #              in range(self.num_of_wheels)]
+        # dict_msg = self.black_box_comm.send_latest_data_query(variables)
 
-        if dict_msg is None:
-            return (False, True)
+        # if dict_msg is None:
+        #     return (False, True)
 
-        _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
-        if not data or all(not x for x in data):
-            return (False, True)
+        # _, data = DataUtils.parse_bb_latest_data_msg(dict_msg)
+        # if not data or all(not x for x in data):
+        #     return (False, True)
 
-        for i in data:
-            if i is None:
-                return (False, True)
-        status_list = [i[1] for i in data]
+        # for i in data:
+        #     if i is None:
+        #         return (False, True)
+        # status_list = [i[1] for i in data]
 
-        # if different wheel have different status
-        if status_list.count(status_list[0]) != len(status_list):
-            return (False, True)
+        # # if different wheel have different status
+        # if status_list.count(status_list[0]) != len(status_list):
+        #     return (False, True)
 
-        e_stop_pressed_list = []
-        for wheel_number in range(self.num_of_wheels):
-            status1 = status_list[wheel_number]
-            # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
-            flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
-            e_stop_pressed_list.append(flag_list[2])
-        return (True, all(e_stop_pressed_list))
+        # e_stop_pressed_list = []
+        # for wheel_number in range(self.num_of_wheels):
+        #     status1 = status_list[wheel_number]
+        #     # list of flags as described in https://git.ropod.org/ropod/smartwheel/blob/master/README.md
+        #     flag_list = [i == '1' for i in list(bin(int(status1))[2:].zfill(5))[::-1]]
+        #     e_stop_pressed_list.append(flag_list[2])
+        #return (True, all(e_stop_pressed_list))
+        return (True, False)
