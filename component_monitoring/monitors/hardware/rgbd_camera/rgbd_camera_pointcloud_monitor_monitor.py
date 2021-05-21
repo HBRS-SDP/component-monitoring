@@ -1,15 +1,28 @@
+import json
+
+import yaml
+
 from component_monitoring.monitor_base import MonitorBase
 import rospy
 from sensor_msgs.msg import PointCloud2
+from kafka import KafkaConsumer, KafkaProducer
 
 class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
     def __init__(self, config_params, black_box_comm):
+        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
         super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, black_box_comm)
         self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/depth_registered/points', PointCloud2, self.callback)
         self._pointcloud = None
 
+    def msg2json(self, msg):
+        ''' Convert a ROS message to JSON format'''
+        y = yaml.load(str(msg))
+        return json.dumps(y, indent=4)
+
     def callback(self, data):
         self._pointcloud = data.data
+        future = self.producer.send('foobar', b'pointcloud <3')
+        result = future.get(timeout=60)
 
     def get_status(self):
         status_msg = self.get_status_message_template()

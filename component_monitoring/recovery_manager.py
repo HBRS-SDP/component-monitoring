@@ -7,7 +7,7 @@ import subprocess
 import threading
 import yaml
 import networkx as nx
-import pymongo as pm
+#import pymongo as pm
 
 from ropod.pyre_communicator.base_class import RopodPyre
 

@@ -132,14 +132,14 @@ if __name__ == '__main__':
             overall_status_msg["header"]["timestamp"] = time.time()
             overall_status_msg["payload"]["monitors"] = monitor_manager.get_component_status_list()
             #if args.debug:
-            camera_monitor = list(
-                filter(
-                    lambda monitor: True if monitor['component_id'] == 'rgbd_camera' else False, 
-                    overall_status_msg['payload']['monitors']
-                    )
-            )[0]
+            #camera_monitor = list(
+            #    filter(
+            #        lambda monitor: True if monitor['component_id'] == 'rgbd_camera' else False,
+            #        overall_status_msg['payload']['monitors']
+            #        )
+            #)[0]
                 
-            print(json.dumps(camera_monitor, default=str, indent=2))
+            #print(json.dumps(camera_monitor, default=str, indent=2))
             #pyre_comm.shout(overall_status_msg)
             #time.sleep(0.5)
             time.sleep(4.0)
