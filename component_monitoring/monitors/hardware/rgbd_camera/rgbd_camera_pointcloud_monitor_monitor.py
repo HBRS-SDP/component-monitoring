@@ -18,7 +18,7 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         self._pointcloud = None
 
     def callback(self, data):
-        self._pointcloud = np.array(data.data)
+        self._pointcloud = np.array(map(lambda x: np.nan if x=='nan' else x, data.data), dtype=np.float)
 
     def to_cpp(self, msg):
         """
