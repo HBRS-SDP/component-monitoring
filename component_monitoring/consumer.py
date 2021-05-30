@@ -5,9 +5,11 @@
 # @File    : consumer.py
 
 from kafka import KafkaConsumer
+from sensor_msgs.msg import PointCloud2
 
 if __name__ == "__main__":
     consumer = KafkaConsumer('foobar')
 
     for msg in consumer:
-        print(msg)
+        print('test')
+        print(PointCloud2().deserialize(msg))
