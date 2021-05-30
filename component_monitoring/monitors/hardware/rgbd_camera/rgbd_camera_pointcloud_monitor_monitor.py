@@ -1,5 +1,5 @@
 import json
-
+from bson import json_util
 import yaml
 
 from component_monitoring.monitor_base import MonitorBase
@@ -28,8 +28,10 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         status_msg["monitorDescription"] = self.config_params.description
         status_msg["healthStatus"] = dict()
         status_msg["healthStatus"]["status"] = False
+
+        message = json.dumps(status_msg)
         
-        future = self.producer.send('hsrb_monitoring_rgbd', b'pointcloud <3')
+        future = self.producer.send('hsrb_monitoring_rgbd', json.dumps(message, default=json_util.default).encode('utf-8'))
         result = future.get(timeout=60)
 
         if self._pointcloud is not None:
