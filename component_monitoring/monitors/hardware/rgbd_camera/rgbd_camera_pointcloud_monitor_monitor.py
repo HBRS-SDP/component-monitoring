@@ -19,16 +19,6 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
 
     def callback(self, data):
         self._pointcloud = np.array(data.data)
-        event = {"monitorName": "rgbd_monitor",
-                 "monitorDescription": "Monitor verifying that the pointcloud of the RGBD camera has no NaNs",
-                 "healthStatus": {
-                     "nans": False
-                    }
-                 }
-        if np.isnan(self._pointcloud).any():
-            event['healthStatus']['nans'] = True
-            future = self.producer.send(self.topic_name, bytes(json.dumps(event)))
-            result = future.get(timeout=60)
 
     def to_cpp(self, msg):
         """
@@ -52,6 +42,16 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         return msg.deserialize(serial_msg)
 
     def get_status(self):
+        event = {"monitorName": "rgbd_monitor",
+                 "monitorDescription": "Monitor verifying that the pointcloud of the RGBD camera has no NaNs",
+                 "healthStatus": {
+                     "nans": False
+                 }
+                 }
+        if np.isnan(self._pointcloud).any():
+            event['healthStatus']['nans'] = True
+            future = self.producer.send(self.topic_name, bytes(json.dumps(event)))
+            result = future.get(timeout=60)
         status_msg = self.get_status_message_template()
         status_msg["monitorName"] = self.config_params.name
         status_msg["monitorDescription"] = self.config_params.description
