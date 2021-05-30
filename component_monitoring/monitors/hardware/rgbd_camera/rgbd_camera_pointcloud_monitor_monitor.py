@@ -11,7 +11,7 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
     def __init__(self, config_params, black_box_comm):
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
         super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, black_box_comm)
-        self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/depth_registered/points', PointCloud2, self.callback)
+        self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/pointcloud', PointCloud2, self.callback)
         self._pointcloud = None
 
     def msg2json(self, msg):
@@ -21,8 +21,6 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
 
     def callback(self, data):
         self._pointcloud = data.data
-        future = self.producer.send('foobar', b'pointcloud <3')
-        result = future.get(timeout=60)
 
     def get_status(self):
         status_msg = self.get_status_message_template()
@@ -30,6 +28,10 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         status_msg["monitorDescription"] = self.config_params.description
         status_msg["healthStatus"] = dict()
         status_msg["healthStatus"]["status"] = False
+        
+        future = self.producer.send('hsrb_monitoring_rgbd', b'pointcloud <3')
+        result = future.get(timeout=60)
+
         if self._pointcloud is not None:
             rospy.loginfo("I got poincloud!")
         else:
