@@ -48,10 +48,11 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
                      "nans": False
                  }
                  }
-        if np.isnan(self._pointcloud).any():
-            event['healthStatus']['nans'] = True
-            future = self.producer.send(self.topic_name, bytes(json.dumps(event)))
-            result = future.get(timeout=60)
+        if self._pointcloud:
+            if np.isnan(self._pointcloud).any():
+                event['healthStatus']['nans'] = True
+                future = self.producer.send(self.topic_name, bytes(json.dumps(event)))
+                result = future.get(timeout=60)
         status_msg = self.get_status_message_template()
         status_msg["monitorName"] = self.config_params.name
         status_msg["monitorDescription"] = self.config_params.description
