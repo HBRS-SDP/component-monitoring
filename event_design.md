@@ -15,8 +15,9 @@
   "target_id":["<monitorName>"],
   "message":{
     "command":"shutdown",
-    "status" :"success/failure/fatal"
+    "status" :"success/failure/fatal",
+    "thread_id":"<source_thread_id>"
   },
-  "type":"ack/cmd"
+  "type":"ack/cmd/helo"
 }
 ```
