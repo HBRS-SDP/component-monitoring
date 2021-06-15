@@ -11,7 +11,7 @@ from kafka import KafkaConsumer, KafkaProducer
 
 class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
     def __init__(self, config_params, black_box_comm):
-        self.topic_name = 'hsrb_monitoring_rgbd'
+        self.topic_name = 'hsrb_monitoring_feedback_rgbd'
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
         super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, black_box_comm)
         self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/pointcloud', PointCloud2, self.callback)
