@@ -15,7 +15,7 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
         super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, black_box_comm)
         self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/pointcloud', PointCloud2, self.callback)
-        self._nans_threshold_ratio = 0.65 # arbitrary chosen threshold
+        self._nans_threshold_ratio = 0.65 # arbitrary chosen threshold, with 0.6 there will be errors
         self._pointcloud = None
         self._status = True # monitor thinks that the component is healthy
 
