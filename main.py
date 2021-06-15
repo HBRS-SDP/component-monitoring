@@ -142,7 +142,7 @@ if __name__ == '__main__':
             #print(json.dumps(camera_monitor, default=str, indent=2))
             #pyre_comm.shout(overall_status_msg)
             #time.sleep(0.5)
-            time.sleep(4.0)
+            time.sleep(0.5)
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
         #pyre_comm.shutdown()
