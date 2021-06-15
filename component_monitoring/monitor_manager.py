@@ -1,6 +1,10 @@
 import time
 import threading
 from component_monitoring.monitor_factory import MonitorFactory
+from bson import json_util
+import json
+from kafka import KafkaConsumer, KafkaProducer
+from jsonschema import validate, ValidationError
 #from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 
 class MonitorManager(object):
@@ -36,6 +40,10 @@ class MonitorManager(object):
         self.monitoring = False
         self.monitor_status_dict_lock = threading.Lock()
         self.robot_store_connections = dict()
+
+        self.create_threads()
+
+    def create_threads(self):
         for component_id, monitors in self.component_monitor_data:
             monitor_msg = dict()
             component_name = self.component_descriptions[component_id]
@@ -47,6 +55,23 @@ class MonitorManager(object):
             self.monitor_status_msgs[component_id] = monitor_msg
             self.monitor_threads[component_id] = threading.Thread(target=self.monitor_components,
                                                                   args=(component_id, monitors))
+
+        # Kafka monitor control producer
+        self._monitor_control_producer = \
+            KafkaProducer(
+                bootstrap_servers='localhost:9092'
+                )
+
+        # Kafka monitor control listener
+        self._monitor_control_listener = \
+            KafkaConsumer(
+                'hsrb_monitoring_control', 
+                bootstrap_servers='localhost:9092',
+                value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+                consumer_timeout_ms=3000
+                )
+
+        
 
     def start_monitors(self):
         self.monitoring = True
@@ -70,7 +95,51 @@ class MonitorManager(object):
             self.monitor_status_dict_lock.release()
             time.sleep(1.0)
 
+    def control_monitoring(self):
+        source = None
+        target = None
+        for message in self._monitor_control_listener:
+            source = message.value['source_id']
+            target = message.value['target_id'][0]
+
+            if message.value['message']['command'] == 'shutdown' and self.monitoring:
+                print('Stopping monitors.')
+                self.stop_monitors()
+            elif message.value['message']['command'] == 'activate' and not self.monitoring:
+                print('Starting monitors')
+                self.create_threads()
+                self.start_monitors()
+
+        message = {
+            "source_id":"<unique>",
+            "target_id":["<monitorName>"],
+            "message":{
+                "command":"shutdown",
+                "status" :"success/failure/fatal",
+                "thread_id":"<source_thread_id>"
+            },
+            "type":"ack/cmd/helo"
+        }
+
+        message['source_id'] = target
+        message['target_id'] = [source]
+        message['message']['command'] = ''
+        message['message']['status'] = 'success'
+        message['message']['thread_id'] = ''
+        message['type'] = 'ack'
+        
+        future = \
+            self._monitor_control_producer.send(
+                'hsrb_monitoring_control', 
+                json.dumps(message, 
+                default=json_util.default).encode('utf-8')
+            )
+
+        result = future.get(timeout=60)
+
+        
     def get_component_status_list(self):
+        self.control_monitoring()
         return [self.robot_store_interface.get_component_status_msg(component_id, self.robot_store_connections[component_id])
                 for component_id in self.monitor_status_msgs.keys()
                 if self.monitor_status_msgs[component_id]['modes']]
