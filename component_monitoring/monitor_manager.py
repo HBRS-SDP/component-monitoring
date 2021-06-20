@@ -99,6 +99,9 @@ class MonitorManager(object):
         source = None
         target = None
         for message in self._monitor_control_listener:
+            if message.value['type'] != 'cmd':
+                break
+
             source = message.value['source_id']
             target = message.value['target_id'][0]
 
@@ -109,33 +112,33 @@ class MonitorManager(object):
                 print('Starting monitors')
                 self.create_threads()
                 self.start_monitors()
+        if source and target:
+            message = {
+                "source_id":"<unique>",
+                "target_id":["<monitorName>"],
+                "message":{
+                    "command":"shutdown",
+                    "status" :"success/failure/fatal",
+                    "thread_id":"<source_thread_id>"
+                },
+                "type":"ack/cmd/helo"
+            }
 
-        message = {
-            "source_id":"<unique>",
-            "target_id":["<monitorName>"],
-            "message":{
-                "command":"shutdown",
-                "status" :"success/failure/fatal",
-                "thread_id":"<source_thread_id>"
-            },
-            "type":"ack/cmd/helo"
-        }
+            message['source_id'] = target
+            message['target_id'] = [source]
+            message['message']['command'] = ''
+            message['message']['status'] = 'success'
+            message['message']['thread_id'] = ''
+            message['type'] = 'ack'
+            
+            future = \
+                self._monitor_control_producer.send(
+                    'hsrb_monitoring_control', 
+                    json.dumps(message, 
+                    default=json_util.default).encode('utf-8')
+                )
 
-        message['source_id'] = target
-        message['target_id'] = [source]
-        message['message']['command'] = ''
-        message['message']['status'] = 'success'
-        message['message']['thread_id'] = ''
-        message['type'] = 'ack'
-        
-        future = \
-            self._monitor_control_producer.send(
-                'hsrb_monitoring_control', 
-                json.dumps(message, 
-                default=json_util.default).encode('utf-8')
-            )
-
-        result = future.get(timeout=60)
+            result = future.get(timeout=60)
 
         
     def get_component_status_list(self):
