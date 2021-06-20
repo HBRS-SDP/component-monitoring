@@ -16,7 +16,6 @@ class MonitorManager(object):
         self.monitors = dict()
 
         self.component_descriptions = dict()
-        self.component_descriptions = dict()
 
         for monitor_config in hw_monitor_config_params:
             self.monitors[monitor_config.component_name] = list()

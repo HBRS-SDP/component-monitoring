@@ -26,7 +26,11 @@ class MonitorBase(Process):
         self.healthstatus = {}
 
     def valid_status_message(self, msg: dict) -> bool:
-        return validate(instance=msg, schema=self.event_schema)
+        try:
+            validate(instance=msg, schema=self.event_schema)
+            return True
+        except:
+            return False
 
     def send_control_msg(self, msg: Union[str, bytes]):
         if isinstance(msg, bytes):

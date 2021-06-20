@@ -26,7 +26,7 @@ class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
         # gen = point_cloud2.read_points(data, field_names=("x", "y", "z"), skip_nans=True) # smart getting rid of NaNs
         self._pointcloud = np.array(gen)
         nan_ratio = np.isnan(self._pointcloud).sum()/np.prod(self._pointcloud)
-        self.healthstatus['nans'] = 0.5
+        self.healthstatus['nans'] = nan_ratio
         self.logger.info(f"Detected {self.healthstatus['nans']*100}% NaN values in the pointcloud.")
 
     def publish_status(self):
