@@ -1,98 +1,41 @@
 import json
 from bson import json_util
-from io import BytesIO, StringIO
-import yaml
 import numpy as np
 from sensor_msgs import point_cloud2
+
+from component_monitoring.config.config_params import MonitorModeConfig
 from component_monitoring.monitor_base import MonitorBase
 import rospy
 from sensor_msgs.msg import PointCloud2
-from kafka import KafkaConsumer, KafkaProducer
+
 
 class RgbdCameraPointcloudMonitorMonitor(MonitorBase):
-    def __init__(self, config_params, black_box_comm):
-        self.topic_name = 'hsrb_monitoring_feedback_rgbd'
-        self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
-        super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, black_box_comm)
+    def __init__(self, config_params: MonitorModeConfig, server_address: str, control_channel: str):
+        super(RgbdCameraPointcloudMonitorMonitor, self).__init__(config_params, server_address, control_channel)
         self._subscriber = rospy.Subscriber('/hsrb/head_rgbd_sensor/pointcloud', PointCloud2, self.callback)
-        self._nans_threshold_ratio = 0.65 # arbitrary chosen threshold, with 0.6 there will be errors
-        self._pointcloud = None
-        self._status = True # monitor thinks that the component is healthy
+        # self.nan_threshold = self.config_params.mappings[0].outputs[0].expected
+
+    def start(self):
+        super(RgbdCameraPointcloudMonitorMonitor, self).start()
+    
+    def stop(self):
+        super(RgbdCameraPointcloudMonitorMonitor, self).stop()
 
     def callback(self, data):
-        gen = point_cloud2.read_points(data, field_names=("x", "y", "z"))
-        self._pointcloud = np.array(list(gen))
+        gen = point_cloud2.read_points(data, field_names=("x", "y", "z"))  # for yelding the errors
+        # gen = point_cloud2.read_points(data, field_names=("x", "y", "z"), skip_nans=True) # smart getting rid of NaNs
+        self._pointcloud = np.array(gen)
+        nan_ratio = np.isnan(self._pointcloud).sum()/np.prod(self._pointcloud)
+        self.healthstatus['nans'] = 0.5
+        self.logger.info(f"Detected {self.healthstatus['nans']*100}% NaN values in the pointcloud.")
 
-    def pointcloud_rejection_policy(self, pointcloud):
-        nans_counts_in_each_row = np.count_nonzero(np.isnan(pointcloud), axis=1)
-        nans_count = np.count_nonzero(nans_counts_in_each_row)
-
-        if nans_count > pointcloud.shape[0]*self._nans_threshold_ratio:
-            return True
-        return False
-
-    def to_cpp(self, msg):
-        """
-        Serialize ROS messages to string
-        :param msg: ROS message to be serialized
-        :rtype: str
-        """
-        buf = StringIO()
-        msg.serialize(buf)
-        return buf.getvalue()
-
-    def from_cpp(self, serial_msg, cls):
-        """
-        Deserialize strings to ROS messages
-        :param serial_msg: serialized ROS message
-        :type serial_msg: str
-        :param cls: ROS message class
-        :return: deserialized ROS message
-        """
-        msg = cls()
-        return msg.deserialize(serial_msg)
-
-    def get_status(self):
-        event = {"monitorName": "rgbd_monitor",
-                 "monitorDescription": "Monitor verifying that the pointcloud of the RGBD camera has no NaNs",
-                 "healthStatus": {
-                     "nans": False
-                 }
-                 }
-                 
-
-        if not self._pointcloud is None:
-            self._status = True
-
-            rospy.loginfo("Poincloud from component received.")
-            
-            if self.pointcloud_rejection_policy(self._pointcloud):
-                self._status = False
-
-                event['healthStatus']['nans'] = True
-                rospy.logwarn("Number of NaN values in the pointcloud exceede a threshold of {}.".
-                format(int(self._nans_threshold_ratio*self._pointcloud.shape[0])))
-                
-                future = self.producer.send(self.topic_name, 
-                                            json.dumps(event, 
-                                            default=json_util.default).encode('utf-8'))
-                result = future.get(timeout=60)
-            else:
-                rospy.loginfo("Correct values in the pointcloud.")
-                event['healthStatus']['nans'] = False
-                future = self.producer.send(self.topic_name, 
-                                            json.dumps(event,
-                                            default=json_util.default).encode('utf-8'))
-                result = future.get(timeout=60)
-        
+    def publish_status(self):
+        msg = {}
+        msg["monitorName"] = self.config_params.name
+        msg["monitorDescription"] = self.config_params.description
+        msg["healthStatus"] = self.healthstatus
+        if self.valid_status_message(msg):
+            self.send_control_msg(json.dumps(msg, default=json_util.default).encode('utf-8'))
+            # result = future.get(timeout=60) # potential result parsing
         else:
-            self._status = False
-            rospy.logwarn("No poincloud from component received.")
-
-        status_msg = self.get_status_message_template()
-        status_msg["monitorName"] = self.config_params.name
-        status_msg["monitorDescription"] = self.config_params.description
-        status_msg["healthStatus"] = dict()
-        status_msg["healthStatus"]["status"] = self._status
-
-        return status_msg
+            self.logger.error(f"Validation of event message failed in {self.config_params.name}!")

@@ -94,6 +94,7 @@ class ComponentMonitorConfigFileReader(object):
                     output_params = OutputConfig()
                     output_params.name = output_node['name']
                     output_params.obtained_value_type = output_node['type']
+                    # output_params.topic = output_node['topic']
                     if 'expected' in output_node.keys():
                         output_params.expected_value = output_node['expected']
                     fn_mapping_params.outputs.append(output_params)

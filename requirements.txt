@@ -7,3 +7,5 @@ git+https://github.com/ropod-project/black-box-tools.git
 kafka-python
 asyncio
 numpy
+pymongo
+jsonschema
