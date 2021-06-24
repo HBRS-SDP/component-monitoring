@@ -53,6 +53,7 @@ class MongoManager(AbstractStorageManager):
 
     def create_query(self, data):
         return self.session.insert_one(data)
+#
 
     def read_query(self,  data):
         result = self.session.find({'timestamp': data['timestamp']})

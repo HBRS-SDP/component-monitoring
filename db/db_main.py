@@ -31,7 +31,6 @@ class DB_Storage:
             init(db_config)
             storage_manager = create_manager(db_config)
             for message in self.event_listener:
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nReceiveing Messages @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                 event_log = convert_message(message, db_config['type'])
                 storage_manager.create_query(event_log)
 
