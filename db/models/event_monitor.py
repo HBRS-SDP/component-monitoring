@@ -8,6 +8,10 @@ Base = declarative_base()
 
 
 class EventLog(Base):
+    """
+    This class extends the Base class of SQLAlchemy.
+    We make use of ORM to store data into a SQL based database.
+    """
 
     __tablename__ = "eventlog"
     timestamp = Column('TIMESTAMP', String, primary_key=True)

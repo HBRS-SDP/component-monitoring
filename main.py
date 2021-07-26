@@ -138,7 +138,8 @@ if __name__ == '__main__':
 
         db_storage = DB_Storage(
             db_config, topic_name="hsrb_monitoring_feedback_rgbd")
-        db_storage.store_messages()
+        # db_storage.store_messages()
+        db_storage.start()
         print('9####################################################')
         # recovery_manager.start_manager()
         while True:
