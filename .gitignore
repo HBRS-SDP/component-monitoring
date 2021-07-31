@@ -1,3 +1,5 @@
 *.pyc
 *.egg-info
 venv
+.idea
+config/db_config.yaml
