@@ -36,5 +36,5 @@ class ZyreNodeFunctionalMonitor(MonitorBase, RopodPyre):
         status_msg["healthStatus"]["status"] = overall_status
         return status_msg
 
-    def stop_monitor(self):
+    def stop(self):
         self.shutdown()

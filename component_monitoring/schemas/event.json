@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "monitorName": {
+      "type": "string"
+    },
+    "monitorDescription": {
+      "type": "string"
+    },
+    "healthStatus": {
+      "type": "object",
+      "properties": {
+        "nans": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "nans"
+      ]
+    }
+  },
+  "required": [
+    "monitorName",
+    "monitorDescription",
+    "healthStatus"
+  ]
+}
