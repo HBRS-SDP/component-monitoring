@@ -90,19 +90,13 @@ if __name__ == '__main__':
 
     component_network = ComponentNetwork(config_file_path)
 
-    # recovery_config = config_data['recovery_config']
-    # recovery_manager = RecoveryManager(robot_id, recovery_config, component_network)
-
     try:
         monitors = monitor_manager.start_monitors()
         monitors.append(monitor_manager.manager.join())
         for m in monitors:
             m.join()
-        #recovery_manager.start_manager()
+
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
-        #pyre_comm.shutdown()
         monitor_manager.stop_monitors()
         monitor_manager.manager.kill()
-        #black_box_comm.shutdown()
-        #recovery_manager.stop()

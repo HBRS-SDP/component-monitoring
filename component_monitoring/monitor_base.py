@@ -4,6 +4,7 @@ from abc import abstractmethod
 from multiprocessing import Process
 from typing import Union
 
+import rospy
 from jsonschema import validate
 from kafka import KafkaProducer, KafkaConsumer
 
@@ -18,12 +19,13 @@ class MonitorBase(Process):
         self.event_topic = f"{self.config_params.name}_eventbus"
         self.control_topic = control_channel
         self.logger = logging.Logger(f"monitor_{self.config_params.name}")
-        self.producer = KafkaProducer(bootstrap_servers=server_address, value_serializer=self.serialize)
+        self.producer = KafkaProducer(bootstrap_servers=server_address) #value_serializer=self.serialize
         self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id=self.config_params.name,
                                       enable_auto_commit=True, auto_commit_interval_ms=5000)
         with open('component_monitoring/schemas/event.json', 'r') as schema:
             self.event_schema = json.load(schema)
         self.healthstatus = {}
+        print(self.event_topic)
 
     def valid_status_message(self, msg: dict) -> bool:
         try:
@@ -32,9 +34,9 @@ class MonitorBase(Process):
         except:
             return False
 
-    def send_control_msg(self, msg: Union[str, bytes]):
+    def send_event_msg(self, msg: Union[str, bytes]):
         if isinstance(msg, bytes):
-            return msg
+            self.producer.send(topic=self.event_topic, value=msg)
         self.producer.send(topic=self.event_topic, value=msg)
 
     @abstractmethod
