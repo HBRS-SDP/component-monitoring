@@ -88,12 +88,8 @@ if __name__ == '__main__':
     component_network = ComponentNetwork(config_file_path)
 
     try:
-        monitors = monitor_manager.start_monitors()
-        monitors.append(monitor_manager.manager.join())
-        for m in monitors:
-            m.join()
+        monitor_manager.start()
+        monitor_manager.join()
 
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
-        monitor_manager.stop_monitors()
-        monitor_manager.manager.kill()
