@@ -1,0 +1,21 @@
+---
+enable_storage: true
+config:
+  storage_name: mongo
+available_storages:
+  kafka:
+    name: kakfa
+    ipaddress: ''
+    port: ''
+    groupid: ''
+  sqlite:
+    name: sqlite3
+    file_name: pythonsqlite.db
+    type: SQL
+    connection_string: sqlite:///pythonsqlite.db
+  mongo:
+    name: mongodb
+    database_name: component_monitoring
+    collection_name: monitor_manager
+    type: NOSQL
+    connection_string: mongodb://localhost:27017/

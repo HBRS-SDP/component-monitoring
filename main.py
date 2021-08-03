@@ -12,6 +12,7 @@ from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.robot_store_interface import RobotStoreInterface
 from component_monitoring.utils.component_network import ComponentNetwork
 #from component_monitoring.communication import BlackBoxPyreCommunicator
+from db.db_main import DB_Storage
 
 
 def generate_robot_status_msg(robot_id):
@@ -93,6 +94,12 @@ if __name__ == '__main__':
     try:
         monitor_manager.start()
         monitor_manager.join()
+
+        db_config = config_data['db_config']
+        db_storage = DB_Storage(
+            db_config, topic_name="hsrb_monitoring_feedback_rgbd")
+        # db_storage.store_messages()
+        db_storage.start()
 
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
