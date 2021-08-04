@@ -8,6 +8,10 @@ from helper import convert_message
 from kafka import KafkaConsumer
 from settings import init
 
+# Convert threads into Processes.
+# Update the list of DB Processes
+# Fault Tolerant DB Manager
+
 # from db import DB_Manager
 
 
@@ -33,6 +37,12 @@ class DB_Storage:
             for message in self.event_listener:
                 event_log = convert_message(message, db_config['type'])
                 storage_manager.create_query(event_log)
+
+    def start_storage(self):
+        pass
+
+    def stop_storage(self):
+        pass
 
 
 def exit_handler(signal_received, frame):
