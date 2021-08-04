@@ -1,8 +1,12 @@
 from os import listdir
 from os.path import join, isfile
+from typing import List
+
 import yaml
 
 from component_monitoring.config.config_file_reader import ComponentMonitorConfigFileReader
+from component_monitoring.config.config_params import ComponentMonitorConfig
+
 
 class ConfigUtils(object):
     # a dictionary of configuration parameters for the component monitoring application
@@ -33,7 +37,7 @@ class ConfigUtils(object):
         return config_data
 
     @staticmethod
-    def get_config_params(monitor_config_dir):
+    def get_config_params(monitor_config_dir, config_file=None) -> List[ComponentMonitorConfig]:
         '''Returns a list of component_monitoring.config.config_params.ComponentMonitorConfig
         objects representing the configuration of the monitors specified
         in the given directory.
@@ -43,8 +47,14 @@ class ConfigUtils(object):
                                    configuration files
 
         '''
-        config_files = ConfigUtils.get_file_names_in_dir(monitor_config_dir)
         monitor_config_params = []
+        if config_file:
+            print('Reading parameters of monitor {0}'.format(config_file))
+            component_config_params = ComponentMonitorConfigFileReader.load(monitor_config_dir,
+                                                                            config_file)
+            monitor_config_params.append(component_config_params)
+            return monitor_config_params
+        config_files = ConfigUtils.get_file_names_in_dir(monitor_config_dir)
         for config_file in config_files:
             print('Reading parameters of monitor {0}'.format(config_file))
             component_config_params = ComponentMonitorConfigFileReader.load(monitor_config_dir,

@@ -41,6 +41,9 @@ class OutputConfig(object):
         ## expected output value
         self.expected_value = ''
 
+        ## Apache kafka topic for publishing
+        # self.topic = ''
+
     def __repr__(self):
         obj = self.get_dict()
         return str(obj)
@@ -50,6 +53,7 @@ class OutputConfig(object):
         obj['name'] = self.name
         obj['obtained_value_type'] = self.obtained_value_type
         obj['expected_value'] = self.expected_value
+        # obj['topic'] = self.topic
         return obj
 
 class FunctionalMappingConfig(object):

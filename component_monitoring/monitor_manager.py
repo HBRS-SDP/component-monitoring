@@ -1,82 +1,144 @@
-import time
-import threading
+import json
+import logging
+from multiprocessing import Process
+from typing import List, Optional
+
+from bson import json_util
+from jsonschema import validate
+from kafka import KafkaProducer, KafkaConsumer
+from kafka.producer.future import FutureRecordMetadata
+
+from component_monitoring.config.config_params import ComponentMonitorConfig
 from component_monitoring.monitor_factory import MonitorFactory
-#from fault_recovery.component_recovery.recovery_action_factory import RecoveryActionFactory
 
-class MonitorManager(object):
-    def __init__(self, hw_monitor_config_params, sw_monitor_config_params,
-                 robot_store_interface, black_box_comm):
+
+class MonitorManager(Process):
+    CMD_SHUTDOWN = 'shutdown'
+    CMD_START = 'activate'
+    STATUS_FAILURE = 'failed'
+    STATUS_SUCCESS = 'success'
+    TYPE_ACK = 'ack'
+    TYPE_CMD = 'cmd'
+    STORAGE = 'storage'
+
+    def __init__(self, hw_monitor_config_params: List[ComponentMonitorConfig],
+                 sw_monitor_config_params: List[ComponentMonitorConfig], server_address: str = 'localhost:9092',
+                 control_channel: str = 'monitor_manager'):
+        Process.__init__(self)
+
+        self.logger = logging.getLogger('monitor_manager')
+        self.logger.setLevel(logging.INFO)
+
+        self._id = 'manager'
+        self.control_channel = control_channel
+        self.server_address = server_address
+        self.producer = KafkaProducer(bootstrap_servers=server_address, value_serializer=self.serialize)
+        self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id='manager',
+                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.storage = None
+
+        with open('component_monitoring/schemas/control.json', 'r') as schema:
+            self.event_schema = json.load(schema)
         self.monitors = dict()
+        self.monitor_config = dict()
 
         self.component_descriptions = dict()
-        self.component_descriptions = dict()
-        self.robot_store_interface = robot_store_interface
 
         for monitor_config in hw_monitor_config_params:
             self.monitors[monitor_config.component_name] = list()
             self.component_descriptions[monitor_config.component_name] = monitor_config.description
+            self.monitor_config[monitor_config.component_name] = dict()
             for monitor_mode_config in monitor_config.modes:
+                self.monitor_config[monitor_config.component_name][monitor_mode_config.name] = monitor_mode_config
                 monitor = MonitorFactory.get_hardware_monitor(monitor_config.component_name,
-                                                              monitor_mode_config, black_box_comm)
+                                                              monitor_mode_config, server_address, control_channel)
                 self.monitors[monitor_config.component_name].append(monitor)
 
         for monitor_config in sw_monitor_config_params:
             self.monitors[monitor_config.component_name] = list()
             self.component_descriptions[monitor_config.component_name] = monitor_config.description
+            self.monitor_config[monitor_config.component_name] = dict()
             for monitor_mode_config in monitor_config.modes:
+                self.monitor_config[monitor_config.component_name][monitor_mode_config.name] = monitor_mode_config
                 monitor = MonitorFactory.get_software_monitor(monitor_config.component_name,
-                                                              monitor_mode_config, black_box_comm)
+                                                              monitor_mode_config, server_address, control_channel)
                 self.monitors[monitor_config.component_name].append(monitor)
 
         self.component_monitor_data = [(component_id, monitors) for (component_id, monitors)
                                        in self.monitors.items()]
 
-        self.monitor_status_msgs = dict()
-        self.monitor_threads = dict()
-        self.monitoring = False
-        self.monitor_status_dict_lock = threading.Lock()
-        self.robot_store_connections = dict()
-        for component_id, monitors in self.component_monitor_data:
-            monitor_msg = dict()
-            component_name = self.component_descriptions[component_id]
-            monitor_msg['component'] = component_name
-            monitor_msg['component_id'] = component_id
-            monitor_msg['component_sm_state'] = 'unknown'
-            monitor_msg['modes'] = []
-            self.robot_store_connections[component_id] = self.robot_store_interface.get_connection()
-            self.monitor_status_msgs[component_id] = monitor_msg
-            self.monitor_threads[component_id] = threading.Thread(target=self.monitor_components,
-                                                                  args=(component_id, monitors))
+    def __send_control_message(self, msg) -> FutureRecordMetadata:
+        return self.producer.send(self.control_channel, msg)
 
-    def start_monitors(self):
+    def __run(self):
+        for msg in self.consumer:
+            self.logger.info(f"Processing {msg.key}")
+            message = self.deserialize(msg)
+            if not self.validate_control_message(message):
+                self.logger.warning("Control message could not be validated!")
+            if self._id != message['source_id'] and message['type'] == self.TYPE_CMD:
+                target_ids = message['target_id']
+                source_id = message['source_id']
+                cmd = message['message']['command']
+                if cmd == self.CMD_SHUTDOWN:
+                    for target_id in target_ids:
+                        self.stop_monitor(target_id)
+                elif cmd == self.CMD_START:
+                    if len(target_ids) == 1 and target_ids[0] == self.STORAGE:
+                        self.start_storage(source_id)
+                    for target_id in target_ids:
+                        try:
+                            self.start_monitor(target_id)
+                            self.send_status_message(source_id, self.STATUS_SUCCESS)
+                        except Exception:
+                            self.logger.warning(f"Monitor with ID {target_id} could not be started!")
+                            self.send_status_message(source_id, self.STATUS_FAILURE)
+
+
+    def start(self):
+        # monitors = self.start_monitors()
+        # for m in monitors:
+        #     m.join()
+        super().start()
+        self.consumer.subscribe([self.control_channel])
+        self.__run()
+
+    def kill(self) -> None:
+        self.stop_monitors()
+        super().kill()
+
+    def terminate(self) -> None:
+        self.stop_monitors()
+        super().terminate()
+
+    def serialize(self, msg) -> bytes:
+        return json.dumps(msg, default=json_util.default).encode('utf-8')
+
+    def deserialize(self, msg) -> dict:
+        return json.loads(msg.value)
+
+    def validate_control_message(self, msg: dict) -> bool:
+        try:
+            validate(instance=msg, schema=self.event_schema)
+            return True
+        except:
+            return False
+
+    def start_monitors(self) -> List[Process]:
+        """
+        Create all monitors specified in the configuration and start them
+        """
         self.monitoring = True
+        processes = []
         for component_id, monitors in self.component_monitor_data:
-            self.monitor_threads[component_id].start()
+            for monitor in self.monitors[component_id]:
+                processes.append(monitor)
+                monitor.start()
+        return processes
 
-    def monitor_components(self, component_id, monitors):
-        while self.monitoring:
-            monitor_msgs = []
-            for monitor in monitors:
-                monitor_status = monitor.get_status()
-                monitor_msgs.append(monitor_status)
-            self.monitor_status_dict_lock.acquire()
-            self.monitor_status_msgs[component_id]['modes'] = monitor_msgs
-            self.monitor_status_msgs[component_id]['component_sm_state'] = \
-                self.robot_store_interface.read_component_sm_status(component_id,
-                                                                    self.robot_store_connections[component_id])
-            self.robot_store_interface.store_component_status_msg(component_id,
-                                                                  self.monitor_status_msgs[component_id],
-                                                                  self.robot_store_connections[component_id])
-            self.monitor_status_dict_lock.release()
-            time.sleep(1.0)
-
-    def get_component_status_list(self):
-        return [self.robot_store_interface.get_component_status_msg(component_id, self.robot_store_connections[component_id])
-                for component_id in self.monitor_status_msgs.keys()
-                if self.monitor_status_msgs[component_id]['modes']]
-
-    def stop_monitors(self):
-        """Call stop method of all monitors. The stop method is used for cleanup
+    def stop_monitors(self) -> None:
+        """
+        Call stop method of all monitors. The stop method is used for cleanup
         (specifically for shutting down pyre nodes)
 
         :return: None
@@ -84,8 +146,39 @@ class MonitorManager(object):
         """
         for component_name, monitors in self.monitors.items():
             for monitor in monitors:
-                monitor.stop_monitor()
+                monitor.stop()
+                monitors.remove(monitor)
 
-        self.monitoring = False
-        for component_id, monitors in self.component_monitor_data:
-            self.monitor_threads[component_id].join()
+    def stop_monitor(self, component_id) -> None:
+        for monitor in self.monitors[component_id]:
+            print(component_id)
+            monitor.stop()
+            self.monitors[component_id].remove(monitor)
+
+    def start_monitor(self, component_id) -> None:
+        for mode_name, mode in self.monitor_config[component_id].items():
+            monitor = MonitorFactory.get_hardware_monitor(component_id, mode, self.server_address,
+                                                          self.control_channel)
+            try:
+                self.monitors[component_id].append(monitor)
+            except KeyError:
+                self.monitors[component_id] = list()
+                self.monitors[component_id].append(monitor)
+            monitor.start()
+            monitor.join()
+
+    def start_storage(self, component_id) -> None:
+        storage_topics = list()
+        for monitor in self.monitors[component_id]:
+            storage_topics.append(monitor.event_topic)
+        self.storage.update(storage_topics)
+
+    def send_status_message(self, target_id: str, status: str) -> None:
+        message = dict()
+        message['source_id'] = self._id
+        message['target_id'] = [target_id]
+        message['message'] = dict()
+        message['message']['status'] = status
+        message['message']['command'] = ''
+        message['type'] = self.TYPE_ACK
+        self.__send_control_message(message)

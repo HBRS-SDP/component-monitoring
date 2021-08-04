@@ -1,6 +1,5 @@
 import json
 from signal import SIGINT, signal
-from threading import Thread
 
 import yaml
 
@@ -10,33 +9,22 @@ from kafka import KafkaConsumer
 from settings import init
 
 # from db import DB_Manager
-# Convert threads into Processes.
-# Update the list of DB Processes
-# Fault Tolerant DB Manager
-
-# from db import DB_Manager
 
 
-class DB_Storage(Thread):
-    """
-    This class supports multi-threaded approach to store the monitoring data.
-    It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
-    """
-
+class DB_Storage:
+    # def __init__(self, config, topic_name="hsrb_monitoring_rgbd"):
     def __init__(self, config, topic_name="hsrb_monitoring_feedback_rgbd"):
-        super(DB_Storage, self).__init__()
+
+        # Constant to connect to kafka topic
         self.topic_name = topic_name
+
+        # Kakfa topic listener
         self.event_listener = KafkaConsumer(
             topic_name, value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+
         self.config = config
 
-    def run(self):
-        self.store_messages()
-
     def store_messages(self):
-        """
-        If the storage is configured, this method keeps reading the message stream on Kafka Topic and stores them to configured Storage Component.
-        """
         if self.config['enable_storage']:
             db_name = self.config['config']['storage_name']
             db_config = self.config['available_storages'][db_name]
@@ -47,20 +35,8 @@ class DB_Storage(Thread):
                 storage_manager.create_query(event_log)
 
 
-   def start_storage(self):
-        pass
-
-    def stop_storage(self):
-        pass
-
-
 def exit_handler(signal_received, frame):
-    """
-    If this file was run as the python program, we can capture the signal and take required action.
-    Currently this method detects ctrl-c key combo and prints the message that the program is Exiting.
-    But this function can be updated as per the requirements.
     # Handle any cleanup here
-    """
     print('SIGINT or CTRL-C detected. Exiting gracefully! Cheers :D')
     exit(0)
 

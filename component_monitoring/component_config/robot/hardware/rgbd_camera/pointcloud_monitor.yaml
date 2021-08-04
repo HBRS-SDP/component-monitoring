@@ -5,5 +5,5 @@ mappings:
         inputs: []
         outputs:
             - output:
-                name: 
+                name:
                 type:

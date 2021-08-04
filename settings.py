@@ -36,6 +36,7 @@ def init_nosql(conn_details):
     # Reference Link:
     # https://stackoverflow.com/q/63368099
     """
+
     global Session
     db_name = conn_details['name']
     if db_name == 'mongodb':
