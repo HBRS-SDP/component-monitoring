@@ -97,7 +97,7 @@ if __name__ == '__main__':
     try:
 
         storage_manager = StorageManager(storage_config)
-        # storage_manager.start()
+        storage_manager.start()
         monitor_manager.start()
 
         #logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
@@ -107,8 +107,8 @@ if __name__ == '__main__':
         logging.error("ERRORRRRRRRR")
         logging.info("DONY")
 
-        # storage_manager.join()
-        monitor_manager.join()
 
+        monitor_manager.join()
+        storage_manager.join()
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')
