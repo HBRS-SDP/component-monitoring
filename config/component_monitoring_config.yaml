@@ -19,6 +19,7 @@ black_box:
 storage_config:
     enable_storage: true
     storage_kafka_topic: 'storage_events'
+    control_channel: monitor_manager
     config:
       storage_name: mongo
     available_storages:

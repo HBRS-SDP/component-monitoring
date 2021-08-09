@@ -96,18 +96,13 @@ if __name__ == '__main__':
 
     try:
 
-        storage_manager = StorageManager(storage_config)
+        # We initialize the process for Storage Manager and start it
+        storage_manager = StorageManager(storage_config,hw_monitor_config_params,sw_monitor_config_params)
         storage_manager.start()
         monitor_manager.start()
 
-        #logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
-        logging.basicConfig()
-        logging.getLogger().setLevel(logging.INFO)
-        logging.root.setLevel(logging.INFO)
-        logging.error("ERRORRRRRRRR")
-        logging.info("DONY")
-
-
+        # We join the two processes to the Main Process,
+        # so whenever Main Process is stopped, all joined processes stop.
         monitor_manager.join()
         storage_manager.join()
     except (KeyboardInterrupt, SystemExit):
