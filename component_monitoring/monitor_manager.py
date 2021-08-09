@@ -15,6 +15,7 @@ from component_monitoring.monitor_factory import MonitorFactory
 class MonitorManager(Process):
     CMD_SHUTDOWN = 'shutdown'
     CMD_START = 'activate'
+    CMD_STORE = 'store'
     STATUS_FAILURE = 'failed'
     STATUS_SUCCESS = 'success'
     TYPE_ACK = 'ack'

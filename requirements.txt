@@ -9,3 +9,4 @@ asyncio
 numpy
 pymongo
 jsonschema
+sqlalchemy

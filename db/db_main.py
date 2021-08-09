@@ -1,4 +1,5 @@
 import json
+from multiprocessing import Process
 from signal import SIGINT, signal
 from threading import Thread
 
@@ -12,7 +13,7 @@ from settings import init
 # from db import DB_Manager
 
 
-class DB_Storage(Thread):
+class DB_Storage(Process):
     """
     This class supports multi-threaded approach to store the monitoring data.
     It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
@@ -25,7 +26,7 @@ class DB_Storage(Thread):
             topic_name, value_deserializer=lambda m: json.loads(m.decode('utf-8')))
         self.config = config
 
-    def run(self):
+    def start(self):
         self.store_messages()
 
     def store_messages(self):
@@ -66,4 +67,5 @@ if __name__ == '__main__':
 
     db_storage = DB_Storage(
         config_data, topic_name="hsrb_monitoring_feedback_rgbd")
-    db_storage.store_messages()
+    db_storage.start()
+    db_storage.join()
