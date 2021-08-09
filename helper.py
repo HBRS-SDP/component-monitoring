@@ -6,6 +6,7 @@ import json
 from bson import json_util
 from jsonschema import validate
 
+
 def convert_message(message: ConsumerRecord, db_type: str):
     timestamp = message.timestamp
     value = deserialize(message)
@@ -17,6 +18,7 @@ def convert_message(message: ConsumerRecord, db_type: str):
                 "monitorName": monitor_name, "healthStatus": health_status}
     return json_msg
 
+
 def validate_control_message(self, msg: dict) -> bool:
     try:
         validate(instance=msg, schema=self.event_schema)
@@ -24,11 +26,12 @@ def validate_control_message(self, msg: dict) -> bool:
     except:
         return False
 
+
 def serialize(msg: dict) -> bytes:
     return json.dumps(msg, default=json_util.default).encode('utf-8')
 
 
-def deserialize(msg:ConsumerRecord) -> dict:
+def deserialize(msg: ConsumerRecord) -> dict:
     return json.loads(msg.value)
 
 

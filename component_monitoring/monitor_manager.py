@@ -11,8 +11,8 @@ from component_monitoring.config.config_params import ComponentMonitorConfig
 from component_monitoring.monitor_factory import MonitorFactory
 import sys
 
-class MonitorManager(Process):
 
+class MonitorManager(Process):
     # Defining some constants
     CMD_SHUTDOWN = 'shutdown'
     CMD_START = 'activate'
@@ -38,8 +38,6 @@ class MonitorManager(Process):
         self.producer = KafkaProducer(bootstrap_servers=server_address, value_serializer=self.serialize)
         self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id='manager',
                                       enable_auto_commit=True, auto_commit_interval_ms=5000)
-        self.storage = None
-        self.storage_config = storage_config
 
         # Loading the json schema for validation
         with open('component_monitoring/schemas/control.json', 'r') as schema:
@@ -90,9 +88,6 @@ class MonitorManager(Process):
                     for target_id in target_ids:
                         self.stop_monitor(target_id)
                 elif cmd == self.CMD_START:
-                    # if len(target_ids) == 1 and target_ids[0] == self.STORAGE:
-                    #if self.storage_config['enable_storage']:
-                        #self.start_storage(target_ids)
                     for target_id in target_ids:
                         try:
                             self.start_monitor(target_id)
@@ -172,13 +167,6 @@ class MonitorManager(Process):
             monitor.start()
             monitor.join()
 
-    def start_storage(self, component_id) -> None:
-        storage_topics = set()
-        for monitor in self.monitors[component_id[0]]:
-            storage_topics.add(monitor.event_topic)
-        message = self.__build_message('', list(storage_topics), self.TYPE_CMD, self.STORAGE)
-        #self.__send_message(self.storage_config['storage_kafka_topic'], message)
-
     def send_status_message(self, target_id: str, status: str) -> None:
         message = dict()
         message['source_id'] = self._id
@@ -188,43 +176,3 @@ class MonitorManager(Process):
         message['message']['command'] = ''
         message['type'] = self.TYPE_ACK
         self.__send_control_message(message)
-
-    # def __build_message(self, status, target_ids, msg_type, command) -> Dict:
-    #     message = dict()
-    #     message['source_id'] = self._id
-    #     message['target_id'] = target_ids
-    #     message['message'] = dict()
-    #     message['message']['status'] = status
-    #     message['message']['command'] = command
-    #     message['type'] = msg_type
-    #     return message
-
-    # def on_send_success(self,record_metadata):
-    #     print(record_metadata.topic)
-    #     print(record_metadata.partition)
-    #     print(record_metadata.offset)
-
-
-    # def on_send_error(self,excp):
-    #     sys.stderr.write('I am an errback', exc_info=excp)
-    #
-    # def __send_message(self, topic_name, message) -> FutureRecordMetadata:
-    #     print(f"Sending message...\n{message}")
-    #
-    #     # result = self.storage_publisher.send(topic=topic_name, value=json.dumps({'foo': 'bar'},default=json_util.default).encode('utf-8'))
-    #     future = self.storage_publisher.send(topic_name, message).add_callback(self.on_send_success).add_errback(self.on_send_error)
-    #     print('Sent Message from Producer!')
-    #     # self.storage_publisher.flush(80)
-    #     return future
-        # raise Exception('spakkiggnustel')
-        # resp = future.get(timeout=60)
-        # print(f"Got some reply: {resp}")
-        # sleep(2)
-        # if result.is_done:
-        #     print(f'Successfully sent value to topic')
-        # else:
-        #     print('Error sending')
-        # # sleep(0.05)
-        # self.storage_publisher.flush(500)
-        # raise Exception('spakkiggnustel')
-        # return result

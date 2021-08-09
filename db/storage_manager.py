@@ -1,8 +1,5 @@
-import json
-from signal import SIGINT, signal
 from multiprocessing import Process
 
-import yaml
 from typing import List
 from db.storage_component import create_storage_component
 from helper import convert_message
@@ -75,57 +72,36 @@ class StorageManager(Process):
     def start_storage(self):
         """
         If the storage has been enabled,
-        this method attaches the kafka
+        this method attaches the kafka consumer to available Kafka Topics
         """
         if self.storage_config['enable_storage']:
             topics = list(self.event_listener.topics())
+            topics = [topic_name for monitor_name in self.monitor_names for topic_name in topics if
+                      monitor_name in topic_name]
             topics.append(self.storage_config['control_channel'])
             self.event_listener.subscribe(topics)
 
-    def stop_storage(self):
-        pass
-
     def update_storage_event_listener(self, msg):
+        """
+        Depending upon the received command signal, we attach or detach from kafka topics
+        """
         message = msg['message']
-        source_id = msg['source_id']
         target_ids = msg['target_id']
         msg_type = msg['type']
+
         if msg_type == 'cmd':
             topics = self.monitor_names.copy()
+
             if message['command'] == 'activate':
                 for target in target_ids:
                     if target not in self.monitor_names:
                         topics.append(target)
+
             if message['command'] == 'shutdown':
                 for target in target_ids:
                     if target in self.monitor_names:
                         topics.remove(target)
+
             if topics != self.monitor_names:
                 topics.append(self.storage_config['control_channel'])
                 self.event_listener.subscribe(topics)
-
-
-def exit_handler(signal_received, frame):
-    """
-    If this file was run as the python program, we can capture the signal and take required action.
-    Currently this method detects ctrl-c key combo and prints the message that the program is Exiting.
-    But this function can be updated as per the requirements.
-    # Handle any cleanup here
-    """
-    print('SIGINT or CTRL-C detected. Exiting gracefully! Cheers :D')
-    exit(0)
-
-
-if __name__ == '__main__':
-    # Reference Link:
-    # https://www.devdungeon.com/content/python-catch-sigint-ctrl-c
-    # Tell Python to run the handler() function when SIGINT is recieved
-    signal(SIGINT, exit_handler)
-
-    # use yaml
-    with open('properties.yaml') as json_file:
-        config_data = yaml.safe_load(json_file)
-
-    db_storage = StorageManager(
-        config_data, topic_name="hsrb_monitoring_feedback_rgbd")
-    db_storage.store_messages()
