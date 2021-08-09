@@ -3,18 +3,18 @@ import argparse
 import json
 import time
 import uuid
-
+import logging
 import rospy
 
-#from ropod.pyre_communicator.base_class import RopodPyre
+# from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.component_network import ComponentNetwork
-#from component_monitoring.recovery_manager import RecoveryManager
+# from component_monitoring.recovery_manager import RecoveryManager
 from component_monitoring.utils.robot_store_interface import \
     RobotStoreInterface
-#from component_monitoring.communication import BlackBoxPyreCommunicator
-from db.db_main import DB_Storage
+# from component_monitoring.communication import BlackBoxPyreCommunicator
+from db.storage_manager import StorageManager
 
 
 def generate_robot_status_msg(robot_id):
@@ -88,20 +88,27 @@ if __name__ == '__main__':
 
     # we initialise a manager for the monitors that will continuously
     # update the component status message
+    storage_config = config_data['storage_config']
     monitor_manager = MonitorManager(hw_monitor_config_params,
-                                     sw_monitor_config_params)
+                                     sw_monitor_config_params, storage_config)
 
     component_network = ComponentNetwork(config_file_path)
 
     try:
-        monitor_manager.start()
-        monitor_manager.join()
-        db_config = config_data['db_config']
 
-        db_storage = DB_Storage(
-            db_config, topic_name="hsrb_monitoring_feedback_rgbd")
-        # db_storage.store_messages()
-        db_storage.start()
+        storage_manager = StorageManager(storage_config)
+        # storage_manager.start()
+        monitor_manager.start()
+
+        #logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.INFO)
+        logging.root.setLevel(logging.INFO)
+        logging.error("ERRORRRRRRRR")
+        logging.info("DONY")
+
+        # storage_manager.join()
+        monitor_manager.join()
 
     except (KeyboardInterrupt, SystemExit):
         print('Component monitors exiting')

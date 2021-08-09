@@ -3,7 +3,7 @@ from signal import SIGINT, signal
 
 import yaml
 
-from db.Storage_Manager import SQLManager, create_manager
+from db.storage_component import SQLStorageComponent, create_storage_component
 from helper import convert_message
 from kafka import KafkaConsumer
 from settings import init
@@ -29,7 +29,7 @@ class DB_Storage:
             db_name = self.config['config']['storage_name']
             db_config = self.config['available_storages'][db_name]
             init(db_config)
-            storage_manager = create_manager(db_config)
+            storage_manager = create_storage_component(db_config)
             for message in self.event_listener:
                 event_log = convert_message(message, db_config['type'])
                 storage_manager.create_query(event_log)

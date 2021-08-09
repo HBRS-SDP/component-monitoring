@@ -24,7 +24,7 @@ class MonitorBase(Process):
         with open('component_monitoring/schemas/event.json', 'r') as schema:
             self.event_schema = json.load(schema)
         self.healthstatus = {}
-        print(self.event_topic)
+        #print(self.event_topic)
 
     def valid_status_message(self, msg: dict) -> bool:
         try:
