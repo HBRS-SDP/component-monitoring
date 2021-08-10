@@ -8,19 +8,6 @@ from component_monitoring.utils.component_network import ComponentNetwork
 from db.db_main import Storage
 
 import logging
-# This sets the root logger to write to stdout (your console).
-# Your script/app needs to call this somewhere at least once.
-logging.basicConfig()
-
-# By default the root logger is set to WARNING and all loggers you define
-# inherit that value. Here we set the root logger to NOTSET. This logging
-# level is automatically inherited by all existing and new sub-loggers
-# that do not set a less verbose level.
-logging.root.setLevel(logging.INFO)
-
-# The following line sets the root logger level as well.
-# It's equivalent to both previous statements combined:
-logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
     rospy.init_node('component_monitor', disable_signals=True)
@@ -32,6 +19,11 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', help='print debug output', action='store_true')
 
     args = parser.parse_args()
+    # setup logging
+    if args.debug:
+        logging.basicConfig(level=logging.INFO)
+    else:
+        logging.basicConfig(level=logging.WARNING)
     config_file_path = args.config_file
     config_data = ConfigUtils.read_config(config_file_path)
 
