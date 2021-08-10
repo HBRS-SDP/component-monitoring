@@ -1,35 +1,3 @@
-class ComponentRecoveryConfig(object):
-    def __init__(self):
-        ## component name
-        self.name = ''
-
-        ## name of a monitor for the component
-        self.monitor = ''
-
-        ## name of a parameter to monitor
-        self.monitored_param = ''
-
-        ## name of a component to restart on failure
-        self.executable_to_restart = ''
-
-        ## indicates whether to recover the children of the component
-        ## when the component itself is recovered
-        self.recover_children = False
-
-    def __repr__(self):
-        obj = self.get_dict()
-        return str(obj)
-
-    def get_dict(self):
-        obj = dict()
-        obj['name'] = self.name
-        obj['monitor'] = self.monitor
-        obj['monitored_parameter'] = self.monitored_param
-        obj['executable_to_restart'] = self.executable_to_restart
-        obj['component_type'] = self.component_type
-        obj['recover_children'] = self.recover_children
-        return obj
-
 class OutputConfig(object):
     def __init__(self):
         ## output value name
@@ -40,9 +8,6 @@ class OutputConfig(object):
 
         ## expected output value
         self.expected_value = ''
-
-        ## Apache kafka topic for publishing
-        # self.topic = ''
 
     def __repr__(self):
         obj = self.get_dict()
@@ -129,10 +94,6 @@ class ComponentMonitorConfig(object):
         ## and the values are dictionaries of monitor descriptions
         self.dependency_monitors = dict()
 
-        ## a list of recovery actions to take in case
-        ## the component is not operating as expected
-        self.recovery_actions = list()
-
     def get_dict(self):
         obj = dict()
         obj['component_name'] = self.component_name
@@ -143,7 +104,6 @@ class ComponentMonitorConfig(object):
             obj['modes'][name] = mode.get_dict()
         obj['component_dependencies'] = self.component_dependencies
         obj['dependency_monitors'] = self.dependency_monitors
-        obj['recovery_actions'] = self.recovery_actions
         return obj
 
     def __repr__(self):

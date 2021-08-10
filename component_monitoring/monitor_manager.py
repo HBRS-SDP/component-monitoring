@@ -25,7 +25,7 @@ class STATUS(Enum):
 
 class TYPE(Enum):
     ACK = 'ack'
-    CMD = 'cmd'
+    CMD = 'command'
 
 
 class MonitorManager(Process):
@@ -44,7 +44,7 @@ class MonitorManager(Process):
         self.producer = KafkaProducer(bootstrap_servers=server_address, value_serializer=self.serialize)
         self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id='manager',
                                       enable_auto_commit=True, auto_commit_interval_ms=5000)
-        self.storage = Storage()
+        # self.storage = Storage()
 
         with open('component_monitoring/schemas/control.json', 'r') as schema:
             self.event_schema = json.load(schema)
@@ -68,25 +68,26 @@ class MonitorManager(Process):
 
     def __run(self):
         for msg in self.consumer:
-            self.logger.info(f"Processing {msg.key}")
+            self.logger.info(f"Processing {msg.value}")
             message = self.deserialize(msg)
             if not self.validate_control_message(message):
                 self.logger.warning("Control message could not be validated!")
-            if self._id != message['source_id'] and message['type'] == TYPE.CMD:
+                self.logger.warning(msg)
+            if self._id != message['source_id'] and TYPE.CMD.value in message['message']:
                 target_ids = message['target_id']
                 source_id = message['source_id']
-                cmd = message['message']['command']
+                cmd = CMD(message['message']['command'])
                 if cmd == CMD.SHUTDOWN:
                     for target_id in target_ids:
-                        self.stop_monitor(target_id)
+                        self.stop_monitor(source_id, target_id)
                 elif cmd == CMD.START:
                     for target_id in target_ids:
-                        try:
-                            self.start_monitor(source_id, target_id)
-                            self.send_status_message(source_id, STATUS.SUCCESS)
-                        except Exception:
-                            self.logger.warning(f"Monitor with ID {target_id} could not be started!")
-                            self.send_status_message(source_id, STATUS.FAILURE)
+                        # try:
+                        self.start_monitor(source_id, target_id)
+                        self.send_status_message(source_id, STATUS.SUCCESS, '')
+                        # except Exception:
+                        #     self.logger.warning(f"Monitor with ID {target_id} could not be started!")
+                        #     self.send_status_message(source_id, STATUS.FAILURE, '')
                 elif cmd == CMD.STORE:
                     if len(target_ids) > 0:
                         self.logger.warning(f"More than one Target ID provided with command {cmd}!")
@@ -120,7 +121,8 @@ class MonitorManager(Process):
         try:
             validate(instance=msg, schema=self.event_schema)
             return True
-        except:
+        except Exception as e:
+            self.logger.warning(e)
             return False
 
     def start_monitors(self) -> None:
@@ -148,15 +150,15 @@ class MonitorManager(Process):
         self.monitors[component_name][mode_name].stop()
         del self.monitors[component_name][mode_name]
 
-    def start_monitor(self, component_name: str, mode_id: str) -> None:
+    def start_monitor(self, component_name: str, mode_name: str) -> None:
         monitor = MonitorFactory.get_monitor(self.monitor_config[component_name].type, component_name,
-                                             self.monitor_config[component_name].modes[mode_id],
+                                             self.monitor_config[component_name].modes[mode_name],
                                              self.server_address, self.control_channel)
         try:
-            self.monitors[component_name][mode_id] = monitor
+            self.monitors[component_name][mode_name] = monitor
         except KeyError:
             self.monitors[component_name] = dict()
-            self.monitors[component_name][mode_id] = monitor
+            self.monitors[component_name][mode_name] = monitor
         monitor.start()
         monitor.join()
 
@@ -170,7 +172,7 @@ class MonitorManager(Process):
         message = dict()
         message['source_id'] = self._id
         message['target_id'] = [target_id]
-        message['type'] = TYPE.ACK
+        message['type'] = TYPE.ACK.value
         message['message'] = dict()
         message['message']['status'] = dict()
         message['message']['status']['code'] = code.value

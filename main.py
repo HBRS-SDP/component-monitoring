@@ -1,56 +1,26 @@
 #!/usr/bin/env python
-import time
-import json
-import uuid
 import argparse
 import rospy
 
-#from ropod.pyre_communicator.base_class import RopodPyre
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
-#from component_monitoring.recovery_manager import RecoveryManager
-from component_monitoring.utils.robot_store_interface import RobotStoreInterface
 from component_monitoring.utils.component_network import ComponentNetwork
-#from component_monitoring.communication import BlackBoxPyreCommunicator
 from db.db_main import Storage
 
+import logging
+# This sets the root logger to write to stdout (your console).
+# Your script/app needs to call this somewhere at least once.
+logging.basicConfig()
 
-def generate_robot_status_msg(robot_id):
-    '''Returns a status message dictionary with the following format:
+# By default the root logger is set to WARNING and all loggers you define
+# inherit that value. Here we set the root logger to NOTSET. This logging
+# level is automatically inherited by all existing and new sub-loggers
+# that do not set a less verbose level.
+logging.root.setLevel(logging.INFO)
 
-    {
-        "header":
-        {
-            "type": "HEALTH-STATUS",
-            "metamodel": "ropod-msg-schema.json",
-            "msgId": <unique-message-ID>,
-            "timestamp": <current-timestamp>
-        },
-        "payload":
-        {
-            "metamodel": "ropod-component-monitor-schema.json",
-            "robotId": [robot_id],
-            "monitors": {}
-        }
-    }
-
-    Keyword arguments:
-    robot_id: str -- robot ID/name for the status message
-
-    '''
-    msg = dict()
-
-    msg["header"] = dict()
-    msg["header"]["type"] = "HEALTH-STATUS"
-    msg["header"]["metamodel"] = "ropod-msg-schema.json"
-    msg["header"]["msgId"] = str(uuid.uuid4())
-    msg["header"]["timestamp"] = time.time()
-
-    msg["payload"] = dict()
-    msg["payload"]["metamodel"] = "ropod-component-monitor-schema.json"
-    msg["payload"]["robotId"] = robot_id
-    msg["payload"]["monitors"] = {}
-    return msg
+# The following line sets the root logger level as well.
+# It's equivalent to both previous statements combined:
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
     rospy.init_node('component_monitor', disable_signals=True)
@@ -80,10 +50,6 @@ if __name__ == '__main__':
     ConfigUtils.hw_monitor_config_params = hw_monitor_config_params
     ConfigUtils.sw_monitor_config_params = sw_monitor_config_params
 
-    # we store the component configuration in the database
-    #robot_store_interface.store_component_configuration(hw_monitor_config_params,
-    #                                                    sw_monitor_config_params)
-
     # we initialise a manager for the monitors that will continuously
     # update the component status message
     monitor_manager = MonitorManager(hw_monitor_config_params,
@@ -98,7 +64,6 @@ if __name__ == '__main__':
         db_config = config_data['db_config']
         db_storage = Storage(
             db_config, topic_name="hsrb_monitoring_feedback_rgbd")
-        # db_storage.store_messages()
         db_storage.start()
 
     except (KeyboardInterrupt, SystemExit):

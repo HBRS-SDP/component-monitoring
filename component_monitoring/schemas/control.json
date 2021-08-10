@@ -15,27 +15,42 @@
     },
     "message": {
       "type": "object",
-      "properties": {
-        "command": {
-          "type": "string"
+      "oneOf": [
+        {
+          "properties": {
+            "command": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "command"
+          ]
         },
-        "status": {
-          "type": "string"
+        {
+          "properties": {
+            "status": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": ["code"]
+            }
+          },
+          "required": [
+            "status"
+          ]
         }
-      },
-      "required": [
-        "command",
-        "status"
       ]
-    },
-    "type": {
-      "type": "string"
     }
   },
   "required": [
     "source_id",
     "target_id",
-    "message",
-    "type"
+    "message"
   ]
 }

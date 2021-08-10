@@ -1,15 +1,14 @@
 import json
 from multiprocessing import Process
 from signal import SIGINT, signal
-from threading import Thread
 from typing import List
 
 import yaml
 
-from db.Storage_Manager import SQLManager, create_manager
-from helper import convert_message
+from db.Storage_Manager import create_manager
+from db.helper import convert_message
 from kafka import KafkaConsumer
-from settings import init
+from db.settings import init
 
 # from db import DB_Manager
 

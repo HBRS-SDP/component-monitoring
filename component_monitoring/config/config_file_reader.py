@@ -27,6 +27,9 @@ class ComponentMonitorConfigFileReader(object):
         else:
             raise AssertionError('{0}: component_name not specified'.format(config_file_name))
 
+        if 'type' in root:
+            params.type = root['type']
+
         if 'description' in root:
             params.description = root['description']
         else:

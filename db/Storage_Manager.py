@@ -1,8 +1,6 @@
 import copy
 
-from pymongo.cursor import Cursor
-
-import settings
+from db import settings
 from db.AbstractStorageManager import AbstractStorageManager
 from db.models.event_monitor import EventLog
 

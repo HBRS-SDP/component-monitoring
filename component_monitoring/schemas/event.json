@@ -9,15 +9,7 @@
       "type": "string"
     },
     "healthStatus": {
-      "type": "object",
-      "properties": {
-        "nans": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "nans"
-      ]
+      "type": "object"
     }
   },
   "required": [
