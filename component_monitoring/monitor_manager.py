@@ -14,18 +14,19 @@ from component_monitoring.monitor_base import MonitorBase
 from component_monitoring.monitor_factory import MonitorFactory
 from db.db_main import Storage
 
-class CMD(Enum):
+class Command(Enum):
     START = 'activate'
     SHUTDOWN = 'shutdown'
     STORE = 'store'
 
-class STATUS(Enum):
+class ResponseCode(Enum):
     SUCCESS = 200
     FAILURE = 400
 
-class TYPE(Enum):
-    ACK = 'ack'
-    CMD = 'command'
+class MessageType(Enum):
+    RESPONSE = 'response'
+    REQUEST = 'request'
+    INFO = 'info'
 
 
 class MonitorManager(Process):
@@ -73,26 +74,25 @@ class MonitorManager(Process):
             if not self.validate_control_message(message):
                 self.logger.warning("Control message could not be validated!")
                 self.logger.warning(msg)
-            if self._id != message['source_id'] and TYPE.CMD.value in message['message']:
-                target_ids = message['target_id']
-                source_id = message['source_id']
-                cmd = CMD(message['message']['command'])
-                if cmd == CMD.SHUTDOWN:
-                    for target_id in target_ids:
-                        self.stop_monitor(source_id, target_id)
-                elif cmd == CMD.START:
-                    for target_id in target_ids:
-                        # try:
-                        self.start_monitor(source_id, target_id)
-                        self.send_status_message(source_id, STATUS.SUCCESS, '')
-                        # except Exception:
-                        #     self.logger.warning(f"Monitor with ID {target_id} could not be started!")
-                        #     self.send_status_message(source_id, STATUS.FAILURE, '')
-                elif cmd == CMD.STORE:
-                    if len(target_ids) > 0:
-                        self.logger.warning(f"More than one Target ID provided with command {cmd}!")
-                    else:
-                        self.storage.update(self.monitors[source_id][target_ids[0]])
+            message_type = MessageType(message['message'])
+            if self._id == message['to'] and MessageType.REQUEST == message_type:
+                component = message['from']
+                message_body = message['body']
+                # process message body for REQUEST
+                cmd = Command(message_body['command'])
+                if cmd == Command.SHUTDOWN:
+                    for monitor in message_body['monitors']:
+                        self.stop_monitor(component, monitor)
+                elif cmd == Command.START:
+                    for monitor in message_body['monitors']:
+                        try:
+                            self.start_monitor(component, monitor)
+                            self.send_response(component, ResponseCode.SUCCESS, '')
+                        except Exception:
+                            self.logger.warning(f"Monitor of component {component} with ID {monitor} could not be started!")
+                            self.send_response(component, ResponseCode.FAILURE, '')
+                elif cmd == Command.STORE:
+                    pass
 
 
     def start(self):
@@ -110,6 +110,11 @@ class MonitorManager(Process):
     def terminate(self) -> None:
         self.stop_monitors()
         super().terminate()
+
+    def log_off(self) -> None:
+        for component in self.monitors.keys():
+            msg = {"source_id": self._id, "target_id": [component], "info": "log"}
+            self.__send_control_message(msg)
 
     def serialize(self, msg) -> bytes:
         return json.dumps(msg, default=json_util.default).encode('utf-8')
@@ -151,6 +156,8 @@ class MonitorManager(Process):
         del self.monitors[component_name][mode_name]
 
     def start_monitor(self, component_name: str, mode_name: str) -> None:
+        if component_name in self.monitors and mode_name in self.monitors[component_name]:
+            self.logger.warning(f"Monitor {mode_name} of {component_name} is already started!")
         monitor = MonitorFactory.get_monitor(self.monitor_config[component_name].type, component_name,
                                              self.monitor_config[component_name].modes[mode_name],
                                              self.server_address, self.control_channel)
@@ -168,13 +175,13 @@ class MonitorManager(Process):
             storage_topics.append(monitor.event_topic)
         self.storage.update(storage_topics)
 
-    def send_status_message(self, target_id: str, code: STATUS, msg: str) -> None:
+    def send_response(self, receiver: str, code: ResponseCode, msg: str) -> None:
         message = dict()
-        message['source_id'] = self._id
-        message['target_id'] = [target_id]
-        message['type'] = TYPE.ACK.value
-        message['message'] = dict()
-        message['message']['status'] = dict()
-        message['message']['status']['code'] = code.value
-        message['message']['status']['message'] = msg
+        message['from'] = self._id
+        message['to'] = receiver
+        message['message'] = MessageType.RESPONSE.value
+        message['body'] = dict()
+        message['body']['status'] = dict()
+        message['body']['status']['code'] = code.value
+        message['body']['status']['message'] = msg
         self.__send_control_message(message)

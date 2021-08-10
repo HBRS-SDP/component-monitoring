@@ -59,4 +59,5 @@ if __name__ == '__main__':
         db_storage.start()
 
     except (KeyboardInterrupt, SystemExit):
+        monitor_manager.log_off()
         print('Component monitors exiting')

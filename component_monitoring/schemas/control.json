@@ -2,55 +2,114 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "source_id": {
+    "from": {
       "type": "string"
     },
-    "target_id": {
-      "type": "array",
-      "items": [
-        {
-          "type": "string"
-        }
-      ]
+    "to": {
+      "type": "string"
     },
     "message": {
-      "type": "object",
-      "oneOf": [
-        {
-          "properties": {
-            "command": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "command"
-          ]
-        },
-        {
-          "properties": {
-            "status": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "number"
-                },
-                "message": {
-                  "type": "string"
-                }
-              },
-              "required": ["code"]
-            }
-          },
-          "required": [
-            "status"
-          ]
-        }
+      "enum": [
+        "request",
+        "response",
+        "info"
       ]
+    },
+    "body": {
+      "type": "object"
     }
   },
   "required": [
-    "source_id",
-    "target_id",
-    "message"
+    "from",
+    "to",
+    "message",
+    "body"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "message": {
+            "const": "request"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "monitors": {
+                "type": "array"
+              }
+            },
+            "required": [
+              "command",
+              "monitors"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message": {
+            "const": "response"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "status": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "number"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "code"
+              ]
+            },
+            "required": [
+              "status"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message": {
+            "const": "info"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "body": {
+            "properties": {
+              "monitors": {
+                "type": "array"
+              },
+              "actions": {
+                "type": "array"
+              }
+            },
+            "required": ["monitors", "actions"]
+          }
+        }
+      }
+    }
   ]
 }
