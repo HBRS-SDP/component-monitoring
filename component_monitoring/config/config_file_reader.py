@@ -45,7 +45,7 @@ class ComponentMonitorConfigFileReader(object):
             for mode_config_file in root['modes']:
                 mode_config = ComponentMonitorConfigFileReader.__load_mode_config(root_dir,
                                                                                   mode_config_file)
-                params.modes.append(mode_config)
+                params.modes[mode_config.name] = mode_config
         else:
             raise AssertionError('{0}: modes not specified'.format(config_file_name))
 

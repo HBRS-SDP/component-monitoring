@@ -2,6 +2,7 @@ import json
 from multiprocessing import Process
 from signal import SIGINT, signal
 from threading import Thread
+from typing import List
 
 import yaml
 
@@ -13,14 +14,14 @@ from settings import init
 # from db import DB_Manager
 
 
-class DB_Storage(Process):
+class Storage(Process):
     """
     This class supports multi-threaded approach to store the monitoring data.
     It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
     """
 
     def __init__(self, config, topic_name="hsrb_monitoring_feedback_rgbd"):
-        super(DB_Storage, self).__init__()
+        super(Storage, self).__init__()
         self.topic_name = topic_name
         self.event_listener = KafkaConsumer(
             topic_name, value_deserializer=lambda m: json.loads(m.decode('utf-8')))
@@ -28,6 +29,9 @@ class DB_Storage(Process):
 
     def start(self):
         self.store_messages()
+
+    def update(self, topic_list: List[str]):
+        return
 
     def store_messages(self):
         """
@@ -65,7 +69,7 @@ if __name__ == '__main__':
     with open('properties.yaml') as json_file:
         config_data = yaml.safe_load(json_file)
 
-    db_storage = DB_Storage(
+    db_storage = Storage(
         config_data, topic_name="hsrb_monitoring_feedback_rgbd")
     db_storage.start()
     db_storage.join()

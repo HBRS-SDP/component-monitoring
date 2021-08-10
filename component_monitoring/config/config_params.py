@@ -111,12 +111,15 @@ class ComponentMonitorConfig(object):
         ## name of the monitored component
         self.component_name = ''
 
+        ## type of the monitored component (software or hardware)
+        self.type = ''
+
         ## monitor description
         self.description = ''
 
         ## a list of 'MonitorModeConfig' objects specifying
         ## the parameters of the monitor modes
-        self.modes = list()
+        self.modes = dict()
 
         ## a list of components on which the component depends
         self.component_dependencies = list()
@@ -133,8 +136,11 @@ class ComponentMonitorConfig(object):
     def get_dict(self):
         obj = dict()
         obj['component_name'] = self.component_name
+        obj['type'] = self.type
         obj['description'] = self.description
-        obj['modes'] = [i.get_dict() for i in self.modes]
+        obj['modes'] = dict()
+        for name, mode in self.modes.items():
+            obj['modes'][name] = mode.get_dict()
         obj['component_dependencies'] = self.component_dependencies
         obj['dependency_monitors'] = self.dependency_monitors
         obj['recovery_actions'] = self.recovery_actions
