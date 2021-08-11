@@ -16,8 +16,9 @@ black_box:
     id: black_box_001
     zyre_node_name: component_monitoring_query_node_ropod_001
     zyre_groups: ['MONITOR', 'ROPOD']
-db_config:
+storage:
     enable_storage: true
+    control_channel: 'monitor_manager'
     config:
       storage_name: mongo
     available_storages:

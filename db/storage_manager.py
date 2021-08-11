@@ -1,11 +1,13 @@
 import copy
 
+from pymongo.cursor import Cursor
+
 from db import settings
-from db.AbstractStorageManager import AbstractStorageManager
+from db.abstract_storage_manager import AbstractStorageManager
 from db.models.event_monitor import EventLog
 
 
-def create_manager(db_config):
+def create_storage_component(db_config):
     """
     This function is responsible to initialize the required Storage Component depending upon the application configuration.
     """
@@ -28,7 +30,7 @@ class SQLManager(AbstractStorageManager):
     def create_query(self, data):
         """
         This method runs the insert query on the required table of the SQL database.
-        Inshort it inserts a row in the SQL table.
+        In short it inserts a row in the SQL table.
         It expects the data to be an object of extension of SQLAlchemy's Base class.
         """
         self.session.add(data)

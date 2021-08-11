@@ -1,3 +1,6 @@
+import os
+import time
+
 import numpy as np
 from sensor_msgs import point_cloud2
 
@@ -34,8 +37,13 @@ class PointcloudMonitor(MonitorBase):
             raise ConfigurationError("NaN threshold has to be a float!")
         self.event_schema['properties']['healthStatus']['properties'] = {"nan_ratio": {"type": "number"}}
         self.event_schema['properties']['healthStatus']['required'] = ["nan_ratio"]
+
+    def run(self):
+        super().run()
         # create ros topic subscriber
+        rospy.init_node(f"{self.component}_{self.config_params.name}", disable_signals=True)
         self._subscriber = rospy.Subscriber(self.ros_topic, PointCloud2, self.callback)
+        self.logger.info(f"subsribed to ros topic {self.ros_topic}")
 
     def callback(self, data):
         gen = point_cloud2.read_points(data, field_names=("x", "y", "z"))  # for yelding the errors

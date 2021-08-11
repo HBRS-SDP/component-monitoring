@@ -20,10 +20,11 @@ class MonitorBase(Process):
         self.config_params = config_params
         self.event_topic = f"{self.component}_{self.config_params.name}_eventbus"
         self.control_topic = control_channel
-        self.logger = logging.Logger(f"monitor_{self.config_params.name}")
-        self.producer = KafkaProducer(bootstrap_servers=server_address)
-        self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id=self.config_params.name,
-                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.server_address = server_address
+        self.logger = logging.getLogger(f"monitor_{self.config_params.name}")
+        self.logger.setLevel(logging.INFO)
+        self.producer = None
+        self.consumer = None
         with open('component_monitoring/schemas/event.json', 'r') as schema:
             self.event_schema = json.load(schema)
         self.healthstatus = {}
@@ -45,13 +46,15 @@ class MonitorBase(Process):
         else:
             self.producer.send(topic=self.event_topic, value=self.serialize(msg))
 
-    def start(self):
-        self.consumer.subscribe([self.event_topic, self.control_topic])
-        super().start()
-
     def stop(self):
         self.consumer.unsubscribe()
         super().terminate()
+
+    def run(self) -> None:
+        self.producer = KafkaProducer(bootstrap_servers=self.server_address)
+        self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id=self.config_params.name,
+                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.consumer.subscribe([self.event_topic, self.control_topic])
 
     def serialize(self, msg):
         return json.dumps(msg, default=json_util.default).encode('utf-8')

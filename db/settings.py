@@ -18,7 +18,6 @@ def init(conn_details):
 def init_sql(conn_details):
     """
     This function initializes the global SQLAlchemy engine based upon the configuration provided for the Storage Component.
-
     # Reference Link:
     # https://stackoverflow.com/q/63368099
     """

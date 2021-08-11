@@ -2,7 +2,7 @@ import json
 import logging
 from enum import Enum
 from multiprocessing import Process
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from bson import json_util
 from jsonschema import validate
@@ -10,14 +10,15 @@ from kafka import KafkaProducer, KafkaConsumer
 from kafka.producer.future import FutureRecordMetadata
 
 from component_monitoring.config.config_params import ComponentMonitorConfig
-from component_monitoring.monitor_base import MonitorBase
 from component_monitoring.monitor_factory import MonitorFactory
-from db.db_main import Storage
+from db.storage import Storage
+
 
 class Command(Enum):
     START = 'activate'
     SHUTDOWN = 'shutdown'
     STORE = 'store'
+    UNSTORE = 'unstore'
 
 class ResponseCode(Enum):
     SUCCESS = 200
@@ -29,12 +30,16 @@ class MessageType(Enum):
     INFO = 'info'
 
 
-class MonitorManager(Process):
+class MonitorManager:
+    """
+    Monitor Manager
+    """
 
     def __init__(self, hw_monitor_config_params: List[ComponentMonitorConfig],
-                 sw_monitor_config_params: List[ComponentMonitorConfig], server_address: str = 'localhost:9092',
+                 sw_monitor_config_params: List[ComponentMonitorConfig],
+                 storage_config_params: Dict,
+                 server_address: str = 'localhost:9092',
                  control_channel: str = 'monitor_manager'):
-        Process.__init__(self)
 
         self.logger = logging.getLogger('monitor_manager')
         self.logger.setLevel(logging.INFO)
@@ -42,10 +47,9 @@ class MonitorManager(Process):
         self._id = 'manager'
         self.control_channel = control_channel
         self.server_address = server_address
-        self.producer = KafkaProducer(bootstrap_servers=server_address, value_serializer=self.serialize)
-        self.consumer = KafkaConsumer(bootstrap_servers=server_address, client_id='manager',
-                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
-        # self.storage = Storage()
+        self.producer = None
+        self.consumer = None
+        # self.storage = Storage(storage_config_params)
 
         with open('component_monitoring/schemas/control.json', 'r') as schema:
             self.event_schema = json.load(schema)
@@ -65,9 +69,24 @@ class MonitorManager(Process):
             self.monitor_config[monitor_config.component_name] = monitor_config
 
     def __send_control_message(self, msg) -> FutureRecordMetadata:
-        return self.producer.send(self.control_channel, msg)
+        """
 
-    def __run(self):
+        @param msg:
+        @return:
+        """
+        result =  self.producer.send(self.control_channel, msg)
+        self.producer.flush()
+        return result
+
+    def run(self) -> None:
+        """
+
+        @return:
+        """
+        self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id='manager',
+                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.consumer.subscribe([self.control_channel])
+        self.producer = KafkaProducer(bootstrap_servers=self.server_address, value_serializer=self.serialize)
         for msg in self.consumer:
             self.logger.info(f"Processing {msg.value}")
             message = self.deserialize(msg)
@@ -92,37 +111,45 @@ class MonitorManager(Process):
                             self.logger.warning(f"Monitor of component {component} with ID {monitor} could not be started!")
                             self.send_response(component, ResponseCode.FAILURE, '')
                 elif cmd == Command.STORE:
-                    pass
-
-
-    def start(self):
-        # monitors = self.start_monitors()
-        # for m in monitors:
-        #     m.join()
-        super().start()
-        self.consumer.subscribe([self.control_channel])
-        self.__run()
-
-    def kill(self) -> None:
-        self.stop_monitors()
-        super().kill()
-
-    def terminate(self) -> None:
-        self.stop_monitors()
-        super().terminate()
+                    topic_list = list()
+                    for monitor in message_body['monitors']:
+                        try:
+                            topic_list.append(self.monitors[component][monitor].event_topic)
+                        except KeyError:
+                            pass
+                    # self.storage.add(topic_list)
 
     def log_off(self) -> None:
+        """
+
+        @return:
+        """
         for component in self.monitors.keys():
             msg = {"source_id": self._id, "target_id": [component], "info": "log"}
             self.__send_control_message(msg)
 
     def serialize(self, msg) -> bytes:
+        """
+
+        @param msg:
+        @return:
+        """
         return json.dumps(msg, default=json_util.default).encode('utf-8')
 
     def deserialize(self, msg) -> dict:
+        """
+
+        @param msg:
+        @return:
+        """
         return json.loads(msg.value)
 
     def validate_control_message(self, msg: dict) -> bool:
+        """
+
+        @param msg:
+        @return:
+        """
         try:
             validate(instance=msg, schema=self.event_schema)
             return True
@@ -152,12 +179,25 @@ class MonitorManager(Process):
                 self.stop_monitor(component_name, mode_name)
 
     def stop_monitor(self, component_name: str, mode_name: str) -> None:
+        """
+
+        @param component_name:
+        @param mode_name:
+        @return:
+        """
         self.monitors[component_name][mode_name].stop()
         del self.monitors[component_name][mode_name]
 
     def start_monitor(self, component_name: str, mode_name: str) -> None:
+        """
+
+        @param component_name:
+        @param mode_name:
+        @return:
+        """
         if component_name in self.monitors and mode_name in self.monitors[component_name]:
             self.logger.warning(f"Monitor {mode_name} of {component_name} is already started!")
+            return
         monitor = MonitorFactory.get_monitor(self.monitor_config[component_name].type, component_name,
                                              self.monitor_config[component_name].modes[mode_name],
                                              self.server_address, self.control_channel)
@@ -166,16 +206,27 @@ class MonitorManager(Process):
         except KeyError:
             self.monitors[component_name] = dict()
             self.monitors[component_name][mode_name] = monitor
-        monitor.start()
-        monitor.join()
+        monitor.run()
 
     def start_storage(self, component_id) -> None:
+        """
+
+        @param component_id:
+        @return:
+        """
         storage_topics = list()
         for monitor in self.monitors[component_id]:
             storage_topics.append(monitor.event_topic)
         self.storage.update(storage_topics)
 
     def send_response(self, receiver: str, code: ResponseCode, msg: str) -> None:
+        """
+
+        @param receiver:
+        @param code:
+        @param msg:
+        @return:
+        """
         message = dict()
         message['from'] = self._id
         message['to'] = receiver

@@ -26,3 +26,15 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
     depends_on:
       - zookeeper-server
+  mongo-db:
+    image: 'bitnami/mongodb:4.4'
+    networks:
+      - kafka-net
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'mongodb_data:/bitnami/mongodb'
+
+volumes:
+  mongodb_data:
+    driver: local

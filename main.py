@@ -5,12 +5,12 @@ import rospy
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
 from component_monitoring.utils.component_network import ComponentNetwork
-from db.db_main import Storage
 
 import logging
 
+from db.storage import Storage
+
 if __name__ == '__main__':
-    rospy.init_node('component_monitor', disable_signals=True)
     parser = argparse.ArgumentParser(description='Monitor component status',
                                      epilog='EXAMPLE: python3 main.py 001 001')
     parser.add_argument('config_file', type=str,
@@ -41,22 +41,20 @@ if __name__ == '__main__':
     ConfigUtils.config_data = config_data
     ConfigUtils.hw_monitor_config_params = hw_monitor_config_params
     ConfigUtils.sw_monitor_config_params = sw_monitor_config_params
+    storage_config_params = config_data['storage']
 
+    # initialize storage component
+    # storage = Storage(db_config)
     # we initialise a manager for the monitors that will continuously
     # update the component status message
     monitor_manager = MonitorManager(hw_monitor_config_params,
-                                     sw_monitor_config_params)
+                                     sw_monitor_config_params,
+                                     storage_config_params)
 
     component_network = ComponentNetwork(config_file_path)
 
     try:
-        monitor_manager.start()
-        monitor_manager.join()
-
-        db_config = config_data['db_config']
-        db_storage = Storage(
-            db_config, topic_name="hsrb_monitoring_feedback_rgbd")
-        db_storage.start()
+        monitor_manager.run()
 
     except (KeyboardInterrupt, SystemExit):
         monitor_manager.log_off()
