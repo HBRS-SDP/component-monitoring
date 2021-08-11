@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractStorageManager(ABC):
+class AbstractStorageComponent(ABC):
     """
     An Abstract Storage Manager class that represents the high-level tasks each Storage Manager is responsible to perform.
     """

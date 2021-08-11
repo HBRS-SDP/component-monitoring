@@ -2,9 +2,9 @@ import copy
 
 from pymongo.cursor import Cursor
 
-from db import settings
-from db.abstract_storage_manager import AbstractStorageManager
-from db.models.event_monitor import EventLog
+from storage import settings
+from storage.abstract_storage_component import AbstractStorageComponent
+from storage.models.event_monitor import EventLog
 
 
 def create_storage_component(db_config):
@@ -13,12 +13,12 @@ def create_storage_component(db_config):
     """
     db_type = db_config['type']
     if db_type == 'SQL':
-        return SQLManager()
+        return SQLStorageComponent()
     if db_type == 'NOSQL' and db_config['name'] == 'mongodb':
-        return MongoManager()
+        return MongoStorageComponent()
 
 
-class SQLManager(AbstractStorageManager):
+class SQLStorageComponent(AbstractStorageComponent):
     """
     SQLManager is responsible for all SQL operations on SQL-based Database.
     It uses the SQLAlchemy ORM to provide a generic way to switch between any SQL-based Database provider by minimal changes in configurations.
@@ -73,7 +73,7 @@ class SQLManager(AbstractStorageManager):
         print("[Storage_Manager] [SQLManger] Destroying Object")
 
 
-class MongoManager(AbstractStorageManager):
+class MongoStorageComponent(AbstractStorageComponent):
     def __init__(self):
         self.session = settings.Session
 
@@ -83,6 +83,7 @@ class MongoManager(AbstractStorageManager):
         Inshort it inserts a document in the MonogDB collection.
         It expects the data to be a python dictionary object.
         """
+        print("store")
         return self.session.insert_one(data)
 
     def read_query(self,  data):

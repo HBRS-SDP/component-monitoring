@@ -11,14 +11,13 @@ from kafka.producer.future import FutureRecordMetadata
 
 from component_monitoring.config.config_params import ComponentMonitorConfig
 from component_monitoring.monitor_factory import MonitorFactory
-from db.storage import Storage
 
 
 class Command(Enum):
     START = 'activate'
     SHUTDOWN = 'shutdown'
-    STORE = 'store'
-    UNSTORE = 'unstore'
+    START_STORE = 'store'
+    STOP_STORE = 'unstore'
 
 class ResponseCode(Enum):
     SUCCESS = 200
@@ -30,17 +29,16 @@ class MessageType(Enum):
     INFO = 'info'
 
 
-class MonitorManager:
+class MonitorManager(Process):
     """
     Monitor Manager
     """
 
     def __init__(self, hw_monitor_config_params: List[ComponentMonitorConfig],
                  sw_monitor_config_params: List[ComponentMonitorConfig],
-                 storage_config_params: Dict,
                  server_address: str = 'localhost:9092',
                  control_channel: str = 'monitor_manager'):
-
+        Process.__init__(self)
         self.logger = logging.getLogger('monitor_manager')
         self.logger.setLevel(logging.INFO)
 
@@ -49,7 +47,6 @@ class MonitorManager:
         self.server_address = server_address
         self.producer = None
         self.consumer = None
-        # self.storage = Storage(storage_config_params)
 
         with open('component_monitoring/schemas/control.json', 'r') as schema:
             self.event_schema = json.load(schema)
@@ -110,14 +107,12 @@ class MonitorManager:
                         except Exception:
                             self.logger.warning(f"Monitor of component {component} with ID {monitor} could not be started!")
                             self.send_response(component, ResponseCode.FAILURE, '')
-                elif cmd == Command.STORE:
                     topic_list = list()
                     for monitor in message_body['monitors']:
                         try:
                             topic_list.append(self.monitors[component][monitor].event_topic)
                         except KeyError:
                             pass
-                    # self.storage.add(topic_list)
 
     def log_off(self) -> None:
         """
@@ -207,17 +202,6 @@ class MonitorManager:
             self.monitors[component_name] = dict()
             self.monitors[component_name][mode_name] = monitor
         monitor.run()
-
-    def start_storage(self, component_id) -> None:
-        """
-
-        @param component_id:
-        @return:
-        """
-        storage_topics = list()
-        for monitor in self.monitors[component_id]:
-            storage_topics.append(monitor.event_topic)
-        self.storage.update(storage_topics)
 
     def send_response(self, receiver: str, code: ResponseCode, msg: str) -> None:
         """

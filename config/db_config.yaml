@@ -10,9 +10,9 @@ available_storages:
     groupid: ''
   sqlite:
     name: sqlite3
-    file_name: pythonsqlite.db
+    file_name: pythonsqlite.storage
     type: SQL
-    connection_string: sqlite:///pythonsqlite.db
+    connection_string: sqlite:///pythonsqlite.storage
   mongo:
     name: mongodb
     database_name: component_monitoring

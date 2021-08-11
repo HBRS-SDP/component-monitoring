@@ -35,7 +35,7 @@ class PressureFunctionalMonitor(MonitorBase):
 
 
     def get_pressure_statuses(self):
-        """Call db utils and data utils function from blackbox tools to get the
+        """Call storage utils and data utils function from blackbox tools to get the
         pressure values from blackbox database. It checks for possible faults
         by comparing pressure value of one wheel with another. (Assumption: all
         wheel must have same pressure values as they are always on the same floor)
