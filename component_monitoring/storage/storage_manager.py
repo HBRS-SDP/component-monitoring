@@ -1,18 +1,18 @@
 import json
 import logging
 from multiprocessing import Process
-
-from typing import List
+from typing import Optional, Dict
 
 from jsonschema import validate
 from kafka.consumer.fetcher import ConsumerRecord
+from kafka.producer.future import FutureRecordMetadata
 
-from component_monitoring.monitor_manager import Command, MessageType
-from storage.models.event_monitor import EventLog
-from storage.storage_component import create_storage_component
-from helper import deserialize
-from kafka import KafkaConsumer
-from storage.settings import init
+from component_monitoring.messages.enums import Command, MessageType, ResponseCode
+from component_monitoring.storage.models.event_monitor import EventLog
+from component_monitoring.storage.storage_component import create_storage_component
+from helper import deserialize, serialize
+from kafka import KafkaConsumer, KafkaProducer
+from component_monitoring.storage.settings import init
 
 
 # from storage import DB_Manager
@@ -28,11 +28,12 @@ class StorageManager(Process):
     It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
     """
 
-    def __init__(self, storage_config, server_address: str = 'localhost:9092', ):
+    def __init__(self, storage_config, server_address: str = 'localhost:9092'):
         Process.__init__(self)
-        self._id = "storage_manager"
+        self._id = "manager"
         self.storage_config = storage_config
         self.server_address = server_address
+        self.monitors = dict()
 
         self.logger = logging.getLogger("storage_manager")
         self.logger.setLevel(logging.INFO)
@@ -40,13 +41,18 @@ class StorageManager(Process):
         with open('component_monitoring/schemas/control.json', 'r') as schema:
             self.control_schema = json.load(schema)
 
-        self.monitors = dict()
-
         # initializing the event listener
-        self.event_listener = None
+        self.consumer = None
+        self.producer = None
 
-    def __run(self):
-        self.store_messages()
+    def __send_control_message(self, msg) -> FutureRecordMetadata:
+        """
+
+        @param msg:
+        @return:
+        """
+        result =  self.producer.send(self.storage_config['control_channel'], msg)
+        return result
 
     def run(self):
         """
@@ -54,7 +60,7 @@ class StorageManager(Process):
         """
         super().run()
         self.start_storage()
-        self.__run()
+        self.store_messages()
 
     def store_messages(self):
         """
@@ -68,7 +74,7 @@ class StorageManager(Process):
             init(storage_config)
             storage_manager = create_storage_component(storage_config)
 
-            for message in self.event_listener:
+            for message in self.consumer:
 
                 if message.topic == self.storage_config['control_channel']:
                     # If the received message is on control channel,
@@ -84,11 +90,12 @@ class StorageManager(Process):
         If the storage has been enabled,
         this method attaches the kafka consumer to available Kafka Topics
         """
-        self.event_listener = KafkaConsumer(bootstrap_servers=self.server_address, client_id='storage_manager',
-                                            enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id='storage_manager',
+                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.producer = KafkaProducer(bootstrap_servers=self.server_address, value_serializer=serialize)
         if self.storage_config['enable_storage']:
             topics = [self.storage_config['control_channel']]
-            self.event_listener.subscribe(topics)
+            self.consumer.subscribe(topics)
 
     def update_storage_event_listener(self, message):
         """
@@ -105,6 +112,7 @@ class StorageManager(Process):
         if self._id == message['to'] and MessageType.REQUEST == message_type:
             component = message['from']
             message_body = message['body']
+            print(message_body)
             # process message body for STORE and STOP_STORE REQUEST
             cmd = Command(message_body['command'])
             if cmd == Command.START_STORE:
@@ -113,7 +121,29 @@ class StorageManager(Process):
             elif cmd == Command.STOP_STORE:
                 for monitor in message_body['monitors']:
                     del self.monitors[monitor]
-            self.event_listener.subscribe(list(self.monitors.values()))
+            else:
+                return
+            self.consumer.subscribe(list(self.monitors.values()))
+            self.send_response(component, ResponseCode.SUCCESS, None)
+
+    def send_response(self, receiver: str, code: ResponseCode, msg: Optional[Dict]) -> None:
+        """
+
+        @param receiver:
+        @param code:
+        @param msg:
+        @return:
+        """
+        message = dict()
+        message['from'] = self._id
+        message['to'] = receiver
+        message['message'] = MessageType.RESPONSE.value
+        message['body'] = dict()
+        message['body']['code'] = code.value
+        if msg:
+            for key, value in msg.items():
+                message['body'][key] = value
+        self.__send_control_message(message)
 
     @staticmethod
     def convert_message(message: ConsumerRecord, db_type: str):

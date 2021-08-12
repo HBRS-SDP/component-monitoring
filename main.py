@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-import rospy
+import multiprocessing
 
 from component_monitoring.config.config_utils import ConfigUtils
 from component_monitoring.monitor_manager import MonitorManager
@@ -8,7 +8,7 @@ from component_monitoring.utils.component_network import ComponentNetwork
 
 import logging
 
-from storage.storage_manager import StorageManager
+from component_monitoring.storage.storage_manager import StorageManager
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Monitor component status',
@@ -43,21 +43,24 @@ if __name__ == '__main__':
     ConfigUtils.sw_monitor_config_params = sw_monitor_config_params
     storage_config_params = config_data['storage']
 
+    manager = multiprocessing.Manager()
+    monitors = manager.dict()
+
+    storage_manager = StorageManager(storage_config_params)
+
     # we initialise a manager for the monitors that will continuously
     # update the component status message
     monitor_manager = MonitorManager(hw_monitor_config_params,
                                      sw_monitor_config_params,
-                                     storage_config_params)
-
-    # storage_manager = StorageManager(storage_config_params)
+                                     storage_manager)
 
     component_network = ComponentNetwork(config_file_path)
 
     try:
         monitor_manager.start()
-        # storage_manager.start()
+        storage_manager.start()
         monitor_manager.join()
-        # storage_manager.join()
+        storage_manager.join()
 
     except (KeyboardInterrupt, SystemExit):
         monitor_manager.log_off()

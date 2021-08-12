@@ -65,22 +65,51 @@
         "properties": {
           "body": {
             "properties": {
-              "status": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
+              "code": {
+                "type": "number"
+              },
+              "monitors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "exception": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "topic": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "topic": {
+                      "type": "string"
+                    },
+                    "exception": {
+                      "type": "string"
+                    }
                   }
                 }
-              },
-              "required": [
-                "code"
-              ]
+              }
             },
             "required": [
+              "code",
               "status"
             ]
           }
@@ -104,9 +133,11 @@
               },
               "actions": {
                 "type": "array"
+              },
+              "message": {
+                "type": "string"
               }
-            },
-            "required": ["monitors", "actions"]
+            }
           }
         }
       }

@@ -1,10 +1,8 @@
 import copy
 
-from pymongo.cursor import Cursor
-
-from storage import settings
-from storage.abstract_storage_component import AbstractStorageComponent
-from storage.models.event_monitor import EventLog
+from component_monitoring.storage import settings
+from component_monitoring.storage.abstract_storage_component import AbstractStorageComponent
+from component_monitoring.storage.models.event_monitor import EventLog
 
 
 def create_storage_component(db_config):
