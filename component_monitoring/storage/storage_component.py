@@ -81,7 +81,6 @@ class MongoStorageComponent(AbstractStorageComponent):
         Inshort it inserts a document in the MonogDB collection.
         It expects the data to be a python dictionary object.
         """
-        print("store")
         return self.session.insert_one(data)
 
     def read_query(self,  data):

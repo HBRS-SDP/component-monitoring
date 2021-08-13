@@ -166,7 +166,7 @@ class MonitorManager(Process):
         @param mode_name:
         @return:
         """
-        self.monitors[component_name][mode_name].stop()
+        self.monitors[component_name][mode_name].terminate()
         del self.monitors[component_name][mode_name]
 
     def start_monitor(self, component_name: str, mode_name: str) -> Optional[str]:

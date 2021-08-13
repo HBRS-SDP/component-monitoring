@@ -46,7 +46,7 @@ class MonitorBase(Process):
         else:
             self.producer.send(topic=self.event_topic, value=self.serialize(msg))
 
-    def stop(self):
+    def terminate(self) -> None:
         self.consumer.unsubscribe()
         super().terminate()
 
