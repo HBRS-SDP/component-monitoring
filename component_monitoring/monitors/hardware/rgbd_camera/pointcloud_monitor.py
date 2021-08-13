@@ -1,14 +1,10 @@
-import os
-import time
-
 import numpy as np
+import rospy
 from sensor_msgs import point_cloud2
+from sensor_msgs.msg import PointCloud2
 
 from component_monitoring.config.config_params import MonitorModeConfig, OutputConfig
 from component_monitoring.monitor_base import MonitorBase
-import rospy
-from sensor_msgs.msg import PointCloud2
-
 from component_monitoring.monitor_exception import ConfigurationError
 
 

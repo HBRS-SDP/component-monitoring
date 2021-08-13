@@ -4,15 +4,15 @@ from multiprocessing import Process
 from typing import Optional, Dict, Union
 
 from jsonschema import validate
+from kafka import KafkaConsumer, KafkaProducer
 from kafka.consumer.fetcher import ConsumerRecord
 from kafka.producer.future import FutureRecordMetadata
 
 from component_monitoring.messages.enums import Command, MessageType, ResponseCode
 from component_monitoring.storage.models.event_monitor import EventLog
+from component_monitoring.storage.settings import init
 from component_monitoring.storage.storage_component import create_storage_component
 from helper import deserialize, serialize
-from kafka import KafkaConsumer, KafkaProducer
-from component_monitoring.storage.settings import init
 
 
 # from storage import DB_Manager
