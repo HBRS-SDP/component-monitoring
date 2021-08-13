@@ -66,8 +66,9 @@ class MonitorManager(Process):
 
     def run(self) -> None:
         """
+        Entry point of the Monitor Manager process
 
-        @return:
+        @return: None
         """
         self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id='manager',
                                       enable_auto_commit=True, auto_commit_interval_ms=5000)
