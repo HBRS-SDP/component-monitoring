@@ -1,7 +1,7 @@
 import json
 import logging
 from multiprocessing import Process
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 
 from jsonschema import validate
 from kafka.consumer.fetcher import ConsumerRecord
@@ -24,7 +24,7 @@ from component_monitoring.storage.settings import init
 
 class StorageManager(Process):
     """
-    This class supports multi-threaded approach to store the monitoring data.
+    This class supports multiprocess approach to store the monitoring data.
     It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
     """
 
@@ -128,11 +128,12 @@ class StorageManager(Process):
 
     def send_response(self, receiver: str, code: ResponseCode, msg: Optional[Dict]) -> None:
         """
+        Send a RESPONSE message over the control channel
 
-        @param receiver:
-        @param code:
-        @param msg:
-        @return:
+        @param receiver: The component the message is addressed to
+        @param code: The ResponseCode to be sent
+        @param msg: The optional message to be included in the response
+        @return: None
         """
         message = dict()
         message['from'] = self._id
@@ -146,7 +147,13 @@ class StorageManager(Process):
         self.__send_control_message(message)
 
     @staticmethod
-    def convert_message(message: ConsumerRecord, db_type: str):
+    def convert_message(message: ConsumerRecord, db_type: str) -> Union[EventLog, Dict]:
+        """
+        Convert a Kafka ConvumerRecord into a Database entry
+        @param message: Event message to be converted
+        @param db_type: Database type: One of [SQL, NOSQL]
+        @return: For SQL database: EventLog; For NOSQL: JSON Dict of the converted event message
+        """
         timestamp = message.timestamp
         value = deserialize(message)
         monitor_name = value['monitorName']
