@@ -59,12 +59,19 @@ class MonitorManager(Component):
             if self.validate_request(message):
                 if not self._id == message['To']:
                     continue
+                dialogue_id = message['Id']
+                component = message['From']
                 message_type = self.get_message_type(message)
                 if message_type == MessageType.START:
                     for monitor in message[MessageType.START.value]:
                         self.start_monitor(message['From'], monitor['Id'], message['Id'])
-                    self.logger.error("START")
-                    self.send_response(message['Id'], message['From'], Response.STARTING)
+                    if dialogue_id in self.pending_helos.keys():
+                        self.send_response(dialogue_id, message['From'], Response.STARTING)
+                    else:
+                        monitors = list()
+                        for monitor in message[MessageType.START.value]:
+                            monitors.append({"mode": monitor, "topic": self.monitors[component][monitor['Id']][1]})
+                        self.send_response(dialogue_id, component, Response.OKAY, monitors)
                 elif message_type == MessageType.STOP:
                     for monitor in message[MessageType.STOP.value]:
                         self.stop_monitor(message['From'], monitor)
@@ -74,25 +81,21 @@ class MonitorManager(Component):
             elif self.validate_response(message):
                 pass
             elif self.validate_broadcast(message):
-                self.logger.error("aökljdfhaskljfhasdlkfjhasflkjashflaskhflaskjfhaslkfhasf")
                 message_type = self.get_message_type(message)
-                self.logger.error("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
                 try:
                     component = message[message_type.value]['Component']
                     mode = message[message_type.value]['Mode']
                     dialogue_id = message['Id']
-                    self.logger.error(message[message_type.value]['Topic'])
                     self.monitors[component][mode][1] = message[message_type.value]['Topic']
-                    self.logger.error(self.pending_helos)
                     self.pending_helos[dialogue_id][component][mode] = True
-                    self.logger.error(self.pending_helos[dialogue_id][component].values())
                     if all(helo for helo in self.pending_helos[dialogue_id][component].values()):
                         monitors = list()
                         for monitor in self.pending_helos[dialogue_id][component]:
                             monitors.append({"mode": monitor, "topic": self.monitors[component][mode][1]})
                         self.send_response(dialogue_id, component, Response.OKAY, monitors)
+                        self.logger.error(self.pending_helos)
                         del self.pending_helos[dialogue_id]
-                        self.logger.error("###############################################")
+                        self.logger.error(self.pending_helos)
                 except KeyError:
                     self.logger.warning(f"Received unawaited HELO from {message['Component']} {message['Mode']}")
             else:
