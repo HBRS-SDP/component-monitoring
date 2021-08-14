@@ -70,7 +70,7 @@ class MonitorManager(Component):
                     else:
                         monitors = list()
                         for monitor in message[MessageType.START.value]:
-                            monitors.append({"mode": monitor, "topic": self.monitors[component][monitor['Id']][1]})
+                            monitors.append({"mode": monitor['Id'], "topic": self.monitors[component][monitor['Id']][1]})
                         self.send_response(dialogue_id, component, Response.OKAY, monitors)
                 elif message_type == MessageType.STOP:
                     for monitor in message[MessageType.STOP.value]:
