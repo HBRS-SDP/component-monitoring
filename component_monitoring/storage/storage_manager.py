@@ -8,7 +8,8 @@ from kafka import KafkaConsumer, KafkaProducer
 from kafka.consumer.fetcher import ConsumerRecord
 from kafka.producer.future import FutureRecordMetadata
 
-from component_monitoring.messages.enums import Command, MessageType, ResponseCode
+from component_monitoring.component import Component
+from component_monitoring.messaging.enums import MessageType, Response
 from component_monitoring.storage.models.event_monitor import EventLog
 from component_monitoring.storage.settings import init
 from component_monitoring.storage.storage_component import create_storage_component
@@ -22,37 +23,22 @@ from helper import deserialize, serialize
 
 # from storage import DB_Manager
 
-class StorageManager(Process):
+class StorageManager(Component):
     """
     This class supports multiprocess approach to store the monitoring data.
-    It makes use of Configured Data Storage to store the incoming messages from the subscribed Kafka Topic.
+    It makes use of Configured Data Storage to store the incoming messaging from the subscribed Kafka Topic.
     """
 
     def __init__(self, storage_config, server_address: str = 'localhost:9092'):
-        Process.__init__(self)
+        Component.__init__(self, 'storage_manager', server_address=server_address, control_channel=storage_config['control_channel'])
         self._id = "manager"
         self.storage_config = storage_config
-        self.server_address = server_address
         self.monitors = dict()
-
         self.logger = logging.getLogger("storage_manager")
         self.logger.setLevel(logging.INFO)
-
-        with open('component_monitoring/schemas/control.json', 'r') as schema:
-            self.control_schema = json.load(schema)
-
         # initializing the event listener
         self.consumer = None
         self.producer = None
-
-    def __send_control_message(self, msg) -> FutureRecordMetadata:
-        """
-
-        @param msg:
-        @return:
-        """
-        result =  self.producer.send(self.storage_config['control_channel'], msg)
-        return result
 
     def run(self):
         """
@@ -79,7 +65,8 @@ class StorageManager(Process):
                 if message.topic == self.storage_config['control_channel']:
                     # If the received message is on control channel,
                     # we need to update our kafka consumer.
-                    self.update_storage_event_listener(deserialize(message))
+                    pass
+                    # self.update_storage_event_listener(deserialize(message))
                 else:
                     # else we store the message to the configured storage component
                     event_log = self.convert_message(message, storage_config['type'])
@@ -102,15 +89,15 @@ class StorageManager(Process):
         Depending upon the received command signal, we attach or detach from kafka topics
         """
         try:
-            validate(instance=message, schema=self.control_schema)
+            validate(instance=message, schema=self.request_schema)
         except:
             self.logger.warning("Control message could not be validated!")
             self.logger.warning(message)
             return
 
         message_type = MessageType(message['message'])
-        if self._id == message['to'] and MessageType.REQUEST == message_type:
-            component = message['from']
+        if self._id == message['To'] and MessageType.REQUEST == message_type:
+            component = message['From']
             message_body = message['body']
             print(message_body)
             # process message body for STORE and STOP_STORE REQUEST
@@ -124,27 +111,7 @@ class StorageManager(Process):
             else:
                 return
             self.consumer.subscribe(list(self.monitors.values()))
-            self.send_response(component, ResponseCode.SUCCESS, None)
-
-    def send_response(self, receiver: str, code: ResponseCode, msg: Optional[Dict]) -> None:
-        """
-        Send a RESPONSE message over the control channel
-
-        @param receiver: The component the message is addressed to
-        @param code: The ResponseCode to be sent
-        @param msg: The optional message to be included in the response
-        @return: None
-        """
-        message = dict()
-        message['from'] = self._id
-        message['to'] = receiver
-        message['message'] = MessageType.RESPONSE.value
-        message['body'] = dict()
-        message['body']['code'] = code.value
-        if msg:
-            for key, value in msg.items():
-                message['body'][key] = value
-        self.__send_control_message(message)
+            self.send_response(component, Response.SUCCESS, None)
 
     @staticmethod
     def convert_message(message: ConsumerRecord, db_type: str) -> Union[EventLog, Dict]:

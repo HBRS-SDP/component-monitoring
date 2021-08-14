@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "The root schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "default": {},
+  "examples": [
+    {
+      "Id": "abc-123",
+      "HELO": {
+        "Component": "rgbd_camera",
+        "Mode": "pointcloud_monitor",
+        "Topic": "rgbd_camera_pointcloud_monitor"
+      },
+      "BYE": {
+        "Component": "rgbd_camera",
+        "Mode": "pointcloud_monitor"
+      }
+    }
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "Id",
+        "HELO"
+      ],
+      "properties": {
+        "Id": {
+          "$id": "#/properties/Id",
+          "type": "string",
+          "title": "The Id schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "abc-123"
+          ]
+        },
+        "HELO": {
+          "$id": "#/properties/HELO",
+          "type": "object",
+          "title": "The HELO schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "Component": "rgbd_camera",
+              "Mode": "pointcloud_monitor",
+              "Topic": "rgbd_camera_pointcloud_monitor"
+            }
+          ],
+          "required": [
+            "Component",
+            "Mode",
+            "Topic"
+          ],
+          "properties": {
+            "Component": {
+              "$id": "#/properties/HELO/properties/Component",
+              "type": "string",
+              "title": "The Component schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "rgbd_camera"
+              ]
+            },
+            "Mode": {
+              "$id": "#/properties/HELO/properties/Mode",
+              "type": "string",
+              "title": "The Mode schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "pointcloud_monitor"
+              ]
+            },
+            "Topic": {
+              "$id": "#/properties/HELO/properties/Topic",
+              "type": "string",
+              "title": "The Topic schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "rgbd_camera_pointcloud_monitor"
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "required": [
+        "BYE"
+      ],
+      "properties": {
+        "BYE": {
+          "$id": "#/properties/BYE",
+          "type": "object",
+          "title": "The BYE schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "Component": "rgbd_camera",
+              "Mode": "pointcloud_monitor"
+            }
+          ],
+          "required": [
+            "Component",
+            "Mode"
+          ],
+          "properties": {
+            "Component": {
+              "$id": "#/properties/BYE/properties/Component",
+              "type": "string",
+              "title": "The Component schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "rgbd_camera"
+              ]
+            },
+            "Mode": {
+              "$id": "#/properties/BYE/properties/Mode",
+              "type": "string",
+              "title": "The Mode schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": "",
+              "examples": [
+                "pointcloud_monitor"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

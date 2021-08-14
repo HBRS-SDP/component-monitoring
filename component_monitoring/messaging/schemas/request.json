@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "The root schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "default": {},
+  "examples": [
+    {
+      "Id": "asdf-1231",
+      "From": "rgbd_camera",
+      "To": "monitor_manager",
+      "START": [
+        {
+          "Id": "pointcloud_monitor",
+          "Params": {
+            "Store": true
+          }
+        }
+      ],
+      "UPDATE": {
+        "Params": {
+          "Store": true
+        }
+      },
+      "STOP": [
+        "pointcloud_monitor"
+      ]
+    }
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "Id": {
+          "$id": "#/properties/Id",
+          "type": "string",
+          "title": "The Id schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": 0,
+          "examples": [
+            1
+          ]
+        },
+        "From": {
+          "$id": "#/properties/From",
+          "type": "string",
+          "title": "The From schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "rgbd_camera"
+          ]
+        },
+        "To": {
+          "$id": "#/properties/To",
+          "type": "string",
+          "title": "The To schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "monitor_manager"
+          ]
+        },
+        "START": {
+          "$id": "#/properties/START",
+          "type": "array",
+          "title": "The START schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "Id": "pointcloud_monitor",
+                "Params": {
+                  "Store": true
+                }
+              }
+            ]
+          ],
+          "additionalItems": true,
+          "items": {
+            "$id": "#/properties/START/items",
+            "anyOf": [
+              {
+                "$id": "#/properties/START/items/anyOf/0",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "examples": [
+                  {
+                    "Id": "pointcloud_monitor",
+                    "Params": {
+                      "Store": true
+                    }
+                  }
+                ],
+                "required": [
+                  "Id"
+                ],
+                "properties": {
+                  "Id": {
+                    "$id": "#/properties/START/items/anyOf/0/properties/Id",
+                    "type": "string",
+                    "title": "The Id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                      "pointcloud_monitor"
+                    ]
+                  },
+                  "Params": {
+                    "$id": "#/properties/START/items/anyOf/0/properties/Params",
+                    "type": "object",
+                    "title": "The Params schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": {},
+                    "examples": [
+                      {
+                        "Store": true
+                      }
+                    ],
+                    "required": [
+                      "Store"
+                    ],
+                    "properties": {
+                      "Store": {
+                        "$id": "#/properties/START/items/anyOf/0/properties/Params/properties/Store",
+                        "type": "boolean",
+                        "title": "The Store schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": false,
+                        "examples": [
+                          true
+                        ]
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "Id",
+        "From",
+        "To",
+        "START"
+      ]
+    },
+    {
+      "properties": {
+        "Id": {
+          "$id": "#/properties/Id",
+          "type": "string",
+          "title": "The Id schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": 0,
+          "examples": [
+            1
+          ]
+        },
+        "From": {
+          "$id": "#/properties/From",
+          "type": "string",
+          "title": "The From schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "rgbd_camera"
+          ]
+        },
+        "To": {
+          "$id": "#/properties/To",
+          "type": "string",
+          "title": "The To schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "monitor_manager"
+          ]
+        },
+        "UPDATE": {
+          "$id": "#/properties/UPDATE",
+          "type": "object",
+          "title": "The UPDATE schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": {},
+          "examples": [
+            {
+              "Params": {
+                "Store": true
+              }
+            }
+          ],
+          "required": [
+            "Params"
+          ],
+          "properties": {
+            "Params": {
+              "$id": "#/properties/UPDATE/properties/Params",
+              "type": "object",
+              "title": "The Params schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": {},
+              "examples": [
+                {
+                  "Store": true
+                }
+              ],
+              "required": [
+                "Store"
+              ],
+              "properties": {
+                "Store": {
+                  "$id": "#/properties/UPDATE/properties/Params/properties/Store",
+                  "type": "boolean",
+                  "title": "The Store schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "Id",
+        "From",
+        "To",
+        "UPDATE"
+      ]
+    },
+    {
+      "properties": {
+        "Id": {
+          "$id": "#/properties/Id",
+          "type": "string",
+          "title": "The Id schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": 0,
+          "examples": [
+            1
+          ]
+        },
+        "From": {
+          "$id": "#/properties/From",
+          "type": "string",
+          "title": "The From schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "rgbd_camera"
+          ]
+        },
+        "To": {
+          "$id": "#/properties/To",
+          "type": "string",
+          "title": "The To schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "monitor_manager"
+          ]
+        },
+        "STOP": {
+          "$id": "#/properties/STOP",
+          "type": "array",
+          "title": "The STOP schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": [],
+          "examples": [
+            [
+              "pointcloud_monitor"
+            ]
+          ],
+          "additionalItems": true,
+          "items": {
+            "$id": "#/properties/STOP/items",
+            "anyOf": [
+              {
+                "$id": "#/properties/STOP/items/anyOf/0",
+                "type": "string",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": "",
+                "examples": [
+                  "pointcloud_monitor"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "Id",
+        "From",
+        "To",
+        "STOP"
+      ]
+    }
+  ],
+  "additionalProperties": true
+}

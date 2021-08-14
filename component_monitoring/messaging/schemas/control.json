@@ -64,56 +64,36 @@
       "then": {
         "properties": {
           "body": {
-            "properties": {
-              "code": {
-                "type": "number"
-              },
-              "monitors": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "exception": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    {
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "topic": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  ],
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "topic": {
-                      "type": "string"
-                    },
-                    "exception": {
-                      "type": "string"
-                    }
+            "oneOf": [
+              {
+                "properties": {
+                  "code": {
+                    "type": "number"
+                  },
+                  "error": {
+                    "type": "string"
                   }
-                }
+                },
+                "required": ["code", "error"]
+              },
+              {
+                "properties": {
+                  "code": {
+                    "type": "number"
+                  },
+                  "topic": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code", "topic"]
               }
-            },
-            "required": [
-              "code",
-              "status"
             ]
           }
-        }
+        },
+        "required": [
+          "code",
+          "status"
+        ]
       }
     },
     {

@@ -1,35 +1,68 @@
-import json
-import logging
-from multiprocessing import Process
 from typing import Union, Dict
 
-from bson import json_util
 from jsonschema import validate
 from kafka import KafkaProducer, KafkaConsumer
 
+from component_monitoring.component import Component
 from component_monitoring.config.config_params import MonitorModeConfig
+from component_monitoring.messaging.enums import MessageType
 
 
-class MonitorBase(Process):
+class MonitorBase(Component):
     """
     Abstract class defining a component monitor on a high level
     """
 
-    def __init__(self, component:str, config_params: MonitorModeConfig, server_address: str, control_channel: str):
-        Process.__init__(self)
+    def __init__(self, component: str, dialogue_id: str, config_params: MonitorModeConfig, server_address: str, control_channel: str):
+        Component.__init__(self, f"{component}_{config_params.name}")
         self.component = component
+        self.dialogue_id = dialogue_id
         self.mode = config_params.name
         self.config_params = config_params
-        self.event_topic = f"{self.component}_{self.config_params.name}_eventbus"
+        self.event_topic = f"{self.component}_{self.config_params.name}"
         self.control_topic = control_channel
         self.server_address = server_address
-        self.logger = logging.getLogger(f"monitor_{self.config_params.name}")
-        self.logger.setLevel(logging.INFO)
-        self.producer = None
-        self.consumer = None
-        with open('component_monitoring/schemas/event.json', 'r') as schema:
-            self.event_schema = json.load(schema)
         self.healthstatus = {}
+
+    def run(self) -> None:
+        """
+        Entry point of the base monitor process; Setting up the Kafka consumer and producer
+
+        @return: None
+        """
+        self.producer = KafkaProducer(bootstrap_servers=self.server_address, value_serializer=self.serialize)
+        self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id=self.config_params.name,
+                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
+        self.consumer.subscribe([self.event_topic, self.control_topic])
+        self.send_helo(self.dialogue_id, self.event_topic)
+
+    def send_helo(self, dialogue_id: str, topic: str):
+        message = dict()
+        message['Id'] = dialogue_id
+        helo = dict()
+        helo['Component'] = self.component
+        helo['Mode'] = self.mode
+        helo['Topic'] = topic
+        message[MessageType.HELO.value] = helo
+        self.logger.info(message)
+        if self.validate_broadcast(message):
+            self.send_control_message(message)
+        else:
+            self.logger.warning("HELO message could not be validated!")
+            self.logger.warning(message)
+
+    def send_bye(self):
+        message = dict()
+        bye = dict()
+        bye['Component'] = self.component
+        bye['Mode'] = self.mode
+        message[MessageType.HELO.value] = bye
+        self.logger.info(message)
+        if self.validate_broadcast(message):
+            self.send_control_message(message)
+        else:
+            self.logger.warning(f"BYE message of {self._id} could not be validated!")
+            self.logger.warning(message)
 
     def get_status_message_template(self) -> Dict:
         """
@@ -39,7 +72,7 @@ class MonitorBase(Process):
         msg = dict()
         return msg
 
-    def valid_status_message(self, msg: dict) -> bool:
+    def valid_event_message(self, msg: dict) -> bool:
         """
         Validate the event message against the respective schema
 
@@ -64,36 +97,6 @@ class MonitorBase(Process):
         else:
             self.producer.send(topic=self.event_topic, value=self.serialize(msg))
 
-    def terminate(self) -> None:
-        """
-        Shutdown monitor
-
-        @return: None
-        """
-        self.consumer.unsubscribe()
-        self.producer.close()
-        super().terminate()
-
-    def run(self) -> None:
-        """
-        Entry point of the base monitor process; Setting up the Kafka consumer and producer
-
-        @return: None
-        """
-        self.producer = KafkaProducer(bootstrap_servers=self.server_address)
-        self.consumer = KafkaConsumer(bootstrap_servers=self.server_address, client_id=self.config_params.name,
-                                      enable_auto_commit=True, auto_commit_interval_ms=5000)
-        self.consumer.subscribe([self.event_topic, self.control_topic])
-
-    def serialize(self, msg: Dict) -> bytes:
-        """
-        JSON serialize any event message
-
-        @param msg: dict to be JSON serialized
-        @return: serialized event message
-        """
-        return json.dumps(msg, default=json_util.default).encode('utf-8')
-
     def publish_status(self) -> None:
         """
         Publish the current health status of the component under monitoring via Kafka
@@ -104,7 +107,7 @@ class MonitorBase(Process):
         msg["monitorName"] = self.config_params.name
         msg["monitorDescription"] = self.config_params.description
         msg["healthStatus"] = self.healthstatus
-        if self.valid_status_message(msg):
+        if self.valid_event_message(msg):
             self.send_event_msg(msg)
         else:
             self.logger.error(f"Validation of event message failed in {self.config_params.name}!")

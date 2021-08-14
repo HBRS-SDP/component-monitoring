@@ -16,7 +16,7 @@ class MonitorFactory(object):
 
     '''
     @staticmethod
-    def get_monitor(monitor_type:str, component_name: str, monitor_config_params: MonitorModeConfig,
+    def get_monitor(monitor_type:str, component_name: str, dialogue_id: str, monitor_config_params: MonitorModeConfig,
                              server_address: str, control_channel: str) -> MonitorBase:
         try:
             monitor_name = monitor_config_params.name
@@ -25,7 +25,7 @@ class MonitorFactory(object):
             class_name = ''.join(x.title() for x in monitor_name.split('_'))
             MonitorClass = getattr(importlib.import_module(module_name),
                                    class_name)
-            return MonitorClass(component_name, monitor_config_params, server_address=server_address, control_channel=control_channel)
+            return MonitorClass(component_name, dialogue_id, monitor_config_params, server_address=server_address, control_channel=control_channel)
         except Exception as e:
             print("While initialising", component_name, "got exception", str(e))
             return MonitorBase(monitor_config_params, server_address=server_address, control_channel=control_channel)

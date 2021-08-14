@@ -1,0 +1,98 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "Id": 1,
+            "From": "monitor_manager",
+            "To": "rgbd_camera",
+            "Response": {
+                "Code": 200,
+                "Message": "OKAY"
+            }
+        }
+    ],
+    "required": [
+        "Id",
+        "From",
+        "To",
+        "Response"
+    ],
+    "properties": {
+        "Id": {
+            "$id": "#/properties/Id",
+            "type": "string",
+            "title": "The Id schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0,
+            "examples": [
+                1
+            ]
+        },
+        "From": {
+            "$id": "#/properties/From",
+            "type": "string",
+            "title": "The From schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "monitor_manager"
+            ]
+        },
+        "To": {
+            "$id": "#/properties/To",
+            "type": "string",
+            "title": "The To schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "rgbd_camera"
+            ]
+        },
+        "Response": {
+            "$id": "#/properties/Response",
+            "type": "object",
+            "title": "The Response schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "Code": 200,
+                    "Description": "OKAY"
+                }
+            ],
+            "required": [
+                "Code"
+            ],
+            "properties": {
+                "Code": {
+                    "$id": "#/properties/Response/properties/Code",
+                    "type": "integer",
+                    "title": "The Code schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        200
+                    ],
+                    "enum": [200, 201, 202, 400, 401, 404]
+                },
+                "Message": {
+                    "$id": "#/properties/Response/properties/Message",
+                    "type": ["object", "string", "array", "null"],
+                    "title": "The Message schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "OKAY"
+                    ]
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": true
+}
