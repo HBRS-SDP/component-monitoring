@@ -93,12 +93,19 @@ An **info** message is send by the transmitting component to inform the receivin
 |`monitors`|True    |array                               |Tuples of `[name, message]` informing the receiving component about something that happened to a particular monitor.
 
 ## Monitor Manager
-The **monitor manager** is one of **two** manging components. It is the central entry point of the monitoring application and controls the individual **monitors**. It is implemented as a python process and only acts upon request via the *Kafka* control channel. The logic is therefore evolving mainly around the *Kafka consumers* message queue.
+The **monitor manager** is one of **two** manging components. It is the central entry point of the monitoring application
+and controls the individual **monitors**. It is implemented as a python process and only acts upon request via the
+*Kafka* control channel. The logic is therefore evolving mainly around the *Kafka consumers* message queue.
 
-Currently the monitor manager is capable of **starting** and **stopping** any monitor that is configured and has a matching implementation using the provided *base* components, such as the `MonitorBase` class that comprises the basic functionalities a monitor has to have in order to being managebale and functional in this environment. In the following its functionalities will be explained in greater detail.
+Currently the monitor manager is capable of **starting** and **stopping** any monitor that is configured and has a
+matching implementation using the provided *base* components, such as the `MonitorBase` class that comprises the basic
+functionalities a monitor has to have in order to being managebale and functional in this environment. In the following
+its functionalities will be explained in greater detail.
 
 ### Start
-Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message. If the command is `activate`, it will expect the `monitors` field to contain a list of strings containing the monitor *modes* to start for the sending fault tolerant component.
+Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message.
+If the command is `activate`, it will expect the `monitors` field to contain a list of strings containing the monitor
+*modes* to start for the sending fault tolerant component.
 ```json
 {
     "from": "rgbd_camera",
@@ -111,7 +118,12 @@ Upon receiving a valid control message with type `request`, the manager will che
 }
 
 ```
-In this example of such a `START` **request**, the fault tolerant component with the *id* `rgbd_camera` is requesting to `activate` the monitor with *id* `pointcloud_monitor`. If such a monitor has been configured in the monitoring configuration, the manager will attempt to create an instance of the respective monitor implementation and start the process. On instanstiation, every monitor creates a unique *event topic*, where it will publish its *event messages* reporting the *health status* of the monitored component. This event topic is returned on startup to the monitor manager, which collects it and communicates it to the faul tolerant component requesting the monitoring via a `SUCESS` **response**.
+In this example of such a `START` **request**, the fault tolerant component with the *id* `rgbd_camera` is requesting to
+`activate` the monitor with *id* `pointcloud_monitor`. If such a monitor has been configured in the monitoring configuration,
+the manager will attempt to create an instance of the respective monitor implementation and start the process.
+On instantiation, every monitor creates a unique *event topic*, where it will publish its *event messages* reporting the
+*health status* of the monitored component. This event topic is returned on startup to the monitor manager, which collects
+it and communicates it to the faul tolerant component requesting the monitoring via a `SUCESS` **response**.
 ```json
 {
     "from": "monitor_manager",
@@ -128,10 +140,14 @@ In this example of such a `START` **request**, the fault tolerant component with
     }
 }
 ```
-In this example the activation of the monitor succeeded and the `monitor_manager` replies to the `rgbd_camera` with response code `200`, representing *success* and includes the *id* and *topic* of the monitors it started in the `monitors` list.
+In this example the activation of the monitor succeeded and the `monitor_manager` replies to the `rgbd_camera` with
+response code `200`, representing *success* and includes the *id* and *topic* of the monitors it started in the `monitors`
+list.
 
 ### Stop
-Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message. If the command is `shutdown`, it will expect the `monitors` field to contain a list of strings containing the monitor *modes* to stop for the sending fault tolerant component.
+Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message.
+If the command is `shutdown`, it will expect the `monitors` field to contain a list of strings containing the monitor
+*modes* to stop for the sending fault tolerant component.
 ```json
 {
     "from": "rgbd_camera",
@@ -143,7 +159,10 @@ Upon receiving a valid control message with type `request`, the manager will che
     }
 }
 ```
-Upond receiving this example shutdown request, the manager will check the list of active monitors for the *ids* provided in the `monitors` array and terminate the respective processes. It will then reply with a response, informing the requesting component whether the shutdown was successful and which monitors were effected like in the example success response message below.
+Upond receiving this example shutdown request, the manager will check the list of active monitors for the *ids* provided
+in the `monitors` array and terminate the respective processes. It will then reply with a response, informing the
+requesting component whether the shutdown was successful and which monitors were effected like in the example success
+response message below.
 ```json
 {
     "from": "monitor_manager",
@@ -161,9 +180,81 @@ Upond receiving this example shutdown request, the manager will check the list o
 ```
 
 ## Storage Manager
+The **storage manager** is the second managing component. It holds the connection to the storage backend and is responsible
+for enabling and disabling storage for a particular monitor on demand. It does that by subscribing to both the control channel
+and the event topics of the monitors that have requested storage. Whenever an event is published on one of the *event topics*
+it is subscribed to, it will convert the event message into a database entry of appropriate format and store it. To ease
+the load on the database backend, common practices like batch writing are employed.
+
+Like the monitor manager, the storage manager is currently capable of two actions, `start_store` and `stop_store`.
+### Start
+Upon receiving a valid control message via the *Kafka* message bus, the **storage manager** checks the *type* and if it
+is a `request`, it additionally checks if the command is `start_store`. If this is the case, the manager reads the
+`monitors` array and subscribes to each *event topic* that is given in the list of monitors.
+```json
+{
+  "from": "rgbd_camera",
+  "to": "storage_manager",
+  "message": "request",
+  "body": {
+    "command": "start_store",
+    "monitors": [
+      {
+        "name": "pointcloud_monitor",
+        "topic": "rgbd_camera_pointcloud_monitor_eventbus"}
+    ]
+  }
+}
+```
+In this example message, the `rgbd_camera` *fault tolerant component* is requesting to start storage of the `pointcloud_monitor`
+with *event topic* `rgbd_camera_pointcloud_monitor_eventbus`. After successfully subscribing to the topic, the manager
+replies to the component with a `SUCCESS` response.
+```json
+{
+  "from": "storage_manager",
+  "to": "rgbd_camera",
+  "message":"response",
+  "body": {
+    "code": 200
+  }
+}
+```
+### Stop
+Upon receiving a valid control message via the *Kafka* message bus, the **storage manager** checks the *type* and if it
+is a `request`, it additionally checks if the command is `stop_store`. If this is the case, the manager reads the
+`monitors` array and unsubscribes from each *event topic* that is given in the list of monitors.
+```json
+{
+  "from": "rgbd_camera",
+  "to": "storage_manager",
+  "message": "request",
+  "body": {
+    "command": "start_store",
+    "monitors": [
+      {
+        "name": "pointcloud_monitor",
+        "topic": "rgbd_camera_pointcloud_monitor_eventbus"}
+    ]
+  }
+}
+```
+In this example message, the `rgbd_camera` *fault tolerant component* is requesting to stop storage of the `pointcloud_monitor`
+with *event topic* `rgbd_camera_pointcloud_monitor_eventbus`. After successfully unsubscribing from the topic, the manager
+replies to the component with a `SUCCESS` response.
+```json
+{
+  "from": "storage_manager",
+  "to": "rgbd_camera",
+  "message":"response",
+  "body": {
+    "code": 200
+  }
+}
+```
 
 ## Monitor
-We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.
+We see monitors as functions that get a certain input and produce a component status message as an output, such that we
+define these mappings in YAML-based configuration files.
 
 Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. We classify monitoring modes into different types, in particular:
 * `Existence monitors`: Validate the existence of a component (e.g. whether a hardware device is recognised by the host operating system or whether a process is running)
