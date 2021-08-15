@@ -52,7 +52,7 @@ class Component(Process):
             validate(instance=msg, schema=self.request_schema)
             return True
         except Exception as e:
-            self.logger.debug(e)
+            self.logger.info(e)
             return False
 
     def validate_response(self, msg: dict) -> bool:
@@ -102,13 +102,14 @@ class Component(Process):
         """
         return json.loads(msg.value)
 
-    def send_start(self, dialogue_id: str, receiver: str, targets: Optional[List[Dict[str, Union[str, Dict]]]]) -> None:
+    def send_start(self, dialogue_id: str, receiver: str, targets: Optional[List[Dict[str, Union[str, Dict]]]]) -> Dict:
         message = self.setup_message_header(dialogue_id, receiver)
         if targets:
             message['START'] = targets
         else:
             message['START'] = "Storage"
         self.send_control_message(message)
+        return message
 
     def send_stop(self, dialogue_id: str, receiver: str, targets: List[str]):
         message = self.setup_message_header(dialogue_id, receiver)

@@ -20,7 +20,8 @@ class PointcloudMonitor(MonitorBase):
 
     def __init__(self, component_name: str, dialogue_id: str, config_params: MonitorModeConfig, server_address: str,
                  control_channel: str):
-        super(PointcloudMonitor, self).__init__(component_name, dialogue_id, config_params, server_address, control_channel)
+        super(PointcloudMonitor, self).__init__(component_name, dialogue_id, config_params, server_address,
+                                                control_channel)
         # parse the pointcloud monitor specific mappings
         if len(config_params.mappings) > 1:
             raise ConfigurationError("Only one mapping is expected for pointcloud monitor!")
@@ -47,8 +48,7 @@ class PointcloudMonitor(MonitorBase):
             self.status_name: {"type": self.status_schema_type}}
         self.event_schema['properties']['healthStatus']['required'] = [self.status_name]
 
-    def timeout(self, a, b):
-        raise TimeoutError
+        self.pending_requests = dict()
 
     def run(self) -> None:
         """
@@ -56,7 +56,6 @@ class PointcloudMonitor(MonitorBase):
         @return: None
         """
         super().run()
-        signal.signal(signal.SIGALRM, self.timeout)
         # create ros topic subscriber
         rospy.init_node(f"{self.component}_{self.config_params.name}", disable_signals=True)
         self._subscriber = rospy.Subscriber(self.ros_topic, PointCloud2, self.callback)
@@ -64,18 +63,26 @@ class PointcloudMonitor(MonitorBase):
         for msg in self.consumer:
             msg: ConsumerRecord
             if msg.topic == self.control_topic:
+                self.logger.info(f"Processing {msg}")
                 message = self.deserialize(msg)
-                if not self.validate_request(message):
+                if self.validate_request(message):
+                    request_type = self.get_message_type(message)
+                    if self._id == message['To'] and request_type == MessageType.UPDATE:
+                        update = message[request_type.value]
+                        if update['Params']['Store']:
+                            dialogue_id = message['Id']
+                            self.pending_requests[dialogue_id] = (
+                                Response.OKAY, message['From'], (Response.OKAY, None))
+                elif self.validate_response(message):
+                    dialogue_id = message['Id']
+                    if self._id == message['To'] and dialogue_id in self.pending_requests:
+                        if self.pending_requests[dialogue_id][0] == Response(message['Response']['Code']):
+                            self.send_response(dialogue_id, self.pending_requests[dialogue_id][1],
+                                               *self.pending_requests[dialogue_id][2])
+                else:
                     self.logger.warning("Request could not be validated!")
                     self.logger.warning(msg)
                     continue
-                request_type = self.get_message_type(message)
-                if self._id == message['To'] and request_type == MessageType.UPDATE:
-                    if message['Params']['Store']:
-                        dialogue_id = str(uuid.uuid4())
-                        self.send_start(dialogue_id, "storage_manager", None)
-                        signal.alarm(5)
-                        self.receive_control_response(dialogue_id, Response.OKAY)
 
     def callback(self, data) -> None:
         """
