@@ -32,9 +32,8 @@ if __name__ == '__main__':
     sw_monitor_config_dir = config_data['config_dirs']['software']
 
     # we read the parameters of the hardware and software monitors
-    hw_monitor_config_params = ConfigUtils.get_config_params(hw_monitor_config_dir,
-                                config_file='rgbd_camera.yaml')
-    sw_monitor_config_params = []#ConfigUtils.get_config_params(sw_monitor_config_dir)
+    hw_monitor_config_params = ConfigUtils.get_config_params(hw_monitor_config_dir)
+    sw_monitor_config_params = ConfigUtils.get_config_params(sw_monitor_config_dir)
 
     # we populate the parameters of the configuration utilities
     # to simplify runtime access to the configuration data
