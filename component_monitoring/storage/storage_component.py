@@ -23,6 +23,7 @@ class SQLStorageComponent(AbstractStorageComponent):
     """
 
     def __init__(self):
+        EventLog.__table__.create(bind=settings.engine, checkfirst=True)
         self.session = settings.Session()
 
     def create_query(self, data):

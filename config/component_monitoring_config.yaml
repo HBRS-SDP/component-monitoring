@@ -20,7 +20,7 @@ storage:
     enable_storage: true
     control_channel: 'monitor_manager'
     config:
-      storage_name: mongo
+      storage_name: sqlite
     available_storages:
       kafka:
         name: kakfa
@@ -29,9 +29,9 @@ storage:
         groupid: ''
       sqlite:
         name: sqlite3
-        file_name: pythonsqlite.storage
+        file_name: pythonsqlite.db
         type: SQL
-        connection_string: sqlite:///pythonsqlite.storage
+        connection_string: sqlite:///pythonsqlite.db
       mongo:
         name: mongodb
         database_name: component_monitoring
