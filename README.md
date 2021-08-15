@@ -206,3 +206,46 @@ Once the necessary files are created, one simply has to complete the mode config
 1. Create a monitor configuration file `component_monitoring/component_config/<host>/<type>/<component-name>.yaml`, where `<host>` is either `robot` or `black-box` and `<type>` is either `hardware` or `software` depending on the type of component, and describe the monitoring modes as explained above. Make sure that the `component_name` parameter in the monitor configuration file is set to `<component-name>`
 2. Create a directory `component_monitoring/component_config/<host>/<type>/<component-name>` and add the mode configuration files there
 3. Create a directory `component_monitoring/monitors/<type>/<component-name>` and implement the mode monitors in separate scripts; the monitors should inherit from the `MonitorBase` class defined in `monitor_base.py`. Make sure that the names of the scripts in which the modes are implemented match the names specified in the mode configuration files
+
+
+# Storage Mechanism
+
+
+## Introduction
+* In our current project, we have a lot of Fault-tolerant components that produce many events related data.
+* There may be use-cases where these produced signals, if stored, can be used for further analysis *(example - to figure at what point certain failures occur)* or other purposes. Thus the Storage of such events becomes essential.
+* But storing all the produced events by every FTSM component could be very impractical as the data can blow up in size within a small amount of time.
+* This has lead us to design a storage mechanism that can be switched on/off on demand and which is highly configurable.
+
+
+## Technical Overview
+* Since storage mechanism is required to function independent of the FTSM components and its monitor, The StorageManager runs as a separate process.
+* The Storage mechanism is governed by the *'StorageManager'* class. And currently the StorageManager stores the event data by using the ***AbstractStorageComponent***. 
+* ***AbstractStorageComponent*** is an abstract class that needs to be inherited by a concrete storage component - which has the ability to store event data to the required database.
+* The configuration of which Storage component to be used is specified in the `config.yaml` before running the main program. Currently, the supported Storage components are: 
+	1. *SQL-based Storage Component*
+	2. *MongoDB-based Storage Component*
+* Naturally, in the future - as per the storage requirement, ***AbstractStorageComponent*** can be extended to support other storage components *(such as file based storage, or Redis-based storage, etc.)* if required.
+
+
+## Storage Components:
+1. *SQL-based Storage Component*:
+   * This component is implemented with help of the library *'SQLAlchemy'*.
+   * There are few advantages when it comes to the use of this library:
+     * Usually there is no need for writing raw SQL queries for basic CRUD operations.
+     * Also, without the change in code, our system has the ability to communicate with all SQL-based databases supported by SQLAlchemy.
+     * In case of switching between different SQL-based database, only changes to the respective configuration of the database needs to be performed. Additionally, it may be required to install the python driver to communicate with the new database.
+2. *MongoDB-based Storage Component*:
+   * Based on *'pymongo'* based implementation, we implement the basic functions for CRUD operations and listing the stored document in a MongoDB collection.
+   * The MongoDB has been configured as the default storage component in the deliverable software package.
+   * If the MongoDB is not running on default configuration, then the configuration file `config.yaml` needs to be updated to point to properly running instance of MongoDB.
+
+
+## Storage Mechanism - Working
+* When the main application is run for the Monitor Manager, Storage Manager starts as a sub-process of the main process.
+* The Storage Manager initializes the required (configured) storage component but does not store anything immediately.
+* Storage Manager keeps listening on the required Kafka control topic. And, as soon as a message,requesting to start storage, arrives on this topic, the Storage Manager updates its Kafka Consumer to listen on the required Kafka Topic where FTSM component is publishing event messages (signals). Whatever this Kafka Consumer listens, firstly it will try to validate if the received message is in a particular format. And then if validation is successful, it will store the message to the required storage component.
+* Once Storage Manager receives the `'start_store'` signal, it will keep storing all the event messages. In order, to stop storage of unneccessary message, on the same control topic the FTSM component can send `'stop_store'` command signal. This command will detach the storage Kafka Consumer from the topic where FTSM component is publishing the message,thus in-turn it stops storing the event messages.
+* Storage can be started again or stopped again as many times required just by sending the `'start_store'` or `'stop_store'` command signal respectively.
+* A better understanding can be found the following flowchart diagram:
+![Storage Mechanism Flowchart](docs/StorageManager_Flowchart.png)
