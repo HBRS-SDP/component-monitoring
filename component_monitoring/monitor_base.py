@@ -64,16 +64,6 @@ class MonitorBase(Process):
         else:
             self.producer.send(topic=self.event_topic, value=self.serialize(msg))
 
-    def terminate(self) -> None:
-        """
-        Shutdown monitor
-
-        @return: None
-        """
-        self.consumer.unsubscribe()
-        self.producer.close()
-        super().terminate()
-
     def run(self) -> None:
         """
         Entry point of the base monitor process; Setting up the Kafka consumer and producer

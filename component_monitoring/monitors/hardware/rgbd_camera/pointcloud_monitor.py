@@ -49,6 +49,7 @@ class PointcloudMonitor(MonitorBase):
         rospy.init_node(f"{self.component}_{self.config_params.name}", disable_signals=True)
         self._subscriber = rospy.Subscriber(self.ros_topic, PointCloud2, self.callback)
         self.logger.info(f"subsribed to ros topic {self.ros_topic}")
+        rospy.spin()
 
     def callback(self, data) -> None:
         """

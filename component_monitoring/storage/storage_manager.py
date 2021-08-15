@@ -30,7 +30,7 @@ class StorageManager(Process):
 
     def __init__(self, storage_config, server_address: str = 'localhost:9092'):
         Process.__init__(self)
-        self._id = "manager"
+        self._id = "storage_manager"
         self.storage_config = storage_config
         self.server_address = server_address
         self.monitors = dict()
@@ -75,7 +75,7 @@ class StorageManager(Process):
             storage_manager = create_storage_component(storage_config)
 
             for message in self.consumer:
-
+                print(message)
                 if message.topic == self.storage_config['control_channel']:
                     # If the received message is on control channel,
                     # we need to update our kafka consumer.
@@ -120,10 +120,14 @@ class StorageManager(Process):
                     self.monitors[monitor['name']] = monitor['topic']
             elif cmd == Command.STOP_STORE:
                 for monitor in message_body['monitors']:
-                    del self.monitors[monitor]
+                    del self.monitors[monitor['name']]
             else:
                 return
-            self.consumer.subscribe(list(self.monitors.values()))
+            topics = list(self.monitors.copy().values())
+            if topics != self.monitors.values():
+                topics.append(self.storage_config['control_channel'])
+                print(topics)
+                self.consumer.subscribe(topics)
             self.send_response(component, ResponseCode.SUCCESS, None)
 
     def send_response(self, receiver: str, code: ResponseCode, msg: Optional[Dict]) -> None:

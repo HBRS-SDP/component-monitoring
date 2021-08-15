@@ -29,7 +29,7 @@ class MonitorManager(Process):
         self.logger = logging.getLogger('monitor_manager')
         self.logger.setLevel(logging.INFO)
 
-        self._id = 'manager'
+        self._id = 'monitor_manager'
         self.control_channel = control_channel
         self.server_address = server_address
         self.producer = None
@@ -86,23 +86,31 @@ class MonitorManager(Process):
                 message_body = message['body']
                 # process message body for REQUEST
                 cmd = Command(message_body['command'])
-                if cmd == Command.SHUTDOWN:
-                    for monitor in message_body['monitors']:
-                        self.stop_monitor(component, monitor)
-                elif cmd == Command.START:
+                if cmd in [Command.SHUTDOWN, Command.START]:
                     response = dict()
                     response['monitors'] = list()
                     code = ResponseCode.SUCCESS
                     for monitor in message_body['monitors']:
-                        try:
-                            topic = self.start_monitor(component, monitor)
-                            print(topic)
-                            response['monitors'].append({"name": monitor, "topic": topic})
-                        except Exception as e:
-                            self.logger.warning(
-                                f"Monitor of component {component} with ID {monitor} could not be started!")
-                            response['monitors'].append({"name": monitor, "exception": e})
-                            code = ResponseCode.FAILURE
+                        if cmd == Command.START:
+                            try:
+                                topic = self.start_monitor(component, monitor)
+                                print(topic)
+                                response['monitors'].append({"name": monitor, "topic": topic})
+                            except Exception as e:
+                                self.logger.warning(
+                                    f"Monitor of component {component} with ID {monitor} could not be started!")
+                                response['monitors'].append({"name": monitor, "exception": e})
+                                code = ResponseCode.FAILURE
+                        elif cmd == Command.SHUTDOWN:
+                            try:
+                                self.stop_monitor(component, monitor)
+                                response['monitors'].append({"name": monitor})
+                            except Exception as e:
+                                self.logger.warning(
+                                    f"Monitor of component {component} with ID {monitor} could not be stopped!")
+                                response['monitors'].append({"name": monitor, "exception": str(e)})
+                                code = ResponseCode.FAILURE
+                    print(response)
                     self.send_response(component, code, response)
 
     def log_off(self) -> None:
@@ -189,7 +197,7 @@ class MonitorManager(Process):
         """
         if component_name in self.monitors and mode_name in self.monitors[component_name]:
             self.logger.warning(f"Monitor {mode_name} of {component_name} is already started!")
-            return
+            return self.monitors[component_name][mode_name].event_topic
         monitor = MonitorFactory.get_monitor(self.monitor_config[component_name].type, component_name,
                                              self.monitor_config[component_name].modes[mode_name],
                                              self.server_address, self.control_channel)
@@ -198,7 +206,7 @@ class MonitorManager(Process):
         except KeyError:
             self.monitors[component_name] = dict()
             self.monitors[component_name][mode_name] = monitor
-        monitor.run()
+        monitor.start()
         return monitor.event_topic
 
     def send_info(self, receiver: str, info: str) -> None:
@@ -235,4 +243,5 @@ class MonitorManager(Process):
         if msg:
             for key, value in msg.items():
                 message['body'][key] = value
+        print(message)
         self.__send_control_message(message)
