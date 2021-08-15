@@ -10,7 +10,7 @@ from kafka.consumer.fetcher import ConsumerRecord
 from kafka.producer.future import FutureRecordMetadata
 
 from component_monitoring.config.config_params import ComponentMonitorConfig
-from component_monitoring.messages.enums import MessageType, Command, ResponseCode
+from component_monitoring.messaging.enums import MessageType, Command, ResponseCode
 from component_monitoring.monitor_factory import MonitorFactory
 from component_monitoring.storage.storage_manager import StorageManager
 
@@ -37,7 +37,7 @@ class MonitorManager(Process):
 
         self.storage = storage
 
-        with open('component_monitoring/schemas/control.json', 'r') as schema:
+        with open('component_monitoring/messaging/schemas/control.json', 'r') as schema:
             self.event_schema = json.load(schema)
         self.monitors = dict()
         self.monitor_config = dict()

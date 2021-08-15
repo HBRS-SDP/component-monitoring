@@ -8,7 +8,7 @@ from kafka import KafkaConsumer, KafkaProducer
 from kafka.consumer.fetcher import ConsumerRecord
 from kafka.producer.future import FutureRecordMetadata
 
-from component_monitoring.messages.enums import Command, MessageType, ResponseCode
+from component_monitoring.messaging.enums import Command, MessageType, ResponseCode
 from component_monitoring.storage.models.event_monitor import EventLog
 from component_monitoring.storage.settings import init
 from component_monitoring.storage.storage_component import create_storage_component
@@ -38,7 +38,7 @@ class StorageManager(Process):
         self.logger = logging.getLogger("storage_manager")
         self.logger.setLevel(logging.INFO)
 
-        with open('component_monitoring/schemas/control.json', 'r') as schema:
+        with open('component_monitoring/messaging/schemas/control.json', 'r') as schema:
             self.control_schema = json.load(schema)
 
         # initializing the event listener

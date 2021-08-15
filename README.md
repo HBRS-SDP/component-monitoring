@@ -96,7 +96,7 @@ The output produced by each component monitor is a string in JSON format which h
 }
 ```
 
-For the full message description, see [ropod-models](https://git.ropod.org/ropod/communication/ropod-models/tree/master/schemas)
+For the full message description, see [ropod-models](https://git.ropod.org/ropod/communication/ropod-models/tree/master/messaging/schemas)
 
 In this message:
 * if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those

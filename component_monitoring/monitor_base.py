@@ -27,7 +27,7 @@ class MonitorBase(Process):
         self.logger.setLevel(logging.INFO)
         self.producer = None
         self.consumer = None
-        with open('component_monitoring/schemas/event.json', 'r') as schema:
+        with open('component_monitoring/messaging/schemas/event.json', 'r') as schema:
             self.event_schema = json.load(schema)
         self.healthstatus = {}
 
