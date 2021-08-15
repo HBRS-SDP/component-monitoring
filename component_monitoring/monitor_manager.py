@@ -70,7 +70,9 @@ class MonitorManager(Component):
                     else:
                         monitors = list()
                         for monitor in message[MessageType.START.value]:
-                            monitors.append({"mode": monitor['Id'], "topic": self.monitors[component][monitor['Id']][1]})
+                            monitors.append(
+                                {"mode": monitor['Id'], "id": self.monitors[component][monitor['Id']][1],
+                                 "topic": self.monitors[component][monitor['Id']][2]})
                         self.send_response(dialogue_id, component, Response.OKAY, monitors)
                 elif message_type == MessageType.STOP:
                     for monitor in message[MessageType.STOP.value]:
@@ -86,12 +88,14 @@ class MonitorManager(Component):
                     component = message[message_type.value]['Component']
                     mode = message[message_type.value]['Mode']
                     dialogue_id = message['Id']
-                    self.monitors[component][mode][1] = message[message_type.value]['Topic']
+                    self.monitors[component][mode][1] = message['From']
+                    self.monitors[component][mode][2] = message[message_type.value]['Topic']
                     self.pending_helos[dialogue_id][component][mode] = True
                     if all(helo for helo in self.pending_helos[dialogue_id][component].values()):
                         monitors = list()
                         for monitor in self.pending_helos[dialogue_id][component]:
-                            monitors.append({"mode": monitor, "topic": self.monitors[component][mode][1]})
+                            monitors.append({"mode": monitor, "id": self.monitors[component][mode][1],
+                                             "topic": self.monitors[component][mode][2]})
                         self.send_response(dialogue_id, component, Response.OKAY, monitors)
                         self.logger.error(self.pending_helos)
                         del self.pending_helos[dialogue_id]
@@ -150,10 +154,10 @@ class MonitorManager(Component):
                                              self.monitor_config[component_name].modes[mode_name],
                                              self.server_address, self.control_channel)
         try:
-            self.monitors[component_name][mode_name] = [monitor, None]
+            self.monitors[component_name][mode_name] = [monitor, None, None]
         except KeyError:
             self.monitors[component_name] = dict()
-            self.monitors[component_name][mode_name] = [monitor, None]
+            self.monitors[component_name][mode_name] = [monitor, None, None]
         monitor.start()
         try:
             self.pending_helos[dialogue_id][component_name][mode_name] = False

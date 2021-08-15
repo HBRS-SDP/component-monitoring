@@ -67,12 +67,17 @@ class PointcloudMonitor(MonitorBase):
                 message = self.deserialize(msg)
                 if self.validate_request(message):
                     request_type = self.get_message_type(message)
+                    self.logger.error(self._id)
+                    self.logger.error(message['To'])
+                    self.logger.error(request_type == MessageType.UPDATE)
                     if self._id == message['To'] and request_type == MessageType.UPDATE:
+                        self.logger.error("1111111111111111111111111111")
                         update = message[request_type.value]
                         if update['Params']['Store']:
                             dialogue_id = message['Id']
                             self.pending_requests[dialogue_id] = (
                                 Response.OKAY, message['From'], (Response.OKAY, None))
+                            self.send_start(dialogue_id, "storage_manager", None)
                 elif self.validate_response(message):
                     dialogue_id = message['Id']
                     if self._id == message['To'] and dialogue_id in self.pending_requests:

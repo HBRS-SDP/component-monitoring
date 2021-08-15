@@ -52,7 +52,7 @@ class Component(Process):
             validate(instance=msg, schema=self.request_schema)
             return True
         except Exception as e:
-            self.logger.info(e)
+            self.logger.debug(e)
             return False
 
     def validate_response(self, msg: dict) -> bool:
@@ -80,7 +80,7 @@ class Component(Process):
             validate(instance=msg, schema=self.broadcast_schema)
             return True
         except Exception as e:
-            self.logger.info(e)
+            self.logger.debug(e)
             return False
 
     def serialize(self, msg) -> bytes:
@@ -107,7 +107,7 @@ class Component(Process):
         if targets:
             message['START'] = targets
         else:
-            message['START'] = "Storage"
+            message['START'] = list()
         self.send_control_message(message)
         return message
 

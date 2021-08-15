@@ -31,9 +31,10 @@ class StorageManager(Component):
 
     def __init__(self, storage_config, server_address: str = 'localhost:9092'):
         Component.__init__(self, 'storage_manager', server_address=server_address, control_channel=storage_config['control_channel'])
-        self._id = "manager"
+        self._id = "storage_manager"
         self.storage_config = storage_config
         self.monitors = dict()
+        self.topics = list()
         self.logger = logging.getLogger("storage_manager")
         self.logger.setLevel(logging.INFO)
         # initializing the event listener
@@ -60,17 +61,31 @@ class StorageManager(Component):
             init(storage_config)
             storage_manager = create_storage_component(storage_config)
 
-            for message in self.consumer:
+            for msg in self.consumer:
 
-                if message.topic == self.storage_config['control_channel']:
+                if msg.topic == self.storage_config['control_channel']:
                     # If the received message is on control channel,
                     # we need to update our kafka consumer.
-                    pass
-                    # self.update_storage_event_listener(deserialize(message))
-                else:
+                    message = self.deserialize(msg)
+                    print(self.validate_request(message))
+                    if self.validate_request(message) and message['To'] == self._id:
+                        self.update_storage_event_listener(message)
+                    elif self.validate_broadcast(message):
+                        self.update_active_monitors(message)
+                elif msg.topic in self.topics:
                     # else we store the message to the configured storage component
-                    event_log = self.convert_message(message, storage_config['type'])
+                    print(self.deserialize(msg))
+                    event_log = self.convert_message(msg, storage_config['type'])
                     storage_manager.create_query(event_log)
+
+    def update_active_monitors(self, message: Dict) -> None:
+        message_type = self.get_message_type(message)
+        if message_type == MessageType.HELO:
+            helo = message[message_type.value]
+            self.monitors[message['From']] = helo['Topic']
+        elif message_type == MessageType.BYE:
+            bye = message[message_type.value]
+            del self.monitors[message['From']]
 
     def start_storage(self):
         """
@@ -81,37 +96,20 @@ class StorageManager(Component):
                                       enable_auto_commit=True, auto_commit_interval_ms=5000)
         self.producer = KafkaProducer(bootstrap_servers=self.server_address, value_serializer=serialize)
         if self.storage_config['enable_storage']:
-            topics = [self.storage_config['control_channel']]
-            self.consumer.subscribe(topics)
+            self.topics = [self.storage_config['control_channel']]
+            self.consumer.subscribe(self.topics)
 
     def update_storage_event_listener(self, message):
         """
         Depending upon the received command signal, we attach or detach from kafka topics
         """
-        try:
-            validate(instance=message, schema=self.request_schema)
-        except:
-            self.logger.warning("Control message could not be validated!")
-            self.logger.warning(message)
-            return
-
-        message_type = MessageType(message['message'])
-        if self._id == message['To'] and MessageType.REQUEST == message_type:
-            component = message['From']
-            message_body = message['body']
-            print(message_body)
-            # process message body for STORE and STOP_STORE REQUEST
-            cmd = Command(message_body['command'])
-            if cmd == Command.START_STORE:
-                for monitor in message_body['monitors']:
-                    self.monitors[monitor['name']] = monitor['topic']
-            elif cmd == Command.STOP_STORE:
-                for monitor in message_body['monitors']:
-                    del self.monitors[monitor]
-            else:
-                return
-            self.consumer.subscribe(list(self.monitors.values()))
-            self.send_response(component, Response.SUCCESS, None)
+        message_type = self.get_message_type(message)
+        print(message)
+        if message_type == MessageType.START:
+            print("################################")
+            self.topics.append(self.monitors[message['From']])
+            self.consumer.subscribe(list(self.topics))
+            self.send_response(message['Id'], message['From'], Response.OKAY, None)
 
     @staticmethod
     def convert_message(message: ConsumerRecord, db_type: str) -> Union[EventLog, Dict]:

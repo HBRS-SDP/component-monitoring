@@ -39,6 +39,7 @@ class MonitorBase(Component):
     def send_helo(self, dialogue_id: str, topic: str):
         message = dict()
         message['Id'] = dialogue_id
+        message['From'] = self._id
         helo = dict()
         helo['Component'] = self.component
         helo['Mode'] = self.mode
@@ -53,6 +54,7 @@ class MonitorBase(Component):
 
     def send_bye(self):
         message = dict()
+        message['From'] = self._id
         bye = dict()
         bye['Component'] = self.component
         bye['Mode'] = self.mode
@@ -92,10 +94,7 @@ class MonitorBase(Component):
         @param msg: The event message to send
         @return: None
         """
-        if isinstance(msg, bytes):
-            self.producer.send(topic=self.event_topic, value=msg)
-        else:
-            self.producer.send(topic=self.event_topic, value=self.serialize(msg))
+        self.producer.send(topic=self.event_topic, value=msg)
 
     def publish_status(self) -> None:
         """

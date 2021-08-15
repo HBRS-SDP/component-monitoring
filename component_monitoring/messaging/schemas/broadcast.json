@@ -23,6 +23,7 @@
     {
       "required": [
         "Id",
+        "From",
         "HELO"
       ],
       "properties": {
@@ -34,6 +35,16 @@
           "default": "",
           "examples": [
             "abc-123"
+          ]
+        },
+        "From": {
+          "$id": "#/properties/HELO/properties/Component",
+          "type": "string",
+          "title": "The From schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "rgbd_camera"
           ]
         },
         "HELO": {
@@ -92,9 +103,20 @@
     },
     {
       "required": [
+        "From",
         "BYE"
       ],
       "properties": {
+        "From": {
+          "$id": "#/properties/HELO/properties/Component",
+          "type": "string",
+          "title": "The From schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "rgbd_camera"
+          ]
+        },
         "BYE": {
           "$id": "#/properties/BYE",
           "type": "object",
