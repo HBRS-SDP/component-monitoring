@@ -35,8 +35,7 @@ class StorageManager(Component):
         self.storage_config = storage_config
         self.monitors = dict()
         self.topics = list()
-        self.logger = logging.getLogger("storage_manager")
-        self.logger.setLevel(logging.INFO)
+
         # initializing the event listener
         self.consumer = None
         self.producer = None

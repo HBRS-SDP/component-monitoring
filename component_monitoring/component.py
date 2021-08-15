@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import sys
 from multiprocessing import Process
 from typing import Optional, Dict, List, Union
 
@@ -10,6 +11,7 @@ from kafka.consumer.fetcher import ConsumerRecord
 from kafka.producer.future import FutureRecordMetadata
 
 from component_monitoring.messaging.enums import MessageType, Response
+from helper import CustomFormatter
 
 
 class Component(Process):
@@ -18,8 +20,17 @@ class Component(Process):
         self._id = _id
         self.control_channel = control_channel
         self.server_address = server_address
+
+        # setup logging
+        self.__log_level = logging.INFO
         self.logger = logging.getLogger(self._id)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(self.__log_level)
+        # create console handler with custom formatter
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(self.__log_level)
+        ch.setFormatter(CustomFormatter())
+        self.logger.addHandler(ch)
+
         self.producer = None
         self.consumer = None
 

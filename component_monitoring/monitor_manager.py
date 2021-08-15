@@ -24,8 +24,6 @@ class MonitorManager(Component):
                  server_address: str = 'localhost:9092',
                  control_channel: str = 'monitor_manager'):
         Component.__init__(self, 'monitor_manager', server_address=server_address, control_channel=control_channel)
-        self.logger = logging.getLogger('monitor_manager')
-        self.logger.setLevel(logging.INFO)
         self.storage = storage
         self.monitors = dict()
         self.monitor_config = dict()
