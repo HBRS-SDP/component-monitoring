@@ -59,7 +59,8 @@ A **response** is only send as a reply to a previously received **request**. The
         "monitors": [
             {
                 "name": "pointcloud_monitor",
-                "topic": "pointcloud_monitor_eventbus"
+                "topic": "pointcloud_monitor_eventbus",
+                "exception": "Something bad happened"
             }
         ],
         "message": "Something happened"
@@ -68,15 +69,96 @@ A **response** is only send as a reply to a previously received **request**. The
 |Parameter |Required|Type                                |Description                                       
 |----------|--------|------------------------------------|--------------------------------------------------
 |`code`    |True    |integer                             |The response code defining the success of a related request
-|`monitors`|False   |array                               |Array of JSON objects containing tupley of `[name, topic]` to inform the receiver about the monitors and the topics which they are publish on
+|`monitors`|False   |array                               |Array of JSON objects containing tupley of `[name, topic]` or `[name, exception]` to inform the receiver about the results of the command execution per monitor. E.g. in the case of an `activate` command it will inform the initiating component about the event topic the monitor is publishing on.
 |`message` |False   |string                              |Any message that aids the status code in explaining the success or failure of a request
-|
 
 ### Info
-
+An **info** message is send by the transmitting component to inform the receiving component about the occurence of some event that might influence its behaviour.
+```json
+{
+    "body": {
+        "monitors": [
+            {
+                "name": "pointcloud_monitor",
+                "message": "Something happened"
+            }
+        ],
+        "message": "Something happened"
+}
+}
+```
+|Parameter |Required|Type                                |Description                                       
+|----------|--------|------------------------------------|--------------------------------------------------
+|`message` |True    |string                              |Any message to be send to the receiver.
+|`monitors`|True    |array                               |Tuples of `[name, message]` informing the receiving component about something that happened to a particular monitor.
 
 ## Monitor Manager
-The **monitor manager** is the central entry point of the monitoring application and controls the individual **monitors**, which are started as processes by the manager on request by the **Faul Tolerant Component** via a `START` message.
+The **monitor manager** is one of **two** manging components. It is the central entry point of the monitoring application and controls the individual **monitors**. It is implemented as a python process and only acts upon request via the *Kafka* control channel. The logic is therefore evolving mainly around the *Kafka consumers* message queue.
+
+Currently the monitor manager is capable of **starting** and **stopping** any monitor that is configured and has a matching implementation using the provided *base* components, such as the `MonitorBase` class that comprises the basic functionalities a monitor has to have in order to being managebale and functional in this environment. In the following its functionalities will be explained in greater detail.
+
+### Start
+Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message. If the command is `activate`, it will expect the `monitors` field to contain a list of strings containing the monitor *modes* to start for the sending fault tolerant component.
+```json
+{
+    "from": "rgbd_camera",
+    "to": "monitor_manager",
+    "message": "request",
+    "body": {
+        "command": "activate",
+        "monitors": ["pointcloud_monitor"]
+    }
+}
+
+```
+In this example of such a `START` **request**, the fault tolerant component with the *id* `rgbd_camera` is requesting to `activate` the monitor with *id* `pointcloud_monitor`. If such a monitor has been configured in the monitoring configuration, the manager will attempt to create an instance of the respective monitor implementation and start the process. On instanstiation, every monitor creates a unique *event topic*, where it will publish its *event messages* reporting the *health status* of the monitored component. This event topic is returned on startup to the monitor manager, which collects it and communicates it to the faul tolerant component requesting the monitoring via a `SUCESS` **response**.
+```json
+{
+    "from": "monitor_manager",
+    "to": "rgbd_camera",
+    "message": "response",
+    "body": {
+        "code": 200,
+        "monitors": [
+            {
+                "name": "pointcloud_monitor",
+                "topic": "pointcloud_monitor_eventbus",
+            }
+        ]
+    }
+}
+```
+In this example the activation of the monitor succeeded and the `monitor_manager` replies to the `rgbd_camera` with response code `200`, representing *success* and includes the *id* and *topic* of the monitors it started in the `monitors` list.
+
+### Stop
+Upon receiving a valid control message with type `request`, the manager will check the `command` included in the message. If the command is `shutdown`, it will expect the `monitors` field to contain a list of strings containing the monitor *modes* to stop for the sending fault tolerant component.
+```json
+{
+    "from": "rgbd_camera",
+    "to": "monitor_manager",
+    "message": "request",
+    "body": {
+        "command": "shutdown",
+        "monitors": ["pointcloud_monitor"]
+    }
+}
+```
+Upond receiving this example shutdown request, the manager will check the list of active monitors for the *ids* provided in the `monitors` array and terminate the respective processes. It will then reply with a response, informing the requesting component whether the shutdown was successful and which monitors were effected like in the example success response message below.
+```json
+{
+    "from": "monitor_manager",
+    "to": "rgbd_camera",
+    "message": "response",
+    "body": {
+        "code": 200,
+        "monitors": [
+            {
+                "name": "pointcloud_monitor"
+            }
+        ]
+    }
+}
+```
 
 ## Storage Manager
 
