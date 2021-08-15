@@ -1,26 +1,86 @@
-# ROPOD Component Monitoring
+# Component Monitoring
+This project is concerned with providing a general, unified and robust approach to monitoring a distributed robotic application. To provide flexibility and extensibility, a general API is provided for controling a distributed monitoring system.
 
-## Dependencies
-
-* `PyYaml`
-* `NetworkX`
-* `PyMongo`
-* `Matplotlib`
-* [Pyre](https://github.com/ropod-project/pyre)
-* [Pyre base communicator](https://github.com/ropod-project/ropod_common)
-
-## How to run
-
+## Usage
 Run by specifying the path to a configuration file:
-
-`python3 main.py [config_file_path]`
+```bash
+python3 main.py [config_file_path]
+```
 
 Example: `python3 main.py config/component_monitoring_config.yaml`
 
-Note that the default value of `[config_file_path]` is `config/component_monitoring_config.yaml`.
+> **NOTE** that the default value of `[config_file_path]` is `config/component_monitoring_config.yaml`.
 
-## Component monitor specification
+## Functional Overview
+On a system level, **four** components can be identified that together provide the monitoring functionality in a distributed manner.
 
+## Control Message Format
+The components of the component monitoring system communicate with each other via the *Apache Kafka Message Bus*. To start, stop and configure the different parts of the system, so called *control messages* are exchanged via the respective *control channel* on *Kafka*. These messages all follow a general message design of header and body. The gerneral structure of all messages looks as follows:
+```json
+{
+    "from": "monitor_manager",
+    "to": "rgbd_camera",
+    "message":"response",
+    "body": {
+        ...
+    }
+}
+```
+The `from`, `to` and `message` parameters together form the *header* of the message, while the `body` argument contains an arbitrary message body that depends on the actual *type* of message being sent. The high level *type* of a message is determined by the `message` parameter, while the contents of the *body* determine the fully qualified *type*.
+|Parameter|Required|Type                                |Description                                       
+|---------|--------|------------------------------------|--------------------------------------------------
+|`from`   |True    |string                              |Contains the address of the originating component.
+|`to`     |True    |string                              |Contains the address of the receiving component.  
+|`message`|True    |enum["response", "request", "info"] |Determines the *type* of the message.             
+|`body`   |True    |object                              |The body of the message, its contents depend on the *message type*.
+
+### Request
+A **request** contains a `command` and the respective `monitors` that it should be applied for. While generally any component can send requests to any other component, currently this type of message is only transmitted by the *fault tolerant component* to request some particular action from one of the managing components in either the *monitor manager* or the *storage manager*.
+```json
+{
+    "command": "activate",
+    "monitors": [
+        "pointcloud_monitor"
+    ]
+}
+```
+|Parameter |Required|Type                                |Description                                       
+|----------|--------|------------------------------------|--------------------------------------------------
+|`command` |True    |enum["activate", "shutdown", "start_store", "stop_store"]|The action that is requested by the sender.
+|`monitors`|True    |array[string]                       |The IDs of the monitors the action should be applied to.
+
+### Response
+A **response** is only send as a reply to a previously received **request**. There is two types of responses, `SUCCESS` and `FAILURE`. Each of them can include additional parameters like `monitors` to return information about the results of a particular command. In the case of failure, the response can contain a `message` field to inform the component about the particular problem that occured on the receiver side.
+
+```json
+{
+    "body": {
+        "code": 200,
+        "monitors": [
+            {
+                "name": "pointcloud_monitor",
+                "topic": "pointcloud_monitor_eventbus"
+            }
+        ],
+        "message": "Something happened"
+}
+```
+|Parameter |Required|Type                                |Description                                       
+|----------|--------|------------------------------------|--------------------------------------------------
+|`code`    |True    |integer                             |The response code defining the success of a related request
+|`monitors`|False   |array                               |Array of JSON objects containing tupley of `[name, topic]` to inform the receiver about the monitors and the topics which they are publish on
+|`message` |False   |string                              |Any message that aids the status code in explaining the success or failure of a request
+|
+
+### Info
+
+
+## Monitor Manager
+The **monitor manager** is the central entry point of the monitoring application and controls the individual **monitors**, which are started as processes by the manager on request by the **Faul Tolerant Component** via a `START` message.
+
+## Storage Manager
+
+## Monitor
 We see monitors as functions that get a certain input and produce a component status message as an output, such that we define these mappings in YAML-based configuration files.
 
 Based on our abstraction, each component is associated with one or more monitors which may be redundant or may look at different aspects of the component; we refer to these monitors as component monitoring *modes*. We classify monitoring modes into different types, in particular:
@@ -43,7 +103,7 @@ dependency_monitors: dict       [optional] -- For each dependency in "dependenci
 
 In `modes`, each file defines the input-output mapping mentioned above and has the format shown below:
 
-```
+```yaml
 name: string                                            [required] -- Monitor mode name (snake case
                                                                       should be used if the name has
                                                                       multiple words)
@@ -74,29 +134,21 @@ arguments:                                              [optional] -- A dictiona
 
 In this specification, the optional output parameter `map_outputs` allows controlling the overall type of the monitor output, such that if `map_outputs` is set to `true`, the outputs will be returned in a dictionary. This is useful if the number of output value copies is unknown at design time.
 
-## Monitor output
+### Monitor output
 
 The output produced by each component monitor is a string in JSON format which has the general format shown below:
 
-```
+```json
 {
-    "component": "",
-    "component_id": "",
-    "component_sm_state": "",
-    "modes":
-    [
-        "monitorName": "",
-        "monitorDescription": "",
-        "healthStatus":
-        {
-            ...
-        },
+    "monitorName": "",
+    "monitorDescription": "",
+    "healthStatus":
+    {
         ...
-    ]
+    },
+    ...
 }
 ```
-
-For the full message description, see [ropod-models](https://git.ropod.org/ropod/communication/ropod-models/tree/master/messaging/schemas)
 
 In this message:
 * if `map_outputs` is set to `false` or is not set at all, `healthStatus` is a list of key-value pairs of the output names specified in the monitor configuration file along with the output values corresponding to those
@@ -106,7 +158,7 @@ In this message:
 
 To illustrate the component monitoring configuration described above, we can consider an example in which a robot has two laser scanners whose status we want to monitor. Let us suppose that we have two monitoring modes for the scanners. Namely, we can monitor whether the scanners are: (i) recognised by the host operating system, and (ii) operational. A configuration file for this scenario would look as follows:
 
-```
+```yaml
 name: laser_monitor
 modes: [laser_monitors/device.yaml, laser_monitors/heartbeat.yaml]
 dependencies: []
@@ -114,7 +166,7 @@ dependencies: []
 
 Referring to the two monitor modes as device and heartbeat monitors, we will have the two monitor configuration files shown below:
 
-```
+```yaml
 name: laser_device_monitor
 mappings:
     - mapping:
@@ -131,7 +183,7 @@ mappings:
                 type: bool
 ```
 
-```
+```yaml
 name: laser_heartbeat_monitor
 mappings:
     - mapping:
@@ -149,7 +201,7 @@ mappings:
 ```
 
 Laser scanner device monitor result example:
-```
+```json
 {
     "monitorName" : "laser_device_monitor",
     "monitorDescription" : "Monitor verifying that laser devices are recognised by the operating system",
@@ -162,7 +214,7 @@ Laser scanner device monitor result example:
 ```
 
 Battery monitor result example:
-```
+```json
 {
     "monitorName" : "battery_functional_monitor",
     "monitorDescription" : "Battery level monitor",
