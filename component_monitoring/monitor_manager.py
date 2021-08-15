@@ -94,7 +94,6 @@ class MonitorManager(Process):
                         if cmd == Command.START:
                             try:
                                 topic = self.start_monitor(component, monitor)
-                                print(topic)
                                 response['monitors'].append({"name": monitor, "topic": topic})
                             except Exception as e:
                                 self.logger.warning(
@@ -110,7 +109,6 @@ class MonitorManager(Process):
                                     f"Monitor of component {component} with ID {monitor} could not be stopped!")
                                 response['monitors'].append({"name": monitor, "exception": str(e)})
                                 code = ResponseCode.FAILURE
-                    print(response)
                     self.send_response(component, code, response)
 
     def log_off(self) -> None:
@@ -243,5 +241,4 @@ class MonitorManager(Process):
         if msg:
             for key, value in msg.items():
                 message['body'][key] = value
-        print(message)
         self.__send_control_message(message)

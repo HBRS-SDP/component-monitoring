@@ -75,7 +75,6 @@ class StorageManager(Process):
             storage_manager = create_storage_component(storage_config)
 
             for message in self.consumer:
-                print(message)
                 if message.topic == self.storage_config['control_channel']:
                     # If the received message is on control channel,
                     # we need to update our kafka consumer.
@@ -112,7 +111,6 @@ class StorageManager(Process):
         if self._id == message['to'] and MessageType.REQUEST == message_type:
             component = message['from']
             message_body = message['body']
-            print(message_body)
             # process message body for STORE and STOP_STORE REQUEST
             cmd = Command(message_body['command'])
             if cmd == Command.START_STORE:
@@ -126,7 +124,6 @@ class StorageManager(Process):
             topics = list(self.monitors.copy().values())
             if topics != self.monitors.values():
                 topics.append(self.storage_config['control_channel'])
-                print(topics)
                 self.consumer.subscribe(topics)
             self.send_response(component, ResponseCode.SUCCESS, None)
 
