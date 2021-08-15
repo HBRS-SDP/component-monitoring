@@ -22,11 +22,6 @@ storage:
     config:
       storage_name: sqlite
     available_storages:
-      kafka:
-        name: kakfa
-        ipaddress: ''
-        port: ''
-        groupid: ''
       sqlite:
         name: sqlite3
         file_name: pythonsqlite.db
