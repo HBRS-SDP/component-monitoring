@@ -53,7 +53,7 @@ if __name__ == '__main__':
                                      sw_monitor_config_params,
                                      storage_manager)
 
-    component_network = ComponentNetwork(config_file_path)
+    # component_network = ComponentNetwork(config_file_path)
 
     try:
         monitor_manager.start()
